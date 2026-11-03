@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
 import { ZoomIn, ZoomOut, Check, X } from "lucide-react";
 
-import { ModalWrapper } from "@/components/common/modal-wrapper";
+import { Modal } from "@/components/common/modal";
 import { Button } from "@/components/ui/button";
 import { getCompressedCroppedAvatar } from "@/lib/cropImage";
 
@@ -70,7 +70,7 @@ export function ImageCropDialog({
   if (!imageSrc) return null;
 
   return (
-    <ModalWrapper
+    <Modal
       open={open}
       onOpenChange={(isOpen) => !isOpen && onClose()}
       title="Crop & Adjust Profile Picture"
@@ -146,6 +146,6 @@ export function ImageCropDialog({
           </Button>
         </div>
       </div>
-    </ModalWrapper>
+    </Modal>
   );
 }
