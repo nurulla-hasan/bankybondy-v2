@@ -10,7 +10,7 @@ A production-grade, enterprise-ready starter template built with **Next.js 16 (T
 - **Runtime & UI**: React 19.3.0 & Base UI
 - **Design System**: Tailwind CSS v4 + Shadcn UI (Full suite)
 - **Data Fetching & Server State**: TanStack React Query v5
-- **Forms & Validation**: TanStack Form + React Hook Form + Zod v4
+- **Forms & Validation**: TanStack Form + Zod v4
 - **Tables & Visualization**: TanStack Table v8 + Recharts v3
 - **Network & API**: `ofetch` Client + Reverse Proxy Rewrites + JWT Support
 - **Theming & Toast**: `next-themes` (Dark/Light) + Sonner Toasts
