@@ -25,7 +25,6 @@ import { useGetMyProfile } from "@/services";
 
 /**
  * Deterministic pseudo-random function for SSR/CSR consistency.
- * Prevents hydration mismatches while creating an organic natural distribution.
  */
 function pseudoRandom(index: number, salt: number = 0) {
   const x = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
@@ -34,18 +33,61 @@ function pseudoRandom(index: number, salt: number = 0) {
 
 // Icon pool representing Bankybondy's audio, conversation & human connection themes
 const FLOATING_ICONS = [
-  { icon: Headphones, label: "headphones" },
-  { icon: Music, label: "music" },
-  { icon: Radio, label: "radio" },
-  { icon: Volume2, label: "volume" },
-  { icon: Disc3, label: "disc" },
-  { icon: AudioWaveform, label: "waveform" },
-  { icon: HeartHandshake, label: "bonds" },
-  { icon: Mic, label: "mic" },
-  { icon: Users, label: "community" },
+  Headphones,
+  Music,
+  Radio,
+  Volume2,
+  Disc3,
+  AudioWaveform,
+  HeartHandshake,
+  Mic,
+  Users,
 ];
 
 const MUSICAL_NOTES = ["♪", "♫", "♩", "♬", "♪", "♫"];
+
+// Precomputed static particle datasets with clean integer values
+// to prevent any floating-point string mismatches during React 19 hydration.
+const BOKEH_ITEMS = Array.from({ length: 12 }, (_, i) => ({
+  id: `bokeh-${i}`,
+  width: Math.round(35 + pseudoRandom(i, 1) * 75),
+  height: Math.round(35 + pseudoRandom(i, 2) * 75),
+  left: `${Math.round(pseudoRandom(i, 3) * 94)}%`,
+  top: `${Math.round(pseudoRandom(i, 4) * 92)}%`,
+  duration: Math.round(9 + pseudoRandom(i, 5) * 6),
+  delay: Math.round(pseudoRandom(i, 6) * 4),
+  driftX: Math.round((pseudoRandom(i, 7) - 0.5) * 18),
+}));
+
+const ICON_ITEMS = Array.from({ length: 16 }, (_, i) => ({
+  id: `icon-${i}`,
+  IconComponent: FLOATING_ICONS[i % FLOATING_ICONS.length],
+  left: `${Math.round(3 + pseudoRandom(i, 10) * 92)}%`,
+  top: `${Math.round(5 + pseudoRandom(i, 11) * 88)}%`,
+  duration: Math.round(7 + pseudoRandom(i, 12) * 5),
+  delay: Math.round(pseudoRandom(i, 13) * 3),
+  rotate: Math.round((pseudoRandom(i, 15) - 0.5) * 16),
+}));
+
+const NOTE_ITEMS = Array.from({ length: 16 }, (_, i) => ({
+  id: `note-${i}`,
+  note: MUSICAL_NOTES[i % MUSICAL_NOTES.length],
+  left: `${Math.round(4 + pseudoRandom(i, 20) * 92)}%`,
+  top: `${Math.round(6 + pseudoRandom(i, 21) * 86)}%`,
+  fontSize: `${Math.round(18 + pseudoRandom(i, 25) * 16)}px`,
+  duration: Math.round(6 + pseudoRandom(i, 22) * 4),
+  delay: Math.round(pseudoRandom(i, 23) * 3),
+  driftX: Math.round((pseudoRandom(i, 26) - 0.5) * 16),
+  rotate: Math.round((pseudoRandom(i, 27) - 0.5) * 20),
+}));
+
+const WAVE_ITEMS = Array.from({ length: 6 }, (_, i) => ({
+  id: `wave-${i}`,
+  left: `${Math.round(5 + pseudoRandom(i, 30) * 85)}%`,
+  top: `${Math.round(12 + pseudoRandom(i, 31) * 76)}%`,
+  duration: Math.round(4 + pseudoRandom(i, 32) * 3),
+  delay: Math.round(pseudoRandom(i, 33) * 2),
+}));
 
 export function Hero() {
   const t = useTranslations("Hero");
@@ -56,13 +98,13 @@ export function Hero() {
   const [mousePos, setMousePos] = React.useState({ x: 50, y: 50 });
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  // Gentle mouse spotlight tracking
+  // Smooth mouse spotlight tracking
   const handleMouseMove = React.useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+      const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
       setMousePos({ x, y });
     },
     [],
@@ -73,7 +115,7 @@ export function Hero() {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       className={cn(
-        "relative w-full min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center text-center",
+        "relative w-full min-h-screen flex flex-col items-center justify-center text-center",
         "bg-background text-foreground overflow-hidden select-none transition-colors duration-300",
       )}
     >
@@ -100,62 +142,46 @@ export function Hero() {
 
       {/* 3. Soft Ambient Floating Bokeh Orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {Array.from({ length: 14 }).map((_, i) => {
-          const width = 35 + pseudoRandom(i, 1) * 75;
-          const height = 35 + pseudoRandom(i, 2) * 75;
-          const left = pseudoRandom(i, 3) * 96;
-          const top = pseudoRandom(i, 4) * 94;
-          const duration = 9 + pseudoRandom(i, 5) * 6;
-          const delay = pseudoRandom(i, 6) * 4;
-
-          return (
-            <motion.div
-              key={`bokeh-${i}`}
-              className="absolute rounded-full bg-primary/4 dark:bg-primary/8 border border-primary/10 backdrop-blur-[1px]"
-              style={{
-                width: `${width}px`,
-                height: `${height}px`,
-                left: `${left}%`,
-                top: `${top}%`,
-              }}
-              animate={{
-                y: [0, -22, 0],
-                x: [0, (pseudoRandom(i, 7) - 0.5) * 18, 0],
-                scale: [1, 1.15, 1],
-                opacity: [0.3, 0.7, 0.3],
-              }}
-              transition={{
-                duration,
-                delay,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          );
-        })}
+        {BOKEH_ITEMS.map((item) => (
+          <motion.div
+            key={item.id}
+            className="absolute rounded-full bg-primary/4 dark:bg-primary/8 border border-primary/10 backdrop-blur-[1px]"
+            style={{
+              width: `${item.width}px`,
+              height: `${item.height}px`,
+              left: item.left,
+              top: item.top,
+            }}
+            animate={{
+              y: [0, -22, 0],
+              x: [0, item.driftX, 0],
+              scale: [1, 1.15, 1],
+              opacity: [0.3, 0.7, 0.3],
+            }}
+            transition={{
+              duration: item.duration,
+              delay: item.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
       </div>
 
       {/* 4. Floating Audio & Connection Icons (Adaptive to Light & Dark) */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {Array.from({ length: 16 }).map((_, i) => {
-          const item = FLOATING_ICONS[i % FLOATING_ICONS.length];
-          const IconComponent = item.icon;
-          const left = 3 + pseudoRandom(i, 10) * 92;
-          const top = 5 + pseudoRandom(i, 11) * 88;
-          const duration = 7 + pseudoRandom(i, 12) * 5;
-          const delay = pseudoRandom(i, 13) * 3;
-          const baseOpacity = 0.16 + pseudoRandom(i, 14) * 0.14;
-
+        {ICON_ITEMS.map((item) => {
+          const Icon = item.IconComponent;
           return (
             <motion.div
-              key={`icon-${i}`}
+              key={item.id}
               className="absolute text-foreground/20 dark:text-foreground/25 hover:text-primary dark:hover:text-primary pointer-events-auto cursor-pointer transition-colors"
-              style={{ left: `${left}%`, top: `${top}%` }}
-              initial={{ opacity: 0 }}
+              style={{ left: item.left, top: item.top }}
+              initial={{ opacity: 0.2 }}
               animate={{
-                opacity: [baseOpacity, baseOpacity * 1.6, baseOpacity],
+                opacity: [0.2, 0.35, 0.2],
                 y: [0, -20, 0],
-                rotate: [0, (pseudoRandom(i, 15) - 0.5) * 16, 0],
+                rotate: [0, item.rotate, 0],
               }}
               whileHover={{
                 scale: 1.35,
@@ -163,13 +189,13 @@ export function Hero() {
                 transition: { duration: 0.2 },
               }}
               transition={{
-                duration,
-                delay,
+                duration: item.duration,
+                delay: item.delay,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
             >
-              <IconComponent className="size-5 sm:size-7 drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:drop-shadow-[0_2px_12px_rgba(255,255,255,0.15)]" />
+              <Icon className="size-5 sm:size-7 drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:drop-shadow-[0_2px_12px_rgba(255,255,255,0.15)]" />
             </motion.div>
           );
         })}
@@ -177,88 +203,69 @@ export function Hero() {
 
       {/* 5. Floating Musical Notes */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {Array.from({ length: 18 }).map((_, i) => {
-          const note = MUSICAL_NOTES[i % MUSICAL_NOTES.length];
-          const left = 4 + pseudoRandom(i, 20) * 92;
-          const top = 6 + pseudoRandom(i, 21) * 86;
-          const duration = 6 + pseudoRandom(i, 22) * 4;
-          const delay = pseudoRandom(i, 23) * 3;
-          const baseOpacity = 0.14 + pseudoRandom(i, 24) * 0.14;
-          const size = 18 + pseudoRandom(i, 25) * 16;
-
-          return (
-            <motion.div
-              key={`note-${i}`}
-              className="absolute text-foreground/16 dark:text-foreground/22 select-none font-bold"
-              style={{
-                left: `${left}%`,
-                top: `${top}%`,
-                fontSize: `${size}px`,
-              }}
-              animate={{
-                y: [0, -25, 0],
-                x: [0, (pseudoRandom(i, 26) - 0.5) * 16, 0],
-                opacity: [baseOpacity, baseOpacity * 1.7, baseOpacity],
-                rotate: [0, (pseudoRandom(i, 27) - 0.5) * 20, 0],
-              }}
-              transition={{
-                duration,
-                delay,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              {note}
-            </motion.div>
-          );
-        })}
+        {NOTE_ITEMS.map((item) => (
+          <motion.div
+            key={item.id}
+            className="absolute text-foreground/16 dark:text-foreground/22 select-none font-bold"
+            style={{
+              left: item.left,
+              top: item.top,
+              fontSize: item.fontSize,
+            }}
+            animate={{
+              y: [0, -25, 0],
+              x: [0, item.driftX, 0],
+              opacity: [0.16, 0.3, 0.16],
+              rotate: [0, item.rotate, 0],
+            }}
+            transition={{
+              duration: item.duration,
+              delay: item.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            {item.note}
+          </motion.div>
+        ))}
       </div>
 
       {/* 6. Soundwave & Audio Frequency Oscillations */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {Array.from({ length: 6 }).map((_, i) => {
-          const left = 5 + pseudoRandom(i, 30) * 85;
-          const top = 12 + pseudoRandom(i, 31) * 76;
-          const duration = 4 + pseudoRandom(i, 32) * 3;
-          const delay = pseudoRandom(i, 33) * 2;
-          const scale = 0.8 + pseudoRandom(i, 34) * 0.5;
-
-          return (
-            <motion.div
-              key={`wave-${i}`}
-              className="absolute text-primary/15 dark:text-primary/25"
-              style={{
-                left: `${left}%`,
-                top: `${top}%`,
-                transform: `scale(${scale})`,
-              }}
-              animate={{
-                opacity: [0.1, 0.28, 0.1],
-                scaleX: [0.95, 1.1, 0.95],
-                y: [0, -10, 0],
-              }}
-              transition={{
-                duration,
-                delay,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+        {WAVE_ITEMS.map((item) => (
+          <motion.div
+            key={item.id}
+            className="absolute text-primary/15 dark:text-primary/25"
+            style={{
+              left: item.left,
+              top: item.top,
+            }}
+            animate={{
+              opacity: [0.1, 0.28, 0.1],
+              scaleX: [0.95, 1.1, 0.95],
+              y: [0, -10, 0],
+            }}
+            transition={{
+              duration: item.duration,
+              delay: item.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <svg
+              width="70"
+              height="24"
+              viewBox="0 0 70 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <svg
-                width="70"
-                height="24"
-                viewBox="0 0 70 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M2 12h8l4-8 6 16 6-12 5 8 5-4h8l4-9 6 15 6-6h6" />
-              </svg>
-            </motion.div>
-          );
-        })}
+              <path d="M2 12h8l4-8 6 16 6-12 5 8 5-4h8l4-9 6 15 6-6h6" />
+            </svg>
+          </motion.div>
+        ))}
       </div>
 
       {/* 7. Center Hero Content */}

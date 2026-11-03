@@ -136,4 +136,21 @@
   html {
     @apply font-sans;
   }
+
+
+     /* Scrollbar Styles */
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--border), transparent 40%);
+    border-radius: 999px;
+    transition: background 0.2s;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklch, var(--muted-foreground), transparent 20%);
+  }
 }

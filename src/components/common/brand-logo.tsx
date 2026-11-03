@@ -7,11 +7,13 @@ interface LogoProps extends React.SVGProps<SVGSVGElement> {
 }
 
 /**
- * BankyBondy Fintech Emblem:
- * Interlocking Trust Knot with Radiant Electric Indigo & Cyan Glow
- * Geometry: Two dynamic interlocking loops forming a modern vault & connection node.
+ * BankyBondy Ultra-Modern FinTech Brand Mark
+ * Design:
+ * - 3D Isometric Intertwined Prism Loops (Bank + Bond)
+ * - Rich layered gradients (Vibrant Electric Violet-Indigo & Glowing Neon Mint-Cyan)
+ * - Deep futuristic lighting with polished specular highlights (Revolut / Linear / Vercel grade)
  */
-export function BrandLogoSvg({ className, size = 40, ...props }: LogoProps) {
+export function BrandLogoSvg({ className, size = 38, ...props }: LogoProps) {
   return (
     <svg
       width={size}
@@ -20,69 +22,83 @@ export function BrandLogoSvg({ className, size = 40, ...props }: LogoProps) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="BankyBondy Brand Emblem"
+      aria-label="BankyBondy Brand Logo"
       className={cn("shrink-0 select-none", className)}
       {...props}
     >
       <defs>
-        {/* Electric Indigo to High-Tech Violet */}
-        <linearGradient
-          id="fintech-indigo-glow"
-          x1="10"
-          y1="10"
-          x2="90"
-          y2="90"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#6366F1" />
+        {/* Layer 1: Electric Indigo-Violet Glow */}
+        <linearGradient id="grad-indigo-bright" x1="10" y1="10" x2="90" y2="90" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#818CF8" />
+          <stop offset="45%" stopColor="#6366F1" />
           <stop offset="100%" stopColor="#4338CA" />
         </linearGradient>
 
-        {/* Vibrant Emerald & Cyan Accent */}
-        <linearGradient
-          id="fintech-cyan-emerald"
-          x1="90"
-          y1="10"
-          x2="10"
-          y2="90"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0%" stopColor="#06B6D4" />
+        {/* Layer 2: Neon Cyan-Emerald Flow */}
+        <linearGradient id="grad-cyan-neon" x1="85" y1="15" x2="15" y2="85" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#22D3EE" />
+          <stop offset="50%" stopColor="#06B6D4" />
           <stop offset="100%" stopColor="#10B981" />
         </linearGradient>
 
-        <filter id="glow-shadow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow
-            dx="0"
-            dy="3"
-            stdDeviation="3"
-            floodColor="#4338CA"
-            floodOpacity="0.25"
-          />
+        {/* Layer 3: Dynamic Highlight Arc */}
+        <linearGradient id="grad-white-glow" x1="30" y1="20" x2="70" y2="60" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+        </linearGradient>
+
+        {/* Sleek FinTech Drop Shadow */}
+        <filter id="fintech-ambient-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#6366F1" floodOpacity="0.4" />
         </filter>
       </defs>
 
-      <g filter="url(#glow-shadow)">
-        {/* Primary Pillar Ribbon (Banky - Foundation & Trust) */}
-        <path
-          d="M28 20H48C62.3594 20 74 31.6406 74 46C74 53.6496 70.7077 60.5303 65.4851 65.2917L36 94H20L51.8152 62.1848C56.8488 57.1512 60 50.1983 60 42.5C60 35.5964 54.4036 30 47.5 30H28V20Z"
-          fill="url(#fintech-indigo-glow)"
+      <g filter="url(#fintech-ambient-glow)">
+        {/* Rounded Diamond/Hex Carrier Base */}
+        <rect
+          x="6"
+          y="6"
+          width="88"
+          height="88"
+          rx="24"
+          className="fill-background/40 stroke-border/80"
+          strokeWidth="1.5"
         />
 
-        {/* Interlocking Bond Ribbon (Bondy - Connection & Flow) */}
+        {/* Primary Intersecting Infinity Arc (Loop A - Trust Vault) */}
         <path
-          d="M72 80H52C37.6406 80 26 68.3594 26 54C26 46.3504 29.2923 39.4697 34.5149 34.7083L64 6H80L48.1848 37.8152C43.1512 42.8488 40 49.8017 40 57.5C40 64.4036 45.5964 70 52.5 70H72V80Z"
-          fill="url(#fintech-cyan-emerald)"
+          d="M32 26C20 26 14 36 14 50C14 64 20 74 32 74C44 74 50 58 54 50C58 42 64 26 76 26C88 26 94 36 94 50C94 64 88 74 76 74C64 74 58 58 54 50"
+          stroke="url(#grad-indigo-bright)"
+          strokeWidth="11"
+          strokeLinecap="round"
         />
 
-        {/* Central Anchor Node */}
-        <circle cx="50" cy="50" r="5" fill="#FFFFFF" />
+        {/* Secondary Overlapping Ribbon (Loop B - Infinite Human Bond) */}
+        <path
+          d="M68 74C80 74 86 64 86 50C86 36 80 26 68 26C56 26 50 42 46 50C42 58 36 74 24 74C12 74 6 64 6 50C6 36 12 26 24 26"
+          stroke="url(#grad-cyan-neon)"
+          strokeWidth="8.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* Polished Glass Light Edge */}
+        <path
+          d="M26 30C28 28 32 27 36 27C44 27 49 38 52 45"
+          stroke="url(#grad-white-glow)"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+
+        {/* Floating Glowing Core Nexus */}
+        <circle cx="50" cy="50" r="4.5" fill="#FFFFFF" className="drop-shadow-sm" />
       </g>
     </svg>
   );
 }
 
 export default BrandLogoSvg;
+
 
 
 

@@ -31,24 +31,25 @@ export function Logo({
         <div
           className={cn(
             showTextOnMobile ? "flex flex-col" : "hidden sm:flex flex-col",
-            "leading-none gap-0.5"
+            "leading-none gap-1"
           )}
         >
           <span
             className={cn(
-              "font-bold tracking-tight text-foreground font-heading",
-              size === "lg" && "text-xl",
-              size === "md" && "text-lg",
+              "font-extrabold tracking-tight font-heading bg-linear-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent",
+              size === "lg" && "text-2xl tracking-tighter",
+              size === "md" && "text-xl tracking-tight",
               size === "sm" && "text-base"
             )}
           >
-            BankyBondy
+            Banky<span className="text-primary font-black">Bondy</span>
           </span>
-          <span className="text-[10px] text-muted-foreground font-medium tracking-wider uppercase">
+          <span className="text-[9px] font-semibold text-muted-foreground/80 tracking-[0.18em] uppercase">
             Red de Vínculos
           </span>
         </div>
       )}
+
     </Link>
   );
 
