@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js 16 Production Starter 🚀
 
-## Getting Started
+A production-grade, enterprise-ready starter template built with **Next.js 16 (Turbopack)**, **React 19**, **Tailwind CSS v4**, and the latest web engineering standards.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ⚡ Tech Stack & Highlights
+
+- **Framework**: Next.js 16.4.4 (App Router, Turbopack)
+- **Runtime & UI**: React 19.3.0 & Base UI
+- **Design System**: Tailwind CSS v4 + Shadcn UI (Full suite)
+- **Data Fetching & Server State**: TanStack React Query v5
+- **Forms & Validation**: TanStack Form + React Hook Form + Zod v4
+- **Tables & Visualization**: TanStack Table v8 + Recharts v3
+- **Network & API**: `ofetch` Client + Reverse Proxy Rewrites + JWT Support
+- **Theming & Toast**: `next-themes` (Dark/Light) + Sonner Toasts
+- **Quality Gates**: Strict design rules, error boundaries, 404 handler, and loading states
+- **AI Agent-Ready**: Integrated with Addy Osmani's 25 Engineering Skills & Context7 MCP support
+
+---
+
+## 📁 Project Structure
+
+```text
+├── .github/
+│   └── copilot-instructions.md   # Strict design & architecture rules
+├── public/                       # Static assets & icons
+├── src/
+│   ├── app/                      # App router (layout, loading, error, not-found)
+│   ├── components/
+│   │   ├── common/               # Modal, ImageCropper, Data Table, etc.
+│   │   └── ui/                   # Full Shadcn / Base UI components
+│   ├── constants/                # App-wide routes & constants
+│   ├── hooks/                    # Custom React hooks
+│   ├── lib/                      # api-client, jwt, toast, utils, error
+│   ├── provider/                 # Theme, QueryClient, and Toast providers
+│   ├── services/                 # api calls & query hooks
+│   ├── types/                    # TypeScript interfaces & types
+│   └── validations/              # Zod validation schemas
+├── .env.example                  # Environment configuration template
+├── components.json               # Shadcn UI configuration
+└── next.config.ts                # Next.js config with backend API proxy rewrites
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Clone & Install Dependencies
 
-## Learn More
+```bash
+pnpm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Copy `.env.example` to `.env.local`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+cp .env.example .env.local
+```
 
-## Deploy on Vercel
+### 3. Run Development Server
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Visit [http://localhost:3000](http://localhost:3000) to view the application.
+
+---
+
+## 🛠️ Build & Lint
+
+```bash
+# Type-check and production build
+pnpm build
+
+# Linting
+pnpm lint
+```
+
+---
+
+## 📄 License
+
+MIT
+
