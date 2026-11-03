@@ -31,11 +31,15 @@ export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
+  confirmPassword?: string;
   phone?: string;
-  gender?: "male" | "female" | "other";
+  gender?: "MALE" | "FEMALE" | "OTHER";
   dateOfBirth?: string;
   address?: string;
+  bio?: string;
+  skills?: string[];
 }
+
 
 export interface VerifyCodePayload {
   email: string;

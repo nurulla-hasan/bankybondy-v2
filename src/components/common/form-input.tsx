@@ -18,6 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MultiSelect } from "@/components/common/multi-select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import CustomCalendar from "@/components/common/custom-calender";
+import { CalendarIcon } from "lucide-react";
+import { formatDate } from "@/lib/utils";
+
+
 
 interface BaseFormInputProps {
   label: string;
@@ -27,6 +35,9 @@ interface BaseFormInputProps {
   description?: string;
   disabled?: boolean;
   options?: { label: string; value: string }[];
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
   inputMode?:
     | "none"
     | "text"
@@ -36,6 +47,7 @@ interface BaseFormInputProps {
     | "numeric"
     | "decimal"
     | "search";
+
   maxLength?: number;
   step?: string | number;
   min?: string | number;
@@ -67,6 +79,9 @@ function FormInputField({
   description,
   disabled,
   options,
+  onLoadMore,
+  hasMore,
+  isLoadingMore,
   inputMode,
   maxLength,
   step,
@@ -76,6 +91,7 @@ function FormInputField({
 }: BaseFormInputProps & {
   field: AnyFieldApi;
 }) {
+
   const rawErrors = field.state.meta.errors as unknown[] | undefined;
   const errorList = rawErrors?.length
     ? rawErrors.map((err: unknown) =>
@@ -157,8 +173,60 @@ function FormInputField({
               ))}
             </SelectContent>
           </Select>
+        ) : type === "multi-select" ? (
+          <MultiSelect
+            options={options || []}
+            selected={(field.state.value as string[]) || []}
+            onChange={(vals) => field.handleChange(vals)}
+            placeholder={placeholder}
+            disabled={disabled}
+            onLoadMore={onLoadMore}
+            hasMore={hasMore}
+            isLoadingMore={isLoadingMore}
+          />
+        ) : type === "date" ? (
+          <Popover>
+            <PopoverTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={disabled}
+                  aria-invalid={isInvalid}
+                  className="w-full justify-between cursor-pointer"
+                >
+                  <span className={field.state.value ? "text-foreground" : "text-muted-foreground"}>
+                    {field.state.value
+                      ? formatDate(field.state.value as string, "dd MMM, yyyy")
+                      : placeholder || "Select date"}
+                  </span>
+                  <CalendarIcon className="size-4 opacity-50 shrink-0 ml-2" />
+                </Button>
+              }
+            />
+            <PopoverContent className="w-auto p-0" align="start">
+              <CustomCalendar
+                selected={
+                  field.state.value
+                    ? new Date(field.state.value as string)
+                    : undefined
+                }
+                onSelect={(d) => {
+                  if (d) {
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, "0");
+                    const dd = String(d.getDate()).padStart(2, "0");
+                    field.handleChange(`${yyyy}-${mm}-${dd}`);
+                  } else {
+                    field.handleChange("");
+                  }
+                }}
+              />
+            </PopoverContent>
+          </Popover>
         ) : (
           <Input
+
             id={field.name}
             name={field.name}
             type={type}

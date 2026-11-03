@@ -87,9 +87,10 @@ export default async function AuthLayout({
         </div>
 
         {/* Form Container */}
-        <div className="w-full max-w-md animate-in fade-in-50 duration-300">
+        <div className="w-full max-w-xl animate-in fade-in-50 duration-300">
           {children}
         </div>
+
       </div>
     </div>
   );

@@ -48,8 +48,8 @@ export default function LoginPage() {
   });
 
   return (
-    <Card className="border-border shadow-xs">
-      <CardHeader className="text-center space-y-1">
+    <Card>
+      <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold tracking-tight">
           {t("loginTitle")}
         </CardTitle>

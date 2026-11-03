@@ -20,13 +20,17 @@ export const registerSchema = z
     password: z.string().min(6, { error: "Password must be at least 6 characters" }),
     confirmPassword: z.string().min(6, { error: "Please confirm your password" }),
     phone: z.string().optional(),
-    gender: z.enum(["male", "female", "other"]).optional(),
+    gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(),
+    dateOfBirth: z.string().optional(),
     address: z.string().optional(),
+    bio: z.string().optional(),
+    skills: z.array(z.string()).optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     error: "Passwords do not match",
     path: ["confirmPassword"],
   });
+
 
 export type RegisterSchemaType = z.infer<typeof registerSchema>;
 
