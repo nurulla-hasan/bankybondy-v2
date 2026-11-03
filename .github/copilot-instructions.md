@@ -28,11 +28,16 @@ This project follows the strict engineering standards established in `L2B7A7-mai
    - For example: instead of `w-[500px]`, write `w-125` ($125 \times 4\text{px} = 500\text{px}$).
    - Instead of `h-[400px]`, write `h-100`.
    - Use standard Tailwind utility classes (`w-full`, `max-w-md`, `max-w-xl`, `h-96`, `p-6`, `gap-4`, `rounded-2xl`, etc.).
+3. **Global Container Width Standard:**
+   - Every page and layout container MUST use `CONTAINER_MAX_WIDTH` (`max-w-350` / $350 \times 4\text{px} = 1400\text{px}$) from `@/components/common/page-wrapper`. Never use arbitrary or mismatched max-widths like `max-w-7xl`, `max-w-6xl`, or `max-w-5xl` for main page containers.
+
 
 ## 🚫 Common AI Anti-Patterns (Strictly Forbidden)
 1. **NO Redundant React Hook Form**: We strictly use `@tanstack/react-form` + `Zod v4`. Do not import or suggest `react-hook-form` or `@hookform/resolvers`.
 2. **NO Outdated Zod 3 Syntax**: Always use modern Zod v4 syntax: `z.email({ error: "..." })` instead of `z.string().email({ message: "..." })`.
-3. **NO Direct State Mutation**: Always use immutable updates and TanStack Query cache invalidations.
+3. **NO Small Button Size (`size="sm"`)**: NEVER use `size="sm"` or `size="xs"` for buttons anywhere in the app. Use `size="default"`, `size="lg"`, or `size="xl"`.
+4. **NO Direct State Mutation**: Always use immutable updates and TanStack Query cache invalidations.
+
 4. **NO Silent Error Swallowing**: Always log or handle errors using `getErrorMessage(error)` and `errorToast()`.
 5. **NO className overrides on Shadcn Components**: When consuming components like `<Button>`, `<Card>`, `<Input>`, etc., never pass visual overrides like custom background, border, padding or typography. Only layout classes like `w-full`, `flex`, `grid` are allowed.
 

@@ -2,19 +2,24 @@
 
 import { ReactNode } from "react";
 import QueryProvider from "./query.provider";
-import { ThemeProvider } from "./theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "./theme-provider";
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider>
-      <QueryProvider>
-        <TooltipProvider>
+    <QueryProvider>
+      <TooltipProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {children}
-          <Toaster richColors position="top-right" />
-        </TooltipProvider>
-      </QueryProvider>
-    </ThemeProvider>
+        </ThemeProvider>
+        <Toaster richColors position="top-right" />
+      </TooltipProvider>
+    </QueryProvider>
   );
 }

@@ -1,0 +1,25 @@
+{
+  "Home": "Home",
+  "Donate": "Donate",
+  "Bonds": "Bonds",
+  "People": "People",
+  "Messages": "Message",
+  "Chatting": "We are chatting",
+  "getStarted": "Get Started",
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+  "profile": "My Profile",
+  "settings": "Settings",
+  "logOut": "Log out",
+  "menu": "Menu",
+  "closeMenu": "Close navigation menu",
+  "search": "Search...",
+  "searchPlaceholder": "Type a command or search...",
+  "notifications": "Notifications",
+  "noNotifications": "No new notifications",
+  "markAllAsRead": "Mark all as read",
+  "viewAll": "View all",
+  "navigation": "Navigation",
+  "actions": "Actions"
+}
+

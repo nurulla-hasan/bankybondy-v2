@@ -1,0 +1,25 @@
+{
+  "Home": "Inicio",
+  "Donate": "Donar",
+  "Bonds": "Vínculos",
+  "People": "Personas",
+  "Messages": "Mensajes",
+  "Chatting": "Estamos charlando",
+  "getStarted": "Empezar",
+  "signIn": "Iniciar sesión",
+  "signUp": "Registrarse",
+  "profile": "Mi perfil",
+  "settings": "Ajustes",
+  "logOut": "Cerrar sesión",
+  "menu": "Menú",
+  "closeMenu": "Cerrar menú de navegación",
+  "search": "Buscar...",
+  "searchPlaceholder": "Escribe un comando o busca...",
+  "notifications": "Notificaciones",
+  "noNotifications": "No hay notificaciones nuevas",
+  "markAllAsRead": "Marcar todo como leído",
+  "viewAll": "Ver todo",
+  "navigation": "Navegación",
+  "actions": "Acciones"
+}
+
