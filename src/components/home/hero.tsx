@@ -115,7 +115,7 @@ export function Hero() {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       className={cn(
-        "relative w-full min-h-screen flex flex-col items-center justify-center text-center",
+        "relative w-full min-h-[calc(100vh-64px)] flex flex-col items-center justify-center text-center",
         "bg-background text-foreground overflow-hidden select-none transition-colors duration-300",
       )}
     >
