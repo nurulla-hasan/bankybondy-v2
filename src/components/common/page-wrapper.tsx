@@ -25,7 +25,7 @@ function PageWrapper({
   paddingSize = "default",
 }: PageWrapperProps) {
   return (
-    <div className={cn(`container mx-auto ${CONTAINER_MAX_WIDTH} screen-height`, paddingMap[paddingSize])}>
+    <div className={cn(`container mx-auto ${CONTAINER_MAX_WIDTH} min-h-[calc(100vh-4rem)]`, paddingMap[paddingSize])}>
       <div className={cn("grow lg:mb-0", className)}>{children}</div>
       {pagination}
     </div>

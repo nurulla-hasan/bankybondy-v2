@@ -125,7 +125,7 @@ export function ImageCropDialog({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-row items-center justify-end gap-2 pt-3 border-t border-border/60">
+        <div className="flex flex-row items-center justify-end gap-2 pt-3 border-t border-border">
           <Button
             type="button"
             variant="outline"

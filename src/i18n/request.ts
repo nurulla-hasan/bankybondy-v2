@@ -21,6 +21,7 @@ export default getRequestConfig(async () => {
       Hero: (await import(`../../messages/${locale}/hero.json`)).default,
       DonateUs: (await import(`../../messages/${locale}/donate.json`)).default,
       Footer: (await import(`../../messages/${locale}/footer.json`)).default,
+      Bonds: (await import(`../../messages/${locale}/bonds.json`)).default,
     },
   };
 

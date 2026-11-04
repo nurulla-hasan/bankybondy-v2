@@ -216,9 +216,8 @@ export function DataTable<TData, TValue, TFilterKey extends string = string>({
                       {onRetry && (
                         <Button
                           variant="outline"
-                          size="sm"
                           onClick={onRetry}
-                          className="mt-2 cursor-pointer"
+                          className="mt-2"
                         >
                           <RotateCcw className="mr-1.5 size-3.5" />
                           Try again

@@ -21,10 +21,8 @@ export default function BackButton({
   return (
     <Button
       variant={variant}
-      size="sm"
-      className={cn("",
-        className
-      )}
+      size="default"
+      className={className}
       onClick={() => router.back()}
     >
       <ArrowLeft />

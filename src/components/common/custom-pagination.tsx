@@ -176,7 +176,6 @@ const CustomPagination: React.FC<
                 ? -1
                 : undefined
             }
-            size="sm"
             className={
               currentPage <= 1
                 ? "pointer-events-none opacity-50"
@@ -211,7 +210,7 @@ const CustomPagination: React.FC<
                   onClick={handleNavigate(
                     pageNumber,
                   )}
-                  size="sm"
+                  size="icon"
                 >
                   {pageNumber}
                 </PaginationLink>
@@ -239,7 +238,6 @@ const CustomPagination: React.FC<
                 ? -1
                 : undefined
             }
-            size="sm"
             className={
               currentPage >= totalPages
                 ? "pointer-events-none opacity-50"
