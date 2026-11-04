@@ -11,9 +11,16 @@ import { successToast } from "@/lib/toast";
 import { getInitials } from "@/lib/utils";
 import type { BondLink } from "@/types";
 
+const STATUS_VARIANT = {
+  ongoing: "active",
+  completed: "completed",
+  cancelled: "rejected",
+} as const;
+
 export function BondLinkCard({ link }: { link: BondLink }) {
   const t = useTranslations("Bonds");
   const isOngoing = link.status === "ongoing";
+  const isCancelled = link.status === "cancelled";
 
   const handleOpenChat = () => {
     successToast(t("mockChatTitle"), t("mockChat", { name: link.name }));
@@ -37,7 +44,7 @@ export function BondLinkCard({ link }: { link: BondLink }) {
           </p>
         </div>
 
-        <Badge variant={isOngoing ? "active" : "completed"}>
+        <Badge variant={STATUS_VARIANT[link.status]}>
           {t(`linkStatus.${link.status}`)}
         </Badge>
       </header>
@@ -54,9 +61,11 @@ export function BondLinkCard({ link }: { link: BondLink }) {
         <span className="text-xs text-muted-foreground">
           {isOngoing
             ? t("linkOngoingHint")
-            : link.pendingRating
-              ? t("ratingPending")
-              : t("linkCompletedHint")}
+            : isCancelled
+              ? t("linkCancelledHint")
+              : link.pendingRating
+                ? t("ratingPending")
+                : t("linkCompletedHint")}
         </span>
 
         {isOngoing ? (

@@ -1,49 +1,165 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
 import {
-  mockBondLinks,
-  mockBondMatches,
-  mockBondRequests,
-} from "@/mocks/bonds.mock";
-import type { BondMatch, BondRequest } from "@/types";
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+import type {
+  ApiResponse,
+  BondLink,
+  BondLinkQueryParams,
+  BondMatch,
+  BondRequest,
+  BondRequestQueryParams,
+  CreateBondLinkInput,
+  PaginationMeta,
+  RawBondRequestList,
+} from "@/types";
 import type { CreateBondValues } from "@/validations";
+import {
+  createBondLink,
+  createBondRequest,
+  deleteBondRequest,
+  getBondMatches,
+  getBondRequestById,
+  getMyBondLinks,
+  getMyBondRequests,
+  setBondRequestPaused,
+} from "../api";
+import { mapBondLink, mapBondMatch, mapBondRequest } from "../mappers/bond.mapper";
+
+export const BOND_REQUESTS_PAGE_SIZE = 12;
+export const BOND_LINKS_PAGE_SIZE = 12;
+export const BOND_MATCHES_PAGE_SIZE = 10;
+const MATCHES_POLL_MS = 3_000;
+
+export type BondRequestPage = {
+  items: BondRequest[];
+  meta: PaginationMeta;
+};
+
+export type BondLinkPage = {
+  items: BondLink[];
+  meta: PaginationMeta;
+};
+
+export type BondMatchPage = {
+  /** 'computing' means the robot is still producing matches; keep polling. */
+  status: "ready" | "computing";
+  reactivated: boolean;
+  items: BondMatch[];
+  meta: PaginationMeta;
+};
 
 export const bondKeys = {
   all: ["bonds"] as const,
   requests: () => [...bondKeys.all, "requests"] as const,
+  requestList: (params: BondRequestQueryParams) =>
+    [...bondKeys.requests(), "list", params] as const,
+  requestDetail: (id: string | null) =>
+    [...bondKeys.requests(), "detail", id] as const,
   matches: () => [...bondKeys.all, "matches"] as const,
+  matchList: (params: { bondRequest: string | null; page: number; limit: number }) =>
+    [...bondKeys.matches(), params] as const,
   links: () => [...bondKeys.all, "links"] as const,
+  linkList: (params: BondLinkQueryParams) =>
+    [...bondKeys.links(), params] as const,
 };
 
-// Mock-backed until the bond endpoints are wired up. Cache stays warm so the
-// page and the dialogs read/write the same source of truth.
-export function useBondRequests() {
+const normalizeRequestParams = (params: BondRequestQueryParams = {}) => ({
+  page: params.page && params.page > 0 ? params.page : 1,
+  limit: params.limit ?? BOND_REQUESTS_PAGE_SIZE,
+  searchTerm: params.searchTerm?.trim() || undefined,
+  sort: params.sort ?? "-createdAt",
+});
+
+const normalizeLinkParams = (params: BondLinkQueryParams = {}) => ({
+  page: params.page && params.page > 0 ? params.page : 1,
+  limit: params.limit ?? BOND_LINKS_PAGE_SIZE,
+  searchTerm: params.searchTerm?.trim() || undefined,
+  sort: params.sort ?? "-createdAt",
+  status: params.status,
+});
+
+export function useBondRequests(params: BondRequestQueryParams = {}) {
+  const normalized = normalizeRequestParams(params);
+
   return useQuery({
-    queryKey: bondKeys.requests(),
-    queryFn: async () => mockBondRequests,
-    initialData: mockBondRequests,
-    staleTime: Infinity,
-    gcTime: Infinity,
+    queryKey: bondKeys.requestList(normalized),
+    queryFn: () => getMyBondRequests(normalized),
+    select: (response): BondRequestPage => ({
+      items: response.data.result.map(mapBondRequest),
+      meta: response.data.meta,
+    }),
+    placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
   });
 }
 
-export function useBondMatches() {
+export function useBondRequest(id: string | null) {
   return useQuery({
-    queryKey: bondKeys.matches(),
-    queryFn: async () => mockBondMatches,
-    initialData: mockBondMatches,
-    staleTime: Infinity,
-    gcTime: Infinity,
+    queryKey: bondKeys.requestDetail(id),
+    queryFn: () => getBondRequestById(id as string),
+    enabled: !!id,
+    select: (response) => mapBondRequest(response.data),
+    staleTime: 30 * 1000,
   });
 }
 
-export function useBondLinks() {
+export function useBondLinks(params: BondLinkQueryParams = {}) {
+  const normalized = normalizeLinkParams(params);
+
   return useQuery({
-    queryKey: bondKeys.links(),
-    queryFn: async () => mockBondLinks,
-    initialData: mockBondLinks,
-    staleTime: Infinity,
-    gcTime: Infinity,
+    queryKey: bondKeys.linkList(normalized),
+    queryFn: () => getMyBondLinks(normalized),
+    select: (response): BondLinkPage => ({
+      items: response.data.result.map(mapBondLink),
+      meta: response.data.meta,
+    }),
+    placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useBondMatches(requestId: string | null, page = 1) {
+  const normalizedPage = page > 0 ? page : 1;
+
+  return useQuery({
+    queryKey: bondKeys.matchList({
+      bondRequest: requestId,
+      page: normalizedPage,
+      limit: BOND_MATCHES_PAGE_SIZE,
+    }),
+    queryFn: () =>
+      getBondMatches({
+        bondRequest: requestId as string,
+        page: normalizedPage,
+        limit: BOND_MATCHES_PAGE_SIZE,
+      }),
+    enabled: !!requestId,
+    select: (response): BondMatchPage => {
+      const raw = response.data;
+
+      return {
+        status: raw.status,
+        reactivated: raw.reactivated,
+        items: raw.data.map((match) => mapBondMatch(match, requestId as string)),
+        meta: {
+          page: raw.page,
+          limit: raw.limit,
+          total: raw.total,
+          totalPages: Math.max(
+            1,
+            Math.ceil(raw.total / Math.max(raw.limit, 1)),
+          ),
+        },
+      };
+    },
+    placeholderData: keepPreviousData,
+    staleTime: 10 * 1000,
+    refetchInterval: (query) =>
+      query.state.data?.data.status === "computing" ? MATCHES_POLL_MS : false,
   });
 }
 
@@ -51,22 +167,28 @@ export function useCreateBondRequest() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (values: CreateBondValues): Promise<BondRequest> => ({
-      id: `req-${Date.now()}`,
-      offer: values.offer,
-      want: values.want,
-      description: values.description,
-      modality: values.modality,
-      radiusKm: values.modality === "physical" ? values.radiusKm : undefined,
-      status: "waiting",
-      createdAt: new Date().toISOString(),
-      matchCount: 0,
-    }),
-    onSuccess: (request) => {
-      queryClient.setQueryData<BondRequest[]>(
-        bondKeys.requests(),
-        (previous = []) => [request, ...previous],
-      );
+    mutationFn: (values: CreateBondValues) =>
+      createBondRequest({
+        offer: values.offer,
+        want: values.want,
+        description: values.description,
+        modality: values.modality,
+        radius:
+          values.modality === "physical" ? values.radiusKm : undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bondKeys.requests() });
+    },
+  });
+}
+
+export function useCreateBondLink() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateBondLinkInput) => createBondLink(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bondKeys.links() });
     },
   });
 }
@@ -75,15 +197,31 @@ export function useToggleBondRequestPause() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (request: BondRequest): Promise<BondRequest> => ({
-      ...request,
-      status: request.status === "paused" ? "waiting" : "paused",
-    }),
+    mutationFn: async (request: BondRequest) => {
+      const response = await setBondRequestPaused(
+        request.id,
+        request.status !== "paused",
+      );
+
+      return mapBondRequest(response.data);
+    },
     onSuccess: (updated) => {
-      queryClient.setQueryData<BondRequest[]>(
-        bondKeys.requests(),
-        (previous = []) =>
-          previous.map((item) => (item.id === updated.id ? updated : item)),
+      queryClient.setQueriesData<ApiResponse<RawBondRequestList>>(
+        { queryKey: bondKeys.requests() },
+        (response) =>
+          response
+            ? {
+                ...response,
+                data: {
+                  ...response.data,
+                  result: response.data.result.map((item) =>
+                    item._id === updated.id
+                      ? { ...item, isPause: updated.status === "paused" }
+                      : item,
+                  ),
+                },
+              }
+            : response,
       );
     },
   });
@@ -93,16 +231,26 @@ export function useDeleteBondRequest() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (request: BondRequest) => request,
-    onSuccess: (request) => {
-      queryClient.setQueryData<BondRequest[]>(
-        bondKeys.requests(),
-        (previous = []) => previous.filter((item) => item.id !== request.id),
-      );
-      queryClient.setQueryData<BondMatch[]>(
-        bondKeys.matches(),
-        (previous = []) =>
-          previous.filter((match) => match.requestId !== request.id),
+    mutationFn: (request: BondRequest) => deleteBondRequest(request.id),
+    onSuccess: (_response, request) => {
+      queryClient.setQueriesData<ApiResponse<RawBondRequestList>>(
+        { queryKey: bondKeys.requests() },
+        (response) =>
+          response
+            ? {
+                ...response,
+                data: {
+                  ...response.data,
+                  meta: {
+                    ...response.data.meta,
+                    total: Math.max(response.data.meta.total - 1, 0),
+                  },
+                  result: response.data.result.filter(
+                    (item) => item._id !== request.id,
+                  ),
+                },
+              }
+            : response,
       );
     },
   });

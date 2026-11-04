@@ -20,7 +20,8 @@
     "matched": "Matched",
     "ongoing": "Ongoing",
     "completed": "Completed",
-    "paused": "Paused"
+    "paused": "Paused",
+    "cancelled": "Cancelled"
   },
   "onlineGlobal": "Online · anywhere",
   "inPersonRadius": "In person · within {km} km",
@@ -41,6 +42,10 @@
   "createSuccessTitle": "Request published",
   "createSuccess": "Your bond request is live. We will notify you when a match appears.",
   "matchesFor": "Matches for: {offer}",
+  "browseRequests": "Browse requests",
+  "matchesReactivated": "Some requests became active again, so matching was restarted.",
+  "matchesComputingTitle": "Finding matches",
+  "matchesComputingDescription": "We are scanning offers and wants. This page refreshes automatically when the results are ready.",
   "clearFilter": "Clear filter",
   "searchEmptyTitle": "No results for “{term}”",
   "searchEmptyDescription": "Try a different word, or clear the search.",
@@ -68,9 +73,13 @@
   "groupNamePlaceholder": "e.g. Neighborhood repair circle",
   "proposeSuccessTitle": "Bond proposed",
   "proposeSuccess": "“{name}” was sent to all participants for confirmation.",
+  "proposeErrorTitle": "Couldn't propose the bond",
+  "proposeError": "Check your connection and try again.",
+  "proposing": "Proposing...",
   "linkStatus": {
     "ongoing": "Ongoing",
-    "completed": "Completed"
+    "completed": "Completed",
+    "cancelled": "Cancelled"
   },
   "membersCount": "{count, plural, one {# member} other {# members}}",
   "started": "Started",
@@ -79,6 +88,7 @@
   "linkOngoingHint": "Chat room is open",
   "ratingPending": "Rate your experience",
   "linkCompletedHint": "Bond completed",
+  "linkCancelledHint": "Bond cancelled",
   "mockChatTitle": "Chat opening",
   "mockChat": "The chat for “{name}” will open here once the API is connected.",
   "mockRateTitle": "Rating",
@@ -88,10 +98,14 @@
     "requestsDescription": "Start by describing what you give and what you want in return.",
     "matchesTitle": "No matches yet",
     "matchesDescription": "When someone fits your offer and want, matches will show up here.",
+    "matchesNoRequestTitle": "Pick a request first",
+    "matchesNoRequestDescription": "Matches are calculated per request. Choose one in the Requests tab and tap Find matches.",
     "matchesFilteredDescription": "This request has no matches yet. Try widening the radius or give it a little time.",
     "linksTitle": "No bonds yet",
     "linksDescription": "Once you propose a match and everyone accepts, it becomes a bond."
   },
+  "loadErrorTitle": "Couldn't load your bonds",
+  "loadErrorDescription": "Check your connection and try again.",
   "createDescription": "Describe what you offer and what you would love to receive. Wildcards are welcome.",
   "modalityLabel": "How do you want to bond?",
   "modalityPhysical": "In person",

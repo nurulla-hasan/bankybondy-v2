@@ -3,7 +3,8 @@ export type BondStatus =
   | "matched"
   | "ongoing"
   | "completed"
-  | "paused";
+  | "paused"
+  | "cancelled";
 
 export type BondModality = "physical" | "online";
 
@@ -33,7 +34,8 @@ export interface BondRequest {
   radiusKm?: number;
   status: BondStatus;
   createdAt: string;
-  matchCount: number;
+  /** Not provided by the list endpoint yet; the card hides the chip when absent. */
+  matchCount?: number;
 }
 
 export interface MatchParticipant extends BondUser {
@@ -50,19 +52,25 @@ export interface MatchFactors {
 
 export interface BondMatch {
   id: string;
+  /** Bond request the matches were computed for. */
   requestId: string;
+  /** Bond request ids that form the exchange cycle, in cycle order. */
+  bondIds: string[];
+  /** Owner (profile) ids in the same order as `bondIds`. */
+  participantIds: string[];
   /** 0-100 strength score shown as a badge. */
   score: number;
   factors?: MatchFactors;
   special?: MatchSpecial;
   participants: MatchParticipant[];
-  createdAt: string;
+  /** Present on mock data; the matches endpoint does not expose a timestamp. */
+  createdAt?: string;
 }
 
 export interface BondLink {
   id: string;
   name: string;
-  status: "ongoing" | "completed";
+  status: "ongoing" | "completed" | "cancelled";
   participants: BondUser[];
   createdAt: string;
   completedAt?: string;

@@ -20,7 +20,8 @@
     "matched": "Con coincidencias",
     "ongoing": "En curso",
     "completed": "Completado",
-    "paused": "En pausa"
+    "paused": "En pausa",
+    "cancelled": "Cancelado"
   },
   "onlineGlobal": "En línea · donde sea",
   "inPersonRadius": "En persona · hasta {km} km",
@@ -41,6 +42,10 @@
   "createSuccessTitle": "Solicitud publicada",
   "createSuccess": "Tu solicitud de vínculo está activa. Te avisaremos cuando aparezca una coincidencia.",
   "matchesFor": "Coincidencias para: {offer}",
+  "browseRequests": "Ver solicitudes",
+  "matchesReactivated": "Algunas solicitudes se reactivaron, así que reiniciamos las coincidencias.",
+  "matchesComputingTitle": "Buscando coincidencias",
+  "matchesComputingDescription": "Estamos revisando ofertas y búsquedas. La página se actualiza sola cuando los resultados estén listos.",
   "clearFilter": "Quitar filtro",
   "searchEmptyTitle": "Sin resultados para “{term}”",
   "searchEmptyDescription": "Prueba con otra palabra o quita la búsqueda.",
@@ -68,9 +73,13 @@
   "groupNamePlaceholder": "p. ej. Círculo de reparaciones del barrio",
   "proposeSuccessTitle": "Vínculo propuesto",
   "proposeSuccess": "“{name}” fue enviado a todos los participantes para confirmar.",
+  "proposeErrorTitle": "No pudimos proponer el vínculo",
+  "proposeError": "Revisá tu conexión e intentá de nuevo.",
+  "proposing": "Proponiendo...",
   "linkStatus": {
     "ongoing": "En curso",
-    "completed": "Completado"
+    "completed": "Completado",
+    "cancelled": "Cancelado"
   },
   "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
   "started": "Iniciado",
@@ -79,6 +88,7 @@
   "linkOngoingHint": "La sala de chat está abierta",
   "ratingPending": "Valora tu experiencia",
   "linkCompletedHint": "Vínculo completado",
+  "linkCancelledHint": "Vínculo cancelado",
   "mockChatTitle": "Abriendo chat",
   "mockChat": "El chat de “{name}” se abrirá aquí cuando la API esté conectada.",
   "mockRateTitle": "Valoración",
@@ -88,10 +98,14 @@
     "requestsDescription": "Empieza describiendo lo que das y lo que quieres recibir.",
     "matchesTitle": "Aún no hay coincidencias",
     "matchesDescription": "Cuando alguien encaje con tu oferta y tu búsqueda, las coincidencias aparecerán aquí.",
+    "matchesNoRequestTitle": "Elige una solicitud primero",
+    "matchesNoRequestDescription": "Las coincidencias se calculan por solicitud. Elige una en la pestaña Solicitudes y toca Buscar coincidencias.",
     "matchesFilteredDescription": "Esta solicitud todavía no tiene coincidencias. Prueba ampliar el radio o espera un poco.",
     "linksTitle": "Aún no hay vínculos",
     "linksDescription": "Cuando propongas una coincidencia y todos acepten, se convertirá en un vínculo."
   },
+  "loadErrorTitle": "No pudimos cargar tus vínculos",
+  "loadErrorDescription": "Revisá tu conexión e intentá de nuevo.",
   "createDescription": "Describe lo que ofreces y lo que te encantaría recibir. Las sorpresas son bienvenidas.",
   "modalityLabel": "¿Cómo quieres vincularos?",
   "modalityPhysical": "En persona",

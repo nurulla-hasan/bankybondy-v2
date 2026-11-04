@@ -15,7 +15,7 @@ import { RequestsTab } from "./requests-tab";
 
 export type BondTab = "requests" | "matches" | "links";
 
-type BondFilterKey = "tab" | "request" | "searchTerm";
+type BondFilterKey = "tab" | "request" | "searchTerm" | "page";
 
 const BOND_TABS: readonly BondTab[] = ["requests", "matches", "links"];
 const DEFAULT_TAB: BondTab = "requests";
@@ -29,10 +29,12 @@ export function BondTabs() {
   const activeTab = BOND_TABS.includes(tabValue) ? tabValue : DEFAULT_TAB;
   const requestFilterId = getFilter("request") || null;
   const searchTerm = getFilter("searchTerm");
+  const pageParam = Number(getFilter("page", "1"));
+  const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
 
-  const { data: requests } = useBondRequests();
-  const { data: matches } = useBondMatches();
-  const { data: links } = useBondLinks();
+  const { data: requests } = useBondRequests({ searchTerm, page });
+  const { data: matches } = useBondMatches(requestFilterId, page);
+  const { data: links } = useBondLinks({ searchTerm, page });
 
   const handleTabChange = (tab: BondTab) => {
     updateFilter("tab", tab === DEFAULT_TAB ? null : tab);
@@ -42,24 +44,30 @@ export function BondTabs() {
     updateBatch({ tab: "matches", request: request.id });
   };
 
+  const handlePageChange = (nextPage: number) => {
+    updateFilter("page", nextPage <= 1 ? null : nextPage, {
+      resetPage: false,
+    });
+  };
+
   const tabs = [
     {
       id: "requests" as const,
       icon: <ClipboardList className="size-4" aria-hidden />,
       label: t("tabs.requests"),
-      count: requests.length,
+      count: requests?.meta.total ?? 0,
     },
     {
       id: "matches" as const,
       icon: <Sparkles className="size-4" aria-hidden />,
       label: t("tabs.matches"),
-      count: matches.length,
+      count: requestFilterId ? (matches?.meta.total ?? 0) : undefined,
     },
     {
       id: "links" as const,
       icon: <Link2 className="size-4" aria-hidden />,
       label: t("tabs.links"),
-      count: links.length,
+      count: links?.meta.total ?? 0,
     },
   ];
 
@@ -83,9 +91,11 @@ export function BondTabs() {
             >
               {tab.icon}
               {tab.label}
-              <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs tabular-nums group-data-active/tab-trigger:bg-primary/10 group-data-active/tab-trigger:text-primary">
-                {tab.count}
-              </span>
+              {typeof tab.count === "number" ? (
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs tabular-nums group-data-active/tab-trigger:bg-primary/10 group-data-active/tab-trigger:text-primary">
+                  {tab.count}
+                </span>
+              ) : null}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -93,13 +103,25 @@ export function BondTabs() {
         <SearchInput />
       </div>
 
-      <RequestsTab onFindMatch={handleFindMatch} searchTerm={searchTerm} />
+      <RequestsTab
+        onFindMatch={handleFindMatch}
+        searchTerm={searchTerm}
+        page={page}
+        onPageChange={handlePageChange}
+      />
       <MatchesTab
         requestFilterId={requestFilterId}
         onClearFilter={() => updateFilter("request", null)}
+        onBrowseRequests={() => updateFilter("tab", null)}
         searchTerm={searchTerm}
+        page={page}
+        onPageChange={handlePageChange}
       />
-      <LinksTab searchTerm={searchTerm} />
+      <LinksTab
+        searchTerm={searchTerm}
+        page={page}
+        onPageChange={handlePageChange}
+      />
     </Tabs>
   );
 }

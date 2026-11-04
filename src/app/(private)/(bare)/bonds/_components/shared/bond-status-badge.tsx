@@ -11,6 +11,7 @@ const STATUS_VARIANT = {
   ongoing: "active",
   completed: "completed",
   paused: "warning",
+  cancelled: "rejected",
 } as const;
 
 export function BondStatusBadge({ status }: { status: BondStatus }) {

@@ -81,9 +81,11 @@ export function BondRequestCard({
 
       <OfferWant offer={request.offer} want={request.want} />
 
-      <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
-        {request.description}
-      </p>
+      {request.description ? (
+        <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+          {request.description}
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
@@ -97,10 +99,12 @@ export function BondRequestCard({
             : t("inPersonRadius", { km: request.radiusKm ?? 0 })}
         </span>
 
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
-          <Users className="size-3.5" aria-hidden />
-          {t("matchesCount", { count: request.matchCount })}
-        </span>
+        {typeof request.matchCount === "number" ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
+            <Users className="size-3.5" aria-hidden />
+            {t("matchesCount", { count: request.matchCount })}
+          </span>
+        ) : null}
       </div>
 
       <div className="mt-auto flex items-center gap-2 border-t border-border/70 pt-3">

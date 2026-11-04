@@ -19,10 +19,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RelativeTime } from "@/components/common/relative-time";
+import { useCreateBondLink } from "@/services";
 import { MatchChain } from "./match-chain";
 import { MatchCycle } from "./match-cycle";
 import { MatchFactors } from "./match-factors";
-import { successToast } from "@/lib/toast";
+import { errorToast, successToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { proposeBondSchema, type ProposeBondValues } from "@/validations";
 import type { BondMatch, MatchSpecial } from "@/types";
@@ -35,6 +36,7 @@ const SPECIAL_DOT: Record<MatchSpecial, string> = {
 
 export function MatchCard({ match }: { match: BondMatch }) {
   const t = useTranslations("Bonds");
+  const createLink = useCreateBondLink();
   const [whyOpen, setWhyOpen] = useState(false);
   const [proposeOpen, setProposeOpen] = useState(false);
 
@@ -44,12 +46,26 @@ export function MatchCard({ match }: { match: BondMatch }) {
       onChange: proposeBondSchema,
     },
     onSubmit: ({ value }) => {
-      successToast(
-        t("proposeSuccessTitle"),
-        t("proposeSuccess", { name: value.name }),
+      createLink.mutate(
+        {
+          name: value.name,
+          participants: [...new Set(match.participantIds)],
+          requestedBonds: match.bondIds,
+        },
+        {
+          onSuccess: () => {
+            successToast(
+              t("proposeSuccessTitle"),
+              t("proposeSuccess", { name: value.name }),
+            );
+            setProposeOpen(false);
+            proposeForm.reset();
+          },
+          onError: () => {
+            errorToast(t("proposeErrorTitle"), t("proposeError"));
+          },
+        },
       );
-      setProposeOpen(false);
-      proposeForm.reset();
     },
   });
 
@@ -88,8 +104,12 @@ export function MatchCard({ match }: { match: BondMatch }) {
             <Users className="size-3.5" aria-hidden />
             {t("membersCount", { count: match.participants.length })}
           </span>
-          <span aria-hidden>·</span>
-          <RelativeTime date={match.createdAt} />
+          {match.createdAt ? (
+            <>
+              <span aria-hidden>·</span>
+              <RelativeTime date={match.createdAt} />
+            </>
+          ) : null}
         </div>
       </header>
 
@@ -169,11 +189,15 @@ export function MatchCard({ match }: { match: BondMatch }) {
                 <proposeForm.Subscribe
                   selector={(state) => [state.canSubmit, state.isSubmitting]}
                 >
-                  {([canSubmit, isSubmitting]) => (
-                    <Button type="submit" disabled={!canSubmit || isSubmitting}>
-                      {isSubmitting ? t("submitting") : t("propose")}
-                    </Button>
-                  )}
+                  {([canSubmit, isSubmitting]) => {
+                    const isPending = isSubmitting || createLink.isPending;
+
+                    return (
+                      <Button type="submit" disabled={!canSubmit || isPending}>
+                        {isPending ? t("proposing") : t("propose")}
+                      </Button>
+                    );
+                  }}
                 </proposeForm.Subscribe>
               </DialogFooter>
             </form>
