@@ -60,9 +60,7 @@ export function NavbarUserMenu({
                   src={user.profile_image}
                   alt={user.name || "User Avatar"}
                 />
-                <AvatarFallback>
-                  {user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
-                </AvatarFallback>
+                <AvatarFallback />
               </Avatar>
             </Button>
           }

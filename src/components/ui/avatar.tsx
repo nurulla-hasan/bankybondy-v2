@@ -37,19 +37,39 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
   )
 }
 
+function DefaultAvatar() {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      aria-hidden="true"
+      className="size-full rounded-full"
+    >
+      <rect width="64" height="64" className="fill-muted" />
+      <circle cx="32" cy="24" r="11" className="fill-muted-foreground/40" />
+      <path
+        d="M10 64c0-12 10-22 22-22s22 10 22 22"
+        className="fill-muted-foreground/40"
+      />
+    </svg>
+  )
+}
+
 function AvatarFallback({
   className,
+  children,
   ...props
 }: AvatarPrimitive.Fallback.Props) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
       className={cn(
-        "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs",
+        "flex size-full items-center justify-center overflow-hidden rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs",
         className
       )}
       {...props}
-    />
+    >
+      {children ?? <DefaultAvatar />}
+    </AvatarPrimitive.Fallback>
   )
 }
 

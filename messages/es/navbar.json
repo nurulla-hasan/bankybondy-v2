@@ -40,7 +40,6 @@
   "categoryFriends": "Amistades",
   "categorySubscription": "Suscripción",
   "deleteNotification": "Eliminar notificación",
-  "loadError": "No se pudieron cargar las notificaciones",
-  "signInToViewNotifications": "Inicia sesión para ver tus notificaciones"
+  "loadError": "No se pudieron cargar las notificaciones"
 }
 

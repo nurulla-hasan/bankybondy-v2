@@ -129,9 +129,7 @@ export function MobileNav({
                       src={user.profile_image}
                       alt={user.name || "User Avatar"}
                     />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                      {user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
-                    </AvatarFallback>
+                    <AvatarFallback />
                   </Avatar>
                   <div className="flex flex-col min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate leading-tight">

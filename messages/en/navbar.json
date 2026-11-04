@@ -40,7 +40,6 @@
   "categoryFriends": "Friends",
   "categorySubscription": "Subscription",
   "deleteNotification": "Delete notification",
-  "loadError": "Couldn't load notifications",
-  "signInToViewNotifications": "Sign in to see your notifications"
+  "loadError": "Couldn't load notifications"
 }
 

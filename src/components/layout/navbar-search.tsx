@@ -21,7 +21,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-import { cn, getInitials } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks";
 import { useGlobalSearch, useGetMyProfile, useLogout } from "@/services";
 import { Button } from "@/components/ui/button";
@@ -187,9 +187,7 @@ export function NavbarSearch({
                           src={person.profile_image}
                           alt={person.name}
                         />
-                        <AvatarFallback>
-                          {getInitials(person.name)}
-                        </AvatarFallback>
+                        <AvatarFallback />
                       </Avatar>
                       <span className="truncate text-sm font-medium">
                         {person.name}

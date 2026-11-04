@@ -293,6 +293,8 @@ export function NavbarNotifications({ className }: NavbarNotificationsProps) {
     }
   };
 
+  if (!isAuthenticated) return null;
+
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger
@@ -356,36 +358,19 @@ export function NavbarNotifications({ className }: NavbarNotificationsProps) {
                   <CheckCheck className="size-4" />
                 </Button>
               )}
-              {isAuthenticated && (
-                <Button
-                  variant={showSettings ? "secondary" : "ghost"}
-                  size="icon"
-                  onClick={() => setShowSettings((current) => !current)}
-                  aria-label={t("notificationSettings")}
-                  title={t("notificationSettings")}
-                >
-                  <Settings className="size-4" />
-                </Button>
-              )}
+              <Button
+                variant={showSettings ? "secondary" : "ghost"}
+                size="icon"
+                onClick={() => setShowSettings((current) => !current)}
+                aria-label={t("notificationSettings")}
+                title={t("notificationSettings")}
+              >
+                <Settings className="size-4" />
+              </Button>
             </div>
           </div>
 
-          {!isAuthenticated ? (
-            <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
-              <Bell className="text-muted-foreground/60 size-6" />
-              <p className="text-muted-foreground text-xs">
-                {t("signInToViewNotifications")}
-              </p>
-              <Button
-                onClick={() => {
-                  setOpen(false);
-                  router.push("/login");
-                }}
-              >
-                {t("signIn")}
-              </Button>
-            </div>
-          ) : showSettings ? (
+          {showSettings ? (
             /* Preferences */
             <div className="max-h-80 overflow-y-auto overscroll-contain p-2">
               <p className="px-2 pb-2 pt-1 text-xs leading-relaxed text-muted-foreground">
