@@ -1,0 +1,23 @@
+{
+  "description": "Una plataforma moderna para colaborar, intercambiar y crecer en comunidad. Construida sobre vínculos auténticos entre personas, no algoritmos.",
+  "platform": "Plataforma",
+  "home": "Inicio",
+  "bonds": "Vínculos",
+  "people": "Personas",
+  "chatting": "Estamos charlando",
+  "support": "Apoyo",
+  "donate": "Donar",
+  "about": "Sobre nosotros",
+  "contact": "Contacto",
+  "legal": "Legal",
+  "terms": "Términos y condiciones",
+  "privacy": "Política de privacidad",
+  "facebook": "Facebook",
+  "instagram": "Instagram",
+  "madeWith": "Hecho con",
+  "byTeam": "por el equipo de BankyBondy",
+  "license": "Creative Commons BY-SA 4.0",
+  "licenseAttribution": "Atribución",
+  "licenseShareAlike": "Compartir igual",
+  "copyright": "© {year} BankyBondy. Todos los derechos reservados."
+}

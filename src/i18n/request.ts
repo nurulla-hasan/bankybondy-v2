@@ -20,6 +20,7 @@ export default getRequestConfig(async () => {
       Navbar: (await import(`../../messages/${locale}/navbar.json`)).default,
       Hero: (await import(`../../messages/${locale}/hero.json`)).default,
       DonateUs: (await import(`../../messages/${locale}/donate.json`)).default,
+      Footer: (await import(`../../messages/${locale}/footer.json`)).default,
     },
   };
 

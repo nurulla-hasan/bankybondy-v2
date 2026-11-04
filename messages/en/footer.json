@@ -1,0 +1,23 @@
+{
+  "description": "A modern platform for collaboration, bartering, and community. Built on authentic bonds between people, not algorithms.",
+  "platform": "Platform",
+  "home": "Home",
+  "bonds": "Bonds",
+  "people": "People",
+  "chatting": "We are chatting",
+  "support": "Support",
+  "donate": "Donate",
+  "about": "About us",
+  "contact": "Contact",
+  "legal": "Legal",
+  "terms": "Terms & Conditions",
+  "privacy": "Privacy Policy",
+  "facebook": "Facebook",
+  "instagram": "Instagram",
+  "madeWith": "Made with",
+  "byTeam": "by the BankyBondy team",
+  "license": "Creative Commons BY-SA 4.0",
+  "licenseAttribution": "Attribution",
+  "licenseShareAlike": "Share Alike",
+  "copyright": "© {year} BankyBondy. All rights reserved."
+}
