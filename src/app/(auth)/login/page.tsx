@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/common/form-input";
-import { useLogin } from "@/services";
+import { useLogin, useLogout } from "@/services";
 import { successToast, errorToast } from "@/lib/toast";
 import { loginSchema, type LoginSchemaType } from "@/validations";
 import { getErrorMessage } from "@/lib/error";
@@ -24,7 +24,9 @@ import { getErrorMessage } from "@/lib/error";
 export default function LoginPage() {
   const t = useTranslations("Auth");
   const router = useRouter();
-  const { mutate: login, isPending } = useLogin();
+  const { mutate: login, isPending: isLoggingIn } = useLogin();
+  const { mutate: logout, isPending: isLoggingOut } = useLogout();
+  const isPending = isLoggingIn || isLoggingOut;
 
   const form = useForm({
     defaultValues: {
@@ -36,7 +38,17 @@ export default function LoginPage() {
     },
     onSubmit: ({ value }) => {
       login(value, {
-        onSuccess: () => {
+        onSuccess: (res) => {
+          const userRole = res?.data?.user?.role;
+          if (userRole && userRole !== "user") {
+            logout(undefined, {
+              onSettled: () => {
+                errorToast(t("adminNotAllowed"));
+              },
+            });
+            return;
+          }
+
           successToast(t("loginTitle"), t("loginSubtitle"));
           router.replace("/");
         },
