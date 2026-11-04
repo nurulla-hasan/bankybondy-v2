@@ -11,6 +11,11 @@
   --font-heading: var(--font-heading);
   --color-emerald-accent: var(--emerald-accent);
   --color-cyan-glow: var(--cyan-glow);
+  --color-amber-accent: var(--amber-accent);
+  --color-violet-accent: var(--violet-accent);
+  --color-pink-accent: var(--pink-accent);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-overlay: var(--overlay);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -72,6 +77,11 @@
   --ring: oklch(0.55 0.22 265);
   --emerald-accent: oklch(0.68 0.17 155);      /* Vibrant Growth Emerald */
   --cyan-glow: oklch(0.72 0.14 205);           /* Modern Cyan */
+  --amber-accent: oklch(0.76 0.15 75);         /* Warning / Pending Amber */
+  --violet-accent: oklch(0.60 0.20 300);       /* Social Violet */
+  --pink-accent: oklch(0.62 0.24 350);         /* Surprise Pink */
+  --destructive-foreground: oklch(0.99 0 0);
+  --overlay: oklch(0 0 0 / 0.3);
   --chart-1: oklch(0.55 0.22 265);
   --chart-2: oklch(0.68 0.17 155);
   --chart-3: oklch(0.72 0.14 205);
@@ -109,6 +119,11 @@
   --ring: oklch(0.62 0.24 265);
   --emerald-accent: oklch(0.72 0.17 155);
   --cyan-glow: oklch(0.75 0.14 205);
+  --amber-accent: oklch(0.80 0.15 75);
+  --violet-accent: oklch(0.68 0.20 300);
+  --pink-accent: oklch(0.70 0.22 350);
+  --destructive-foreground: oklch(0.99 0 0);
+  --overlay: oklch(0 0 0 / 0.5);
   --chart-1: oklch(0.62 0.24 265);
   --chart-2: oklch(0.72 0.17 155);
   --chart-3: oklch(0.75 0.14 205);

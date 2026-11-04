@@ -7,18 +7,20 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
   Activity,
-  CreditCard,
   Lock,
   LogIn,
   Percent,
   ReceiptText,
   Users,
-  Wallet,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { DonationAmbience } from "@/app/(public)/donate/_components/donation-ambience";
 import { CardAura, HeroVisuals } from "@/components/home/hero-visuals";
+import {
+  MercadoPagoIcon,
+  PayPalIcon,
+} from "@/components/common/brand-icons";
 import { SectionWrapper } from "@/components/common/section-wrapper";
 import { SectionHeading } from "@/components/common/section-heading";
 import { ProgressGrid } from "@/components/common/progress-grid";
@@ -327,7 +329,7 @@ export default function DonatePage() {
                         loadingText={t("processing")}
                         onClick={() => handleDonate("paypal")}
                       >
-                        <Wallet className="size-4" aria-hidden />
+                        <PayPalIcon className="size-4" />
                         {t("payWithPaypal")}
                       </Button>
 
@@ -340,7 +342,7 @@ export default function DonatePage() {
                         loadingText={t("processing")}
                         onClick={() => handleDonate("mercadopago")}
                       >
-                        <CreditCard className="size-4" aria-hidden />
+                        <MercadoPagoIcon className="size-4" />
                         {t("payWithMercadopago")}
                       </Button>
                     </div>

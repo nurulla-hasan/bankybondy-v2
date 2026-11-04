@@ -29,6 +29,18 @@
   "offers": "Ofrece",
   "wants": "Busca",
   "bondEmpty": "Nada",
-  "bondSurprise": "Sorpresa"
+  "bondSurprise": "Sorpresa",
+  "notificationSettings": "Ajustes de notificaciones",
+  "back": "Volver",
+  "loading": "Cargando...",
+  "muteHint": "Las categorías silenciadas siguen en tu lista pero ya no cuentan en el badge.",
+  "categoryMatches": "Matches",
+  "categoryTrades": "Trueques",
+  "categoryReviews": "Reseñas",
+  "categoryFriends": "Amistades",
+  "categorySubscription": "Suscripción",
+  "deleteNotification": "Eliminar notificación",
+  "loadError": "No se pudieron cargar las notificaciones",
+  "signInToViewNotifications": "Inicia sesión para ver tus notificaciones"
 }
 

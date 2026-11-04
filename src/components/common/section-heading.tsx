@@ -77,9 +77,7 @@ export function SectionHeading({
             </p>
           )}
 
-          {badge && (
-            <Badge className="bg-primary/10 text-primary p-3">{badge}</Badge>
-          )}
+          {badge && <Badge variant="secondary">{badge}</Badge>}
 
           <Tag
             className={cn(

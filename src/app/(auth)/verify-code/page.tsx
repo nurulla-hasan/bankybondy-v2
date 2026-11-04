@@ -137,7 +137,7 @@ function VerifyCodeContent() {
         <div className="mx-auto size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2">
           <Mail className="size-6" />
         </div>
-        <CardTitle className="text-2xl font-bold tracking-tight">
+        <CardTitle>
           {isResetMode ? t("verifyResetCodeTitle") : "Verify your email"}
         </CardTitle>
         <CardDescription className="max-w-xs mx-auto">
@@ -177,13 +177,13 @@ function VerifyCodeContent() {
             loadingText={t("loading")}
             disabled={code.length < 4}
           >
-            <CheckCircle2 className="size-4 mr-2" />
+            <CheckCircle2 className="size-4" />
             Verify & Continue
           </Button>
         </form>
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-3 text-center text-xs">
+      <CardFooter className="flex flex-col gap-3 text-center">
         <div className="flex items-center justify-center gap-1.5">
           <span>Didn&apos;t receive the code?</span>
           <button

@@ -122,7 +122,7 @@ export function NavbarSearch({
           variant="ghost"
           size="icon"
           onClick={() => setOpen(true)}
-          className={cn("rounded-lg cursor-pointer", className)}
+          className={cn(className)}
           aria-label={t("search")}
         >
           <Search className="size-4" />
@@ -139,8 +139,8 @@ export function NavbarSearch({
         >
           <Search className="size-3.5 text-muted-foreground/80 group-hover:text-foreground transition-colors" />
           <span className="hidden sm:inline font-normal">{t("search")}</span>
-          <kbd className="pointer-events-none hidden sm:inline-flex h-4.5 select-none items-center gap-0.5 rounded border border-border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground shadow-2xs">
-            <span className="text-[11px]">⌘</span>K
+          <kbd className="border-border bg-background text-muted-foreground pointer-events-none hidden h-4.5 select-none items-center gap-0.5 rounded border px-1.5 font-mono text-xs font-medium shadow-2xs sm:inline-flex">
+            <span>⌘</span>K
           </kbd>
         </button>
       )}
@@ -187,7 +187,7 @@ export function NavbarSearch({
                           src={person.profile_image}
                           alt={person.name}
                         />
-                        <AvatarFallback className="text-[10px]">
+                        <AvatarFallback>
                           {getInitials(person.name)}
                         </AvatarFallback>
                       </Avatar>
@@ -272,41 +272,41 @@ export function NavbarSearch({
                 <CommandItem
                   onSelect={() => handleSelect(() => router.push("/"))}
                 >
-                  <Home className="size-4 mr-2" />
+                  <Home className="size-4" />
                   <span>{t("Home")}</span>
                   <CommandShortcut>⌘H</CommandShortcut>
                 </CommandItem>
                 <CommandItem
                   onSelect={() => handleSelect(() => router.push("/donate"))}
                 >
-                  <HeartHandshake className="size-4 mr-2" />
+                  <HeartHandshake className="size-4" />
                   <span>{t("Donate")}</span>
                 </CommandItem>
                 <CommandItem
                   onSelect={() => handleSelect(() => router.push("/bonds"))}
                 >
-                  <Handshake className="size-4 mr-2" />
+                  <Handshake className="size-4" />
                   <span>{t("Bonds")}</span>
                   <CommandShortcut>⌘B</CommandShortcut>
                 </CommandItem>
                 <CommandItem
                   onSelect={() => handleSelect(() => router.push("/people"))}
                 >
-                  <Users className="size-4 mr-2" />
+                  <Users className="size-4" />
                   <span>{t("People")}</span>
                   <CommandShortcut>⌘P</CommandShortcut>
                 </CommandItem>
                 <CommandItem
                   onSelect={() => handleSelect(() => router.push("/messages"))}
                 >
-                  <MessageSquare className="size-4 mr-2" />
+                  <MessageSquare className="size-4" />
                   <span>{t("Messages")}</span>
                   <CommandShortcut>⌘M</CommandShortcut>
                 </CommandItem>
                 <CommandItem
                   onSelect={() => handleSelect(() => router.push("/chatting"))}
                 >
-                  <Radio className="size-4 mr-2" />
+                  <Radio className="size-4" />
                   <span>{t("Chatting")}</span>
                   <CommandShortcut>⌘C</CommandShortcut>
                 </CommandItem>
@@ -324,9 +324,9 @@ export function NavbarSearch({
                   }
                 >
                   {theme === "dark" ? (
-                    <Sun className="size-4 mr-2 text-amber-400" />
+                    <Sun className="text-amber-accent size-4" />
                   ) : (
-                    <Moon className="size-4 mr-2 text-indigo-400" />
+                    <Moon className="text-violet-accent size-4" />
                   )}
                   <span>
                     {theme === "dark"
@@ -342,22 +342,21 @@ export function NavbarSearch({
                         handleSelect(() => router.push("/profile"))
                       }
                     >
-                      <User className="size-4 mr-2" />
+                      <User className="size-4" />
                       <span>{t("profile")}</span>
                     </CommandItem>
                     <CommandItem
                       onSelect={() => handleSelect(() => logout())}
-                      className="text-destructive focus:text-destructive"
                     >
-                      <LogOut className="size-4 mr-2" />
-                      <span>{t("logOut")}</span>
+                      <LogOut className="text-destructive size-4" />
+                      <span className="text-destructive">{t("logOut")}</span>
                     </CommandItem>
                   </>
                 ) : (
                   <CommandItem
                     onSelect={() => handleSelect(() => router.push("/login"))}
                   >
-                    <LogIn className="size-4 mr-2" />
+                    <LogIn className="size-4" />
                     <span>{t("signIn")}</span>
                   </CommandItem>
                 )}

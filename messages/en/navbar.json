@@ -29,6 +29,18 @@
   "offers": "Offers",
   "wants": "Wants",
   "bondEmpty": "Nothing",
-  "bondSurprise": "Surprise"
+  "bondSurprise": "Surprise",
+  "notificationSettings": "Notification settings",
+  "back": "Back",
+  "loading": "Loading...",
+  "muteHint": "Muted categories stay in your list but no longer count on the badge.",
+  "categoryMatches": "Matches",
+  "categoryTrades": "Trades",
+  "categoryReviews": "Reviews",
+  "categoryFriends": "Friends",
+  "categorySubscription": "Subscription",
+  "deleteNotification": "Delete notification",
+  "loadError": "Couldn't load notifications",
+  "signInToViewNotifications": "Sign in to see your notifications"
 }
 

@@ -51,7 +51,7 @@ function CommandDialog({
       </DialogHeader>
       <DialogContent
         showCloseButton={showCloseButton}
-        className="max-h-[calc(100dvh-2rem)] overflow-hidden p-0 sm:max-w-lg"
+        className="max-h-dvh overflow-hidden p-0 sm:max-w-lg"
       >
         <Command
           shouldFilter={shouldFilter}
@@ -94,7 +94,7 @@ function CommandList({
     <CommandPrimitive.List
       data-slot="command-list"
       className={cn(
-        "max-h-[min(20rem,calc(100dvh-9rem))] flex-1 overflow-x-hidden overflow-y-auto overscroll-contain will-change-scroll p-2",
+        "max-h-80 min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain will-change-scroll p-2",
         className,
       )}
       {...props}
@@ -167,7 +167,7 @@ function CommandShortcut({
     <kbd
       data-slot="command-shortcut"
       className={cn(
-        "bg-muted text-muted-foreground ml-auto inline-flex h-5 items-center rounded border border-border px-1.5 font-mono text-[10px] font-medium tracking-widest",
+        "bg-muted text-muted-foreground border-border ml-auto inline-flex h-5 items-center rounded border px-1.5 font-mono text-xs font-medium tracking-widest",
         className,
       )}
       {...props}

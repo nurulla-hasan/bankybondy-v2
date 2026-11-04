@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "Common" });
 
   return {
-    title: `${t("brandName")} — ${t("brandTagline")}`,
+    title: `${t("brandName")} - ${t("brandTagline")}`,
     description: t("brandDescription"),
   };
 }

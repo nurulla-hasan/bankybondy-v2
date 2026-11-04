@@ -52,7 +52,7 @@ export function NavbarUserMenu({
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full cursor-pointer hover:ring-2 hover:ring-primary/20"
+              className="rounded-full"
               aria-label={user.name || "User account menu"}
             >
               <Avatar className="size-8">
@@ -60,7 +60,7 @@ export function NavbarUserMenu({
                   src={user.profile_image}
                   alt={user.name || "User Avatar"}
                 />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                <AvatarFallback>
                   {user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
                 </AvatarFallback>
               </Avatar>
@@ -69,12 +69,12 @@ export function NavbarUserMenu({
         />
         <DropdownMenuContent align="end" className="w-52">
           <DropdownMenuGroup>
-            <DropdownMenuLabel className="font-normal">
+            <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-semibold text-foreground leading-none">
+                <p className="text-foreground text-sm font-semibold leading-none">
                   {user.name || "User"}
                 </p>
-                <p className="text-xs text-muted-foreground leading-none truncate">
+                <p className="text-muted-foreground truncate text-xs leading-none">
                   {user.email}
                 </p>
               </div>
@@ -85,11 +85,8 @@ export function NavbarUserMenu({
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={handleLogout}
-            className="text-destructive focus:text-destructive cursor-pointer"
-          >
-            <LogOut className="size-4 mr-2" />
+          <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+            <LogOut className="size-4" />
             <span>{t("logOut")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -99,10 +96,7 @@ export function NavbarUserMenu({
 
   return (
     <div className="hidden sm:flex items-center">
-      <Button
-        render={<Link href="/login" />}
-        className="cursor-pointer font-medium px-4"
-      >
+      <Button render={<Link href="/login" />}>
         <span>{t("getStarted")}</span>
         <ArrowRight />
       </Button>
