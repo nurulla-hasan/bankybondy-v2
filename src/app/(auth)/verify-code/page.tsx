@@ -126,7 +126,7 @@ function VerifyCodeContent() {
   };
 
   return (
-    <Card className="border-border shadow-xs">
+    <Card>
       <CardHeader className="text-center space-y-1">
         <div className="mx-auto size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2">
           <Mail className="size-6" />
@@ -165,7 +165,7 @@ function VerifyCodeContent() {
 
           <Button
             type="submit"
-            className="w-full cursor-pointer"
+            className="w-full"
             size="lg"
             loading={isVerifying}
             loadingText={t("loading")}
@@ -177,7 +177,7 @@ function VerifyCodeContent() {
         </form>
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-3 text-center text-xs border-t pt-4">
+      <CardFooter className="flex flex-col gap-3 text-center text-xs">
         <div className="flex items-center justify-center gap-1.5">
           <span>Didn&apos;t receive the code?</span>
           <button

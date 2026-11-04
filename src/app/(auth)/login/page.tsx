@@ -15,7 +15,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { FormInput } from "@/components/common/form-input";
+import { GoogleLoginButton } from "@/components/common/google-login-button";
 import { useLogin, useLogout } from "@/services";
 import { successToast, errorToast } from "@/lib/toast";
 import { loginSchema, type LoginSchemaType } from "@/validations";
@@ -108,7 +110,7 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            className="w-full cursor-pointer"
+            className="w-full"
             size="lg"
             loading={isPending}
             loadingText={t("loading")}
@@ -116,10 +118,21 @@ export default function LoginPage() {
             {t("loginButton")}
             <ArrowRight className="size-4" />
           </Button>
+
+          <div className="relative my-4 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <span className="relative bg-card px-2 text-xs uppercase tracking-wider text-muted-foreground">
+              {t("or")}
+            </span>
+          </div>
+
+          <GoogleLoginButton className="w-full" />
         </form>
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-2 text-center text-xs border-t pt-4">
+      <CardFooter className="flex flex-col gap-2 text-center text-xs">
         <div>
           {t("signUpSubtitle")}{" "}
           <Link

@@ -85,7 +85,7 @@ function ResetPasswordContent() {
         <CardContent className="flex flex-col gap-3">
           <Button
             type="button"
-            className="w-full cursor-pointer"
+            className="w-full"
             size="lg"
             onClick={() => router.push("/forgot-password")}
           >
@@ -95,7 +95,7 @@ function ResetPasswordContent() {
           <Button
             type="button"
             variant="outline"
-            className="w-full cursor-pointer"
+            className="w-full"
             size="lg"
             onClick={() => router.push("/login")}
           >
@@ -113,7 +113,7 @@ function ResetPasswordContent() {
         <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           <KeyRound className="size-6" />
         </div>
-        <CardTitle className="text-2xl font-bold tracking-tight">
+        <CardTitle>
           {t("resetPasswordTitle")}
         </CardTitle>
         <CardDescription>
@@ -122,7 +122,7 @@ function ResetPasswordContent() {
       </CardHeader>
 
       <CardContent>
-        <div className="mb-4 rounded-xl border border-border/60 bg-muted/40 p-3 text-center">
+        <div className="mb-4 rounded-xl border border-border bg-muted/40 p-3 text-center">
           <span className="text-xs text-muted-foreground block">
             Resetting password for
           </span>
@@ -159,7 +159,7 @@ function ResetPasswordContent() {
 
           <Button
             type="submit"
-            className="w-full cursor-pointer mt-2"
+            className="w-full"
             size="lg"
             loading={isPending}
             loadingText={t("loading")}
@@ -170,7 +170,7 @@ function ResetPasswordContent() {
         </form>
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-2 border-t pt-4 text-center text-xs">
+      <CardFooter className="flex flex-col gap-2 text-center text-xs">
         <Link
           href="/login"
           className="inline-flex items-center justify-center gap-1.5 font-medium text-muted-foreground hover:text-foreground"

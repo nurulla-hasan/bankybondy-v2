@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
 
           <Button
             type="submit"
-            className="w-full cursor-pointer"
+            className="w-full"
             size="lg"
             loading={isPending}
             loadingText={t("loading")}
@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
         </form>
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-2 border-t pt-4 text-center text-xs">
+      <CardFooter className="flex flex-col gap-2 text-center text-xs">
         <Link
           href="/login"
           className="inline-flex items-center justify-center gap-1.5 font-medium text-muted-foreground hover:text-foreground"

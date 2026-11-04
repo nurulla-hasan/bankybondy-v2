@@ -151,7 +151,7 @@ function FormInputField({
           >
             <SelectTrigger
               id={field.name}
-              className="w-full cursor-pointer"
+              className="w-full"
               aria-invalid={isInvalid}
             >
               <SelectValue placeholder={placeholder}>
@@ -170,7 +170,6 @@ function FormInputField({
                 <SelectItem
                   key={opt.value || "empty-default"}
                   value={opt.value}
-                  className="cursor-pointer"
                 >
                   {opt.label}
                 </SelectItem>
@@ -197,9 +196,10 @@ function FormInputField({
                 <Button
                   type="button"
                   variant="outline"
+                  size="lg"
                   disabled={disabled}
                   aria-invalid={isInvalid}
-                  className="w-full justify-between cursor-pointer"
+                  className="w-full justify-between"
                 >
                   <span className={field.state.value ? "text-foreground" : "text-muted-foreground"}>
                     {field.state.value
