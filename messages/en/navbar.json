@@ -20,6 +20,15 @@
   "markAllAsRead": "Mark all as read",
   "viewAll": "View all",
   "navigation": "Navigation",
-  "actions": "Actions"
+  "actions": "Actions",
+  "searching": "Searching...",
+  "noResults": "No results found",
+  "sectionPeople": "People",
+  "sectionBonds": "Bonds",
+  "sectionAudios": "Audios",
+  "offers": "Offers",
+  "wants": "Wants",
+  "bondEmpty": "Nothing",
+  "bondSurprise": "Surprise"
 }
 

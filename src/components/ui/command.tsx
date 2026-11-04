@@ -34,11 +34,13 @@ function CommandDialog({
   description = "Search for a command to run...",
   children,
   showCloseButton = false,
+  shouldFilter,
   ...props
 }: Omit<React.ComponentProps<typeof Dialog>, "children"> & {
   title?: string;
   description?: string;
   showCloseButton?: boolean;
+  shouldFilter?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -49,9 +51,12 @@ function CommandDialog({
       </DialogHeader>
       <DialogContent
         showCloseButton={showCloseButton}
-        className="overflow-hidden p-0 sm:max-w-lg"
+        className="max-h-[calc(100dvh-2rem)] overflow-hidden p-0 sm:max-w-lg"
       >
-        <Command className="**:[[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group]]:px-2 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-3 **:[[cmdk-item]]:py-2">
+        <Command
+          shouldFilter={shouldFilter}
+          className="**:[[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:font-medium **:[[cmdk-group]]:px-2 **:[[cmdk-input]]:h-12 **:[[cmdk-item]]:px-3 **:[[cmdk-item]]:py-2 min-h-0"
+        >
           {children}
         </Command>
       </DialogContent>
@@ -89,7 +94,7 @@ function CommandList({
     <CommandPrimitive.List
       data-slot="command-list"
       className={cn(
-        "max-h-80 flex-1 overflow-x-hidden overflow-y-auto p-2",
+        "max-h-[min(20rem,calc(100dvh-9rem))] flex-1 overflow-x-hidden overflow-y-auto overscroll-contain will-change-scroll p-2",
         className,
       )}
       {...props}
