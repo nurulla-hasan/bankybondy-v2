@@ -5,23 +5,29 @@ import { useTranslations } from "next-intl";
 
 import { FilterSelect } from "@/components/common/filter-select";
 import { Button } from "@/components/ui/button";
+import { useNextFilter } from "@/hooks/useNextFilter";
 
 interface PeopleFiltersProps {
-  online: boolean;
-  near: boolean;
   nearPending: boolean;
-  onToggleOnline: () => void;
   onToggleNear: () => void;
 }
 
 export function PeopleFilters({
-  online,
-  near,
   nearPending,
-  onToggleOnline,
   onToggleNear,
 }: PeopleFiltersProps) {
   const t = useTranslations("People");
+  const { getFilter, updateBatch } = useNextFilter();
+
+  const online = getFilter("online") === "true";
+  const near = getFilter("near") === "true";
+
+  const handleToggleOnline = () => {
+    updateBatch(
+      { online: online ? null : "true", page: null },
+      { resetPage: false },
+    );
+  };
 
   const sortOptions = [
     { value: "all", label: t("filters.sortDefault") },
@@ -44,7 +50,7 @@ export function PeopleFilters({
           type="button"
           variant={online ? "secondary" : "outline"}
           aria-pressed={online}
-          onClick={onToggleOnline}
+          onClick={handleToggleOnline}
         >
           <Wifi className="size-4" aria-hidden />
           {t("filters.online")}

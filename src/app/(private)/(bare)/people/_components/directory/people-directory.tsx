@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { MapPin, SearchX, Users, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -10,18 +10,13 @@ import { SearchInput } from "@/components/common/search-input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNextFilter } from "@/hooks/useNextFilter";
-import { getErrorMessage } from "@/lib/error";
-import { errorToast, successToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import {
-  PEOPLE_PAGE_SIZE,
-  usePeople,
-  useUpdateMyLocation,
-} from "@/services";
+import { PEOPLE_PAGE_SIZE, usePeople } from "@/services";
 import type { PersonSort } from "@/types";
 
 import { PeopleFilters } from "./people-filters";
 import { PersonCard } from "./person-card";
+import { useNearFilter } from "./use-near-filter";
 
 type PeopleFilterKey = "searchTerm" | "page" | "sort" | "online" | "near";
 
@@ -31,13 +26,12 @@ const isPersonSort = (value: string): value is PersonSort =>
 export function PeopleDirectory() {
   const t = useTranslations("People");
   const { getFilter, updateBatch } = useNextFilter<PeopleFilterKey>();
-  const updateLocation = useUpdateMyLocation();
+  const { near, nearPending, toggleNear, requestLocation } = useNearFilter();
 
   const searchTerm = getFilter("searchTerm");
   const sortParam = getFilter("sort");
   const sort = isPersonSort(sortParam) ? sortParam : undefined;
   const online = getFilter("online") === "true";
-  const near = getFilter("near") === "true";
   const pageParam = Number(getFilter("page", "1"));
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
 
@@ -61,82 +55,11 @@ export function PeopleDirectory() {
     );
   }, [data, page, updateBatch]);
 
-  const requestLocation = useCallback(
-    (onSuccess?: () => void) => {
-      if (typeof navigator === "undefined" || !navigator.geolocation) {
-        errorToast(t("filters.nearUnsupported"));
-        return;
-      }
-
-      if (!window.isSecureContext) {
-        errorToast(t("filters.nearUnavailable"));
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          updateLocation.mutate(
-            {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-              mode: "auto",
-            },
-            {
-              onSuccess: () => {
-                successToast(
-                  t("filters.nearUpdated"),
-                  t("filters.nearUpdatedDescription"),
-                );
-                onSuccess?.();
-              },
-              onError: (error) =>
-                errorToast(t("filters.nearDenied"), getErrorMessage(error)),
-            },
-          );
-        },
-        (error) => {
-          if (error.code === error.TIMEOUT) {
-            errorToast(t("filters.nearTimeout"));
-            return;
-          }
-
-          errorToast(
-            t("filters.nearDenied"),
-            t("filters.nearDeniedDescription"),
-          );
-        },
-        { timeout: 10_000, maximumAge: 300_000 },
-      );
-    },
-    [t, updateLocation],
-  );
-
   const handlePageChange = (nextPage: number) => {
     updateBatch(
       { page: nextPage <= 1 ? null : nextPage },
       { resetPage: false },
     );
-  };
-
-  const handleToggleOnline = () => {
-    updateBatch(
-      { online: online ? null : "true", page: null },
-      { resetPage: false },
-    );
-  };
-
-  const handleToggleNear = () => {
-    if (near) {
-      updateBatch({ near: null, page: null }, { resetPage: false });
-      return;
-    }
-
-    requestLocation(() => {
-      updateBatch(
-        { near: "true", sort: null, page: null },
-        { resetPage: false },
-      );
-    });
   };
 
   const items = data?.result ?? [];
@@ -148,13 +71,7 @@ export function PeopleDirectory() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <SearchInput />
 
-        <PeopleFilters
-          online={online}
-          near={near}
-          nearPending={updateLocation.isPending}
-          onToggleOnline={handleToggleOnline}
-          onToggleNear={handleToggleNear}
-        />
+        <PeopleFilters nearPending={nearPending} onToggleNear={toggleNear} />
       </div>
 
       {data && !isError && !needsLocation ? (
@@ -190,7 +107,7 @@ export function PeopleDirectory() {
           description={t("empty.locationDescription")}
           action={
             <Button
-              loading={updateLocation.isPending}
+              loading={nearPending}
               loadingText={t("empty.locationAction")}
               onClick={() => requestLocation()}
             >
