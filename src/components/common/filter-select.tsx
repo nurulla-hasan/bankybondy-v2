@@ -7,14 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useNextFilter } from "@/hooks/useNextFilter";
 import { cn } from "@/lib/utils";
-
-type FilterValue = string | number | null | undefined;
-
-type StateFilterController = {
-  getFilter: (key: string, defaultValue?: string) => string;
-  updateFilter: (key: string, value: FilterValue) => void;
-};
 
 export interface FilterOption {
   label: string;
@@ -24,35 +18,38 @@ export interface FilterOption {
 export type FilterOptionItem = FilterOption | string | number;
 
 export interface FilterSelectProps {
-  filter: StateFilterController;
   filterKey: string;
   placeholder?: string;
   defaultValue?: string;
   options: readonly FilterOptionItem[] | FilterOptionItem[];
   className?: string;
   align?: "start" | "center" | "end";
+  disabled?: boolean;
 }
 
 export function FilterSelect({
-  filter,
   filterKey,
   placeholder = "Select...",
   defaultValue,
   options,
   className,
   align = "end",
+  disabled = false,
 }: FilterSelectProps) {
+  const { getFilter, updateFilter } = useNextFilter();
+
   const hasAll = options.some(
     (opt) => (typeof opt === "object" ? String(opt.value) : String(opt)) === "all"
   );
-  const rawValue = filter.getFilter(filterKey, defaultValue);
+  const rawValue = getFilter(filterKey, defaultValue);
   const value = rawValue || (hasAll ? "all" : null);
 
   return (
     <Select
       value={value}
+      disabled={disabled}
       onValueChange={(val) => {
-        filter.updateFilter(filterKey, !val || val === "all" ? null : val);
+        updateFilter(filterKey, !val || val === "all" ? null : val);
       }}
     >
       <SelectTrigger className={cn("cursor-pointer", className)}>

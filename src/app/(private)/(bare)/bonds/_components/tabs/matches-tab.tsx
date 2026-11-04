@@ -4,6 +4,7 @@ import { SearchX, Sparkles, WifiOff, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import CustomPagination from "@/components/common/custom-pagination";
+import { EmptyState } from "@/components/common/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,7 +14,6 @@ import { useBondMatches, useBondRequest } from "@/services";
 import { cn } from "@/lib/utils";
 
 import { MatchCard } from "../cards/match-card";
-import { EmptyState } from "../shared/empty-state";
 
 interface MatchesTabProps {
   requestFilterId: string | null;

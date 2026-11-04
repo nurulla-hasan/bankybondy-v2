@@ -4,13 +4,13 @@ import { Link2, SearchX, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import CustomPagination from "@/components/common/custom-pagination";
+import { EmptyState } from "@/components/common/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
 import { useBondLinks } from "@/services";
 import { cn } from "@/lib/utils";
 
 import { BondLinkCard } from "../cards/bond-link-card";
-import { EmptyState } from "../shared/empty-state";
 
 interface LinksTabProps {
   searchTerm: string;

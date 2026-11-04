@@ -1,5 +1,3 @@
-"use client";
-
 import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 
@@ -8,7 +6,7 @@ import { SectionHeading } from "@/components/common/section-heading";
 import { BondTabs } from "@/app/(private)/(bare)/bonds/_components/tabs/bond-tabs";
 import { CreateBondDialog } from "@/app/(private)/(bare)/bonds/_components/dialogs/create-bond-dialog";
 
-function BondsContent() {
+export default function BondsPage() {
   const t = useTranslations("Bonds");
 
   return (
@@ -24,15 +22,9 @@ function BondsContent() {
         <CreateBondDialog />
       </SectionHeading>
 
-      <BondTabs />
+      <Suspense fallback={null}>
+        <BondTabs />
+      </Suspense>
     </PageWrapper>
-  );
-}
-
-export default function BondsPage() {
-  return (
-    <Suspense fallback={null}>
-      <BondsContent />
-    </Suspense>
   );
 }

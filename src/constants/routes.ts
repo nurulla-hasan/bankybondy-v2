@@ -2,6 +2,7 @@ export const PRIVATE_ROUTES = [
   "/profile",
   "/settings",
   "/bonds",
+  "/people",
   "/chatting",
   "/message",
   "/friends",

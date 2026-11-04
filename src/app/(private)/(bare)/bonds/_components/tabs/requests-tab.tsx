@@ -4,6 +4,7 @@ import { ClipboardList, SearchX, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import CustomPagination from "@/components/common/custom-pagination";
+import { EmptyState } from "@/components/common/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
 import { useBondRequests } from "@/services";
@@ -12,7 +13,6 @@ import type { BondRequest } from "@/types";
 
 import { BondRequestCard } from "../cards/bond-request-card";
 import { CreateBondDialog } from "../dialogs/create-bond-dialog";
-import { EmptyState } from "../shared/empty-state";
 
 interface RequestsTabProps {
   onFindMatch: (request: BondRequest) => void;
