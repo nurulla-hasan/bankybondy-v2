@@ -35,10 +35,12 @@ interface BaseFormInputProps {
   description?: string;
   disabled?: boolean;
   options?: { label: string; value: string }[];
+  onSearchChange?: (val: string) => void;
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
   inputMode?:
+
     | "none"
     | "text"
     | "tel"
@@ -79,6 +81,7 @@ function FormInputField({
   description,
   disabled,
   options,
+  onSearchChange,
   onLoadMore,
   hasMore,
   isLoadingMore,
@@ -91,6 +94,7 @@ function FormInputField({
 }: BaseFormInputProps & {
   field: AnyFieldApi;
 }) {
+
 
   const rawErrors = field.state.meta.errors as unknown[] | undefined;
   const errorList = rawErrors?.length
@@ -180,10 +184,12 @@ function FormInputField({
             onChange={(vals) => field.handleChange(vals)}
             placeholder={placeholder}
             disabled={disabled}
+            onSearchChange={onSearchChange}
             onLoadMore={onLoadMore}
             hasMore={hasMore}
             isLoadingMore={isLoadingMore}
           />
+
         ) : type === "date" ? (
           <Popover>
             <PopoverTrigger

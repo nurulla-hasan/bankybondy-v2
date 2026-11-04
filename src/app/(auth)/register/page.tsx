@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "@tanstack/react-form";
 import { ArrowRight } from "lucide-react";
 
+
 import {
   Card,
   CardContent,
@@ -16,21 +17,54 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/common/form-input";
-import { useRegister, useGetAllSkills } from "@/services";
+import { useRegister, useGetInfiniteSkills } from "@/services";
 import { successToast, errorToast } from "@/lib/toast";
 import { registerSchema, type RegisterSchemaType } from "@/validations";
 import { getErrorMessage } from "@/lib/error";
+import { useMemo, useState } from "react";
+import { useDebounce } from "@/hooks/useUtilityHooks";
 
 export default function RegisterPage() {
   const t = useTranslations("Auth");
   const router = useRouter();
   const { mutate: register, isPending } = useRegister();
-  const { data: skillsData } = useGetAllSkills({ limit: 100 });
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 400);
 
-  const skillOptions = (skillsData?.data?.result || []).map((s) => ({
-    label: s.name,
-    value: s._id,
-  }));
+  // Infinite skills fetching with initial limit = 10 and debounced backend search
+  const {
+    data: skillsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useGetInfiniteSkills({ limit: 10, searchTerm: debouncedSearchTerm });
+
+
+  const skillOptions = useMemo(() => {
+    if (!skillsData?.pages) return [];
+    
+    // Deduplicate options across fetched pagination pages by their unique _id
+    const seen = new Set<string>();
+    const options: { label: string; value: string }[] = [];
+
+    for (const page of skillsData.pages) {
+      const items = page?.data?.result || [];
+      for (const s of items) {
+        if (s?._id && !seen.has(s._id)) {
+          seen.add(s._id);
+          options.push({
+            label: s.name,
+            value: s._id,
+          });
+        }
+      }
+    }
+
+    return options;
+  }, [skillsData]);
+
+
+
 
   const form = useForm({
     defaultValues: {
@@ -161,7 +195,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Row 4: Skills Multi-select */}
+          {/* Row 4: Skills Multi-select with 10-item Infinite Scroll & Backend Search */}
           <FormInput
             form={form}
             name="skills"
@@ -169,7 +203,13 @@ export default function RegisterPage() {
             type="multi-select"
             placeholder={t("skillsPlaceholder")}
             options={skillOptions}
+            onSearchChange={(val) => setSearchTerm(val)}
+            onLoadMore={() => fetchNextPage()}
+            hasMore={Boolean(hasNextPage)}
+            isLoadingMore={isFetchingNextPage}
           />
+
+
 
           {/* Row 5: Bio */}
           <FormInput
