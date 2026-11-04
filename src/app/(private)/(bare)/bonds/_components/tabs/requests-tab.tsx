@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { TabsContent } from "@/components/ui/tabs";
@@ -13,19 +13,28 @@ import { EmptyState } from "../shared/empty-state";
 
 export function RequestsTab({
   onFindMatch,
+  searchTerm,
 }: {
   onFindMatch: (request: BondRequest) => void;
+  searchTerm: string;
 }) {
   const t = useTranslations("Bonds");
   const { data: requests } = useBondRequests();
+
+  const term = searchTerm.trim().toLowerCase();
+  const visibleRequests = term
+    ? requests.filter((request) =>
+        `${request.offer} ${request.want}`.toLowerCase().includes(term),
+      )
+    : requests;
 
   return (
     <TabsContent value="requests" className="space-y-4">
       <h2 className="sr-only">{t("tabs.requests")}</h2>
 
-      {requests.length ? (
+      {visibleRequests.length ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {requests.map((request) => (
+          {visibleRequests.map((request) => (
             <BondRequestCard
               key={request.id}
               request={request}
@@ -33,6 +42,12 @@ export function RequestsTab({
             />
           ))}
         </div>
+      ) : term ? (
+        <EmptyState
+          icon={<SearchX className="size-5" aria-hidden />}
+          title={t("searchEmptyTitle", { term: searchTerm.trim() })}
+          description={t("searchEmptyDescription")}
+        />
       ) : (
         <EmptyState
           icon={<ClipboardList className="size-5" aria-hidden />}

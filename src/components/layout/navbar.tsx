@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/common/logo";
 import { ThemeToggle } from "@/components/common/theme-toggle";
 import { LanguageToggle } from "@/components/common/language-toggle";
-import { CONTAINER_MAX_WIDTH } from "@/components/common/page-wrapper";
+import { CONTAINER_GUTTER, CONTAINER_MAX_WIDTH } from "@/lib/layout";
 
 import { useNavLinks } from "./nav-items";
 import { DesktopNav } from "./desktop-nav";
@@ -31,8 +31,9 @@ export function Navbar({ className }: NavbarProps) {
     >
       <div
         className={cn(
-          "mx-auto flex h-16 w-full items-center justify-between px-5",
+          "mx-auto flex h-16 w-full items-center justify-between",
           CONTAINER_MAX_WIDTH,
+          CONTAINER_GUTTER,
         )}
       >
         {/* Left: Brand Logo */}

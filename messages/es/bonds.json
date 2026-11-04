@@ -42,7 +42,17 @@
   "createSuccess": "Tu solicitud de vínculo está activa. Te avisaremos cuando aparezca una coincidencia.",
   "matchesFor": "Coincidencias para: {offer}",
   "clearFilter": "Quitar filtro",
+  "searchEmptyTitle": "Sin resultados para “{term}”",
+  "searchEmptyDescription": "Prueba con otra palabra o quita la búsqueda.",
   "matchScore": "{score}% de afinidad",
+  "compatibility": "Compatibilidad",
+  "breakdown": "Cómo puntuamos",
+  "factors": {
+    "semantic": "Semántica",
+    "reputation": "Reputación",
+    "proximity": "Proximidad",
+    "activity": "Actividad"
+  },
   "special": {
     "gift": "Incluye regalo",
     "openSurprise": "Sorpresa abierta",
@@ -51,7 +61,6 @@
   "noRatings": "Sin valoraciones",
   "cycleNote": "El ciclo se cierra con {name} — todos dan y todos reciben.",
   "whyMatch": "¿Por qué esta coincidencia?",
-  "whyRow": "{from} ofrece {offer} a {to}",
   "propose": "Proponer vínculo",
   "proposeTitle": "Nombra tu vínculo",
   "proposeDescription": "Todos en esta coincidencia verán el nombre y podrán aceptar o rechazar.",
@@ -64,7 +73,7 @@
     "completed": "Completado"
   },
   "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
-  "started": "Iniciado {time}",
+  "started": "Iniciado",
   "openChat": "Abrir chat",
   "rateNow": "Valorar ahora",
   "linkOngoingHint": "La sala de chat está abierta",

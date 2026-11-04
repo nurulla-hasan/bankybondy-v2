@@ -16,7 +16,8 @@
   "instagram": "Instagram",
   "madeWith": "Hecho con",
   "byTeam": "por el equipo de BankyBondy",
-  "license": "Creative Commons BY-SA 4.0",
+  "license": "CC BY-SA 4.0",
+  "licenseLine": "BankyBondy © {year} por Emilio Roo está bajo la licencia",
   "licenseAttribution": "Atribución",
   "licenseShareAlike": "Compartir igual",
   "copyright": "© {year} BankyBondy. Todos los derechos reservados."

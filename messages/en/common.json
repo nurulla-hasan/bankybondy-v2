@@ -10,5 +10,8 @@
   "brandQuote": "Doing together is easier and more human.",
   "backToHome": "Back to Home",
   "pageNotFound": "Page Not Found",
-  "pageNotFoundDesc": "The page you are looking for does not exist or has been moved."
+  "pageNotFoundDesc": "The page you are looking for does not exist or has been moved.",
+  "searchPlaceholder": "Search...",
+  "searchLabel": "Search",
+  "searchClear": "Clear search"
 }

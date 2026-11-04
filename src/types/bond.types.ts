@@ -41,11 +41,19 @@ export interface MatchParticipant extends BondUser {
   want: string;
 }
 
+export interface MatchFactors {
+  semantic: number;
+  reputation: number;
+  proximity: number;
+  activity: number;
+}
+
 export interface BondMatch {
   id: string;
   requestId: string;
   /** 0-100 strength score shown as a badge. */
   score: number;
+  factors?: MatchFactors;
   special?: MatchSpecial;
   participants: MatchParticipant[];
   createdAt: string;

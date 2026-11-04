@@ -42,7 +42,17 @@
   "createSuccess": "Your bond request is live. We will notify you when a match appears.",
   "matchesFor": "Matches for: {offer}",
   "clearFilter": "Clear filter",
+  "searchEmptyTitle": "No results for “{term}”",
+  "searchEmptyDescription": "Try a different word, or clear the search.",
   "matchScore": "{score}% match",
+  "compatibility": "Compatibility",
+  "breakdown": "How we scored it",
+  "factors": {
+    "semantic": "Semantic",
+    "reputation": "Reputation",
+    "proximity": "Proximity",
+    "activity": "Activity"
+  },
   "special": {
     "gift": "Gift included",
     "openSurprise": "Open surprise",
@@ -51,7 +61,6 @@
   "noRatings": "No ratings yet",
   "cycleNote": "The cycle closes with {name} — everyone gives and everyone receives.",
   "whyMatch": "Why this match?",
-  "whyRow": "{from} gives {offer} to {to}",
   "propose": "Propose bond",
   "proposeTitle": "Name your bond",
   "proposeDescription": "Everyone in this match will see the name and can accept or decline.",
@@ -64,7 +73,7 @@
     "completed": "Completed"
   },
   "membersCount": "{count, plural, one {# member} other {# members}}",
-  "started": "Started {time}",
+  "started": "Started",
   "openChat": "Open chat",
   "rateNow": "Rate now",
   "linkOngoingHint": "Chat room is open",

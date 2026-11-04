@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, X } from "lucide-react";
+import { SearchX, Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
@@ -14,9 +14,11 @@ import { EmptyState } from "../shared/empty-state";
 export function MatchesTab({
   requestFilterId,
   onClearFilter,
+  searchTerm,
 }: {
   requestFilterId: string | null;
   onClearFilter: () => void;
+  searchTerm: string;
 }) {
   const t = useTranslations("Bonds");
   const { data: requests } = useBondRequests();
@@ -29,6 +31,17 @@ export function MatchesTab({
   const visibleMatches = filterRequest
     ? matches.filter((match) => match.requestId === filterRequest.id)
     : matches;
+
+  const term = searchTerm.trim().toLowerCase();
+  const searchedMatches = term
+    ? visibleMatches.filter((match) =>
+        match.participants.some((participant) =>
+          `${participant.name} ${participant.offer} ${participant.want}`
+            .toLowerCase()
+            .includes(term),
+        ),
+      )
+    : visibleMatches;
 
   return (
     <TabsContent value="matches" className="space-y-4">
@@ -46,12 +59,18 @@ export function MatchesTab({
         </div>
       )}
 
-      {visibleMatches.length ? (
+      {searchedMatches.length ? (
         <div className="space-y-4">
-          {visibleMatches.map((match) => (
+          {searchedMatches.map((match) => (
             <MatchCard key={match.id} match={match} />
           ))}
         </div>
+      ) : term ? (
+        <EmptyState
+          icon={<SearchX className="size-5" aria-hidden />}
+          title={t("searchEmptyTitle", { term: searchTerm.trim() })}
+          description={t("searchEmptyDescription")}
+        />
       ) : (
         <EmptyState
           icon={<Sparkles className="size-5" aria-hidden />}

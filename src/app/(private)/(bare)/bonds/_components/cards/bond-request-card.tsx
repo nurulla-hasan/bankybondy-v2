@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmationModal } from "@/components/common/confirmation-modal";
+import { RelativeTime } from "@/components/common/relative-time";
 import { BondStatusBadge } from "../shared/bond-status-badge";
 import { OfferWant } from "../shared/offer-want";
 import {
@@ -20,7 +21,7 @@ import {
   useToggleBondRequestPause,
 } from "@/services";
 import { successToast } from "@/lib/toast";
-import { formatRelativeTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { BondRequest } from "@/types";
 
 interface BondRequestCardProps {
@@ -64,26 +65,28 @@ export function BondRequestCard({
   };
 
   return (
-    <article className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 transition-colors duration-300 hover:border-primary/30">
+    <article
+      className={cn(
+        "group flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5",
+        isPaused && "border-dashed bg-muted/30",
+      )}
+    >
       <header className="flex items-center justify-between gap-3">
         <BondStatusBadge status={request.status} />
-        <span className="text-xs text-muted-foreground">
-          {formatRelativeTime(request.createdAt)}
-        </span>
+        <RelativeTime
+          date={request.createdAt}
+          className="shrink-0 text-xs text-muted-foreground"
+        />
       </header>
 
-      <OfferWant
-        offer={request.offer}
-        want={request.want}
-        orientation="vertical"
-      />
+      <OfferWant offer={request.offer} want={request.want} />
 
       <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
         {request.description}
       </p>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
           {request.modality === "online" ? (
             <Globe className="size-3.5" aria-hidden />
           ) : (
@@ -94,7 +97,7 @@ export function BondRequestCard({
             : t("inPersonRadius", { km: request.radiusKm ?? 0 })}
         </span>
 
-        <span className="inline-flex items-center gap-1.5">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
           <Users className="size-3.5" aria-hidden />
           {t("matchesCount", { count: request.matchCount })}
         </span>

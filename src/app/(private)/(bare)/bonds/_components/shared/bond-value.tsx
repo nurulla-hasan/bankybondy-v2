@@ -32,5 +32,5 @@ export function BondValue({
     );
   }
 
-  return <span className={cn("block truncate", className)}>{value}</span>;
+  return <span className={cn("line-clamp-2", className)}>{value}</span>;
 }

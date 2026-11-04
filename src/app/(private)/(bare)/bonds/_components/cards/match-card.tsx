@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { ArrowRight, ChevronDown, Handshake, Sparkles } from "lucide-react";
+import { ChevronDown, Handshake, Sparkles, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,9 +18,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RelativeTime } from "@/components/common/relative-time";
 import { MatchChain } from "./match-chain";
+import { MatchCycle } from "./match-cycle";
+import { MatchFactors } from "./match-factors";
 import { successToast } from "@/lib/toast";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { proposeBondSchema, type ProposeBondValues } from "@/validations";
 import type { BondMatch, MatchSpecial } from "@/types";
 
@@ -55,18 +58,11 @@ export function MatchCard({ match }: { match: BondMatch }) {
     if (!open) proposeForm.reset();
   };
 
-  const valueLabel = (value: string) =>
-    value === "empty"
-      ? t("openGift")
-      : value === "surprise"
-        ? t("surprise")
-        : value;
-
   const scoreVariant =
     match.score >= 90 ? "success" : match.score >= 85 ? "info" : "pending";
 
   return (
-    <article className="rounded-2xl border border-border bg-card p-5">
+    <article className="rounded-2xl border border-border bg-card p-5 transition-colors duration-300 hover:border-primary/30">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={scoreVariant}>
@@ -87,9 +83,14 @@ export function MatchCard({ match }: { match: BondMatch }) {
           )}
         </div>
 
-        <span className="text-xs text-muted-foreground">
-          {formatRelativeTime(match.createdAt)}
-        </span>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Users className="size-3.5" aria-hidden />
+            {t("membersCount", { count: match.participants.length })}
+          </span>
+          <span aria-hidden>·</span>
+          <RelativeTime date={match.createdAt} />
+        </div>
       </header>
 
       <MatchChain participants={match.participants} className="mt-4" />
@@ -181,29 +182,24 @@ export function MatchCard({ match }: { match: BondMatch }) {
       </div>
 
       {whyOpen && (
-        <ul className="mt-3 space-y-2 rounded-xl bg-muted/40 p-4">
-          {match.participants.map((participant, index) => {
-            const next =
-              match.participants[(index + 1) % match.participants.length];
+        <div className="mt-3 rounded-2xl border border-border/70 bg-muted/30 p-4 sm:p-5">
+          <div className="flex flex-col items-center gap-6 lg:flex-row lg:gap-8">
+            <MatchCycle
+              score={match.score}
+              participants={match.participants}
+              className="shrink-0"
+            />
 
-            return (
-              <li
-                key={participant.id}
-                className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"
-              >
-                <ArrowRight
-                  className="mt-0.5 size-3.5 shrink-0 text-primary/70"
-                  aria-hidden
-                />
-                {t("whyRow", {
-                  from: participant.name,
-                  offer: valueLabel(participant.offer),
-                  to: next.name,
-                })}
-              </li>
-            );
-          })}
-        </ul>
+            {match.factors && (
+              <div className="w-full min-w-0 flex-1 space-y-3">
+                <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                  {t("breakdown")}
+                </p>
+                <MatchFactors factors={match.factors} />
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </article>
   );

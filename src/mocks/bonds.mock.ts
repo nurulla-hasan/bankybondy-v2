@@ -9,10 +9,18 @@ const users: Record<string, BondUser> = {
   leo: { id: "leo", name: "Leo Márquez", reputation: { avg: 4.7, count: 8 } },
   mia: { id: "mia", name: "Mia Chen", reputation: { avg: 4.8, count: 21 } },
   diego: { id: "diego", name: "Diego Salas", reputation: { avg: 4.6, count: 5 } },
-  sara: { id: "sara", name: "Sara Okafor", reputation: { avg: 5, count: 3 } },
+  sara: {
+    id: "sara",
+    name: "María de los Ángeles Fernández Okafor",
+    reputation: { avg: 5, count: 3 },
+  },
   rafa: { id: "rafa", name: "Rafa Núñez", reputation: { avg: 4.4, count: 9 } },
   nadia: { id: "nadia", name: "Nadia Haddad", reputation: { avg: 4.9, count: 14 } },
-  tomas: { id: "tomas", name: "Tomás Vidal", reputation: { avg: 4.5, count: 6 } },
+  tomas: {
+    id: "tomas",
+    name: "Maximiliano de la Cruz Vidal",
+    reputation: { avg: 4.5, count: 6 },
+  },
   ines: { id: "ines", name: "Inés Duarte", reputation: { avg: 4.8, count: 11 } },
   marco: { id: "marco", name: "Marco Bianchi", reputation: { avg: 4.3, count: 4 } },
   june: { id: "june", name: "June Park", reputation: { avg: 4.9, count: 17 } },
@@ -68,9 +76,9 @@ export const mockBondRequests: BondRequest[] = [
   {
     id: "req-murals",
     offer:
-      "Hand-painted custom murals for cafés, studios and community spaces, including design sketches and a weatherproof finish",
+      "Hand-painted custom murals for cafés",
     want:
-      "Monthly Spanish conversation sessions plus help setting up a small online shop for my hand-thrown ceramics collection",
+      "Monthly Spanish conversation sessions",
     description:
       "I paint large-scale murals and would love a language exchange in return. Happy to travel around the city for the right collaboration.",
     modality: "physical",
@@ -86,6 +94,7 @@ export const mockBondMatches: BondMatch[] = [
     id: "match-repair-circle",
     requestId: "req-bike",
     score: 94,
+    factors: { semantic: 92, reputation: 96, proximity: 100, activity: 88 },
     createdAt: hoursAgo(2),
     participants: [
       {
@@ -109,6 +118,7 @@ export const mockBondMatches: BondMatch[] = [
     id: "match-camera-swap",
     requestId: "req-bike",
     score: 88,
+    factors: { semantic: 84, reputation: 91, proximity: 82, activity: 95 },
     createdAt: hoursAgo(5),
     participants: [
       {
@@ -127,6 +137,7 @@ export const mockBondMatches: BondMatch[] = [
     id: "match-open-surprise",
     requestId: "req-design",
     score: 91,
+    factors: { semantic: 90, reputation: 95, proximity: 100, activity: 80 },
     special: "openSurprise",
     createdAt: daysAgo(1),
     participants: [
@@ -146,6 +157,7 @@ export const mockBondMatches: BondMatch[] = [
     id: "match-films-guitar",
     requestId: "req-guitar",
     score: 86,
+    factors: { semantic: 82, reputation: 89, proximity: 74, activity: 97 },
     createdAt: daysAgo(2),
     participants: [
       {

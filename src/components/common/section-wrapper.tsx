@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { CONTAINER_MAX_WIDTH } from "./page-wrapper";
+import { CONTAINER_GUTTER, CONTAINER_MAX_WIDTH } from "@/lib/layout";
 
 type SectionWrapperProps = {
   children: ReactNode;
@@ -47,7 +47,7 @@ function SectionWrapper({
     <Tag
       id={id}
       className={cn(
-        container && `mx-auto w-full ${CONTAINER_MAX_WIDTH} px-4 md:px-6`,
+        container && cn("mx-auto w-full", CONTAINER_MAX_WIDTH, CONTAINER_GUTTER),
         paddingMap[padding],
         className,
       )}

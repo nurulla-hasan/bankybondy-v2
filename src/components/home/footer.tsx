@@ -10,7 +10,7 @@ import {
   InstagramIcon,
   ShareAlikeIcon,
 } from "@/components/common/brand-icons";
-import { CONTAINER_MAX_WIDTH } from "@/components/common/page-wrapper";
+import { CONTAINER_GUTTER, CONTAINER_MAX_WIDTH } from "@/lib/layout";
 import { cn } from "@/lib/utils";
 
 const PLATFORM_LINKS = [
@@ -73,8 +73,9 @@ export function Footer() {
 
       <div
         className={cn(
-          "relative mx-auto px-5 pt-12 pb-8 lg:pt-16",
+          "relative mx-auto pt-12 pb-8 lg:pt-16",
           CONTAINER_MAX_WIDTH,
+          CONTAINER_GUTTER,
         )}
       >
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
@@ -128,13 +129,15 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 flex flex-col gap-4 border-t border-border/70 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="text-xs text-muted-foreground">
-              {t("copyright", { year })}
-            </p>
+        <div className="mt-12 grid gap-5 border-t border-border/70 pt-6 sm:grid-cols-3 sm:items-center">
+          <p className="text-xs text-muted-foreground">
+            {t("copyright", { year })}
+          </p>
 
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+            <span>{t("licenseLine", { year })}</span>
+
+            <span className="flex items-center gap-2">
               {LICENSE_LINKS.map((license) => (
                 <a
                   key={license.key}
@@ -148,16 +151,23 @@ export function Footer() {
                   <license.icon className="size-4" />
                 </a>
               ))}
-            </div>
+            </span>
+
+            <a
+              href={LICENSE_URL}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="font-medium text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
+            >
+              {t("license")}
+            </a>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              {t("madeWith")}
-              <Heart className="size-3.5 fill-pink-accent/20 text-pink-accent" />
-              <span>{t("byTeam")}</span>
-            </span>
-          </div>
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground sm:justify-self-end">
+            {t("madeWith")}
+            <Heart className="size-3.5 fill-pink-accent/20 text-pink-accent" />
+            <span>{t("byTeam")}</span>
+          </span>
         </div>
       </div>
     </footer>

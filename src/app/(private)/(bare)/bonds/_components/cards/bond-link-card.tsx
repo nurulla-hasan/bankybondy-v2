@@ -6,8 +6,9 @@ import { useTranslations } from "next-intl";
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RelativeTime } from "@/components/common/relative-time";
 import { successToast } from "@/lib/toast";
-import { formatRelativeTime, getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 import type { BondLink } from "@/types";
 
 export function BondLinkCard({ link }: { link: BondLink }) {
@@ -32,7 +33,7 @@ export function BondLinkCard({ link }: { link: BondLink }) {
           <p className="mt-1 text-xs text-muted-foreground">
             {t("membersCount", { count: link.participants.length })}
             <span aria-hidden> · </span>
-            {t("started", { time: formatRelativeTime(link.createdAt) })}
+            {t("started")} <RelativeTime date={link.createdAt} />
           </p>
         </div>
 

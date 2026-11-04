@@ -4,8 +4,9 @@ import { Fragment } from "react";
 import { ArrowDown, ArrowRight, RotateCw, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BondValue } from "../shared/bond-value";
-import { cn, getInitials } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { MatchParticipant } from "@/types";
 
 function ParticipantNode({ participant }: { participant: MatchParticipant }) {
@@ -15,14 +16,23 @@ function ParticipantNode({ participant }: { participant: MatchParticipant }) {
   return (
     <div className="min-w-0 flex-1 rounded-2xl border border-border bg-background/70 p-4">
       <div className="flex items-center gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-          {getInitials(participant.name)}
-        </span>
+        <Avatar size="lg" title={participant.name}>
+          {participant.avatarUrl && (
+            <AvatarImage
+              src={participant.avatarUrl}
+              alt={participant.name}
+            />
+          )}
+          <AvatarFallback/>
+        </Avatar>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-foreground">
+          <p
+            title={participant.name}
+            className="truncate text-sm font-semibold text-foreground"
+          >
             {participant.name}
           </p>
-          <p className="flex items-center gap-1 text-xs text-muted-foreground">
+          <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
             {reputation && reputation.count > 0 ? (
               <>
                 <Star
