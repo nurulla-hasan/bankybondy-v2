@@ -61,7 +61,8 @@ export interface VerifyResetOtpPayload {
 
 export interface ResetPasswordPayload {
   email: string;
-  newPassword: string;
+  password?: string;
+  newPassword?: string;
   confirmPassword?: string;
 }
 

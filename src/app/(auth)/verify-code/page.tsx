@@ -20,7 +20,12 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useVerifyCode, useResendVerifyCode } from "@/services";
+import {
+  useVerifyCode,
+  useResendVerifyCode,
+  useVerifyResetOtp,
+  useResendResetCode,
+} from "@/services";
 import { successToast, errorToast } from "@/lib/toast";
 import { getErrorMessage } from "@/lib/error";
 
@@ -29,15 +34,23 @@ function VerifyCodeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
+  const type = searchParams.get("type") || "signup";
+  const isResetMode = type === "reset-password";
 
   const [code, setCode] = React.useState("");
-  const { mutate: verify, isPending: isVerifying } = useVerifyCode();
-  const { mutate: resend, isPending: isResending } = useResendVerifyCode();
+  const { mutate: verifySignup, isPending: isVerifyingSignup } = useVerifyCode();
+  const { mutate: resendSignup, isPending: isResendingSignup } = useResendVerifyCode();
+
+  const { mutate: verifyReset, isPending: isVerifyingReset } = useVerifyResetOtp();
+  const { mutate: resendReset, isPending: isResendingReset } = useResendResetCode();
+
+  const isVerifying = isVerifyingSignup || isVerifyingReset;
+  const isResending = isResendingSignup || isResendingReset;
 
   const handleVerify = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!email) {
-      errorToast("Email address is missing. Please sign up again.");
+      errorToast("Email address is missing. Please start again.");
       return;
     }
     if (code.length < 4) {
@@ -45,18 +58,38 @@ function VerifyCodeContent() {
       return;
     }
 
-    verify(
-      { email, verifyCode: code },
-      {
-        onSuccess: () => {
-          successToast("Account Verified", "Your account has been verified successfully!");
-          router.replace("/");
-        },
-        onError: (err) => {
-          errorToast(getErrorMessage(err, "Verification failed. Invalid or expired code."));
-        },
-      },
-    );
+    if (isResetMode) {
+      verifyReset(
+        { email, resetCode: Number(code) || code },
+        {
+          onSuccess: () => {
+            successToast(
+              t("codeVerifiedToast", { defaultMessage: "Code Verified" }),
+              "Code verified! Now set your new password."
+            );
+            router.push(
+              `/reset-password?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`
+            );
+          },
+          onError: (err) => {
+            errorToast(getErrorMessage(err, "Verification failed. Invalid or expired code."));
+          },
+        }
+      );
+    } else {
+      verifySignup(
+        { email, verifyCode: code },
+        {
+          onSuccess: () => {
+            successToast("Account Verified", "Your account has been verified successfully!");
+            router.replace("/");
+          },
+          onError: (err) => {
+            errorToast(getErrorMessage(err, "Verification failed. Invalid or expired code."));
+          },
+        }
+      );
+    }
   };
 
   const handleResend = () => {
@@ -65,17 +98,31 @@ function VerifyCodeContent() {
       return;
     }
 
-    resend(
-      { email },
-      {
-        onSuccess: () => {
-          successToast("Code Resent", "A new verification code has been sent to your email.");
-        },
-        onError: (err) => {
-          errorToast(getErrorMessage(err, "Failed to resend code. Please try again."));
-        },
-      },
-    );
+    if (isResetMode) {
+      resendReset(
+        { email },
+        {
+          onSuccess: () => {
+            successToast("Code Resent", "A new reset code has been sent to your email.");
+          },
+          onError: (err) => {
+            errorToast(getErrorMessage(err, "Failed to resend code. Please try again."));
+          },
+        }
+      );
+    } else {
+      resendSignup(
+        { email },
+        {
+          onSuccess: () => {
+            successToast("Code Resent", "A new verification code has been sent to your email.");
+          },
+          onError: (err) => {
+            errorToast(getErrorMessage(err, "Failed to resend code. Please try again."));
+          },
+        }
+      );
+    }
   };
 
   return (
@@ -85,10 +132,12 @@ function VerifyCodeContent() {
           <Mail className="size-6" />
         </div>
         <CardTitle className="text-2xl font-bold tracking-tight">
-          Verify your email
+          {isResetMode ? t("verifyResetCodeTitle") : "Verify your email"}
         </CardTitle>
         <CardDescription className="max-w-xs mx-auto">
-          We sent a verification code to{" "}
+          {isResetMode
+            ? t("verifyResetCodeSubtitle")
+            : "We sent a verification code to "}{" "}
           <span className="font-semibold text-foreground break-all">
             {email || "your email"}
           </span>
