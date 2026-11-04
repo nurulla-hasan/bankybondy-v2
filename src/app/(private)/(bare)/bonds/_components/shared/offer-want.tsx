@@ -3,8 +3,8 @@
 import { ArrowDownUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { BondValue } from "@/components/common/bond-value";
 import { cn } from "@/lib/utils";
-import { BondValue } from "./bond-value";
 
 function ExchangeRow({
   label,

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Lock, UserX, WifiOff } from "lucide-react";
+import { Lock, UserX, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { EmptyState } from "@/components/common/empty-state";
@@ -16,17 +16,6 @@ import { PersonBonds } from "./person-bonds";
 import { PersonReviews } from "./person-reviews";
 import { ProfileActions } from "./profile-actions";
 import { ProfileHeader } from "./profile-header";
-
-function BackToPeople() {
-  const t = useTranslations("People");
-
-  return (
-    <Button variant="ghost" render={<Link href="/people" />}>
-      <ArrowLeft className="size-4" aria-hidden />
-      {t("profile.back")}
-    </Button>
-  );
-}
 
 export function PersonProfile({ id }: { id: string }) {
   const t = useTranslations("People");
@@ -56,8 +45,6 @@ export function PersonProfile({ id }: { id: string }) {
 
     return (
       <PageWrapper className="space-y-6">
-        <BackToPeople />
-
         <EmptyState
           icon={
             hidden ? (
@@ -102,8 +89,6 @@ export function PersonProfile({ id }: { id: string }) {
 
   return (
     <PageWrapper className="space-y-6">
-      <BackToPeople />
-
       <ProfileHeader
         profile={profile}
         reputation={reputation}

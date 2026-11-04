@@ -5,7 +5,7 @@ import { ArrowDown, ArrowRight, RotateCw, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BondValue } from "../shared/bond-value";
+import { BondValue } from "@/components/common/bond-value";
 import { cn } from "@/lib/utils";
 
 export interface BondParticipant {
