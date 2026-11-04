@@ -1,5 +1,6 @@
 import type { PaginationMeta } from "./api.types";
-import type { BondModality } from "./bond.types";
+
+export type BondModality = "physical" | "online";
 
 /** Backend bond request lifecycle values (bondRequest.enum.ts). */
 export type RawBondRequestStatus =

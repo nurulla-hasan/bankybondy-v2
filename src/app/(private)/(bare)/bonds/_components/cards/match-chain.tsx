@@ -7,9 +7,17 @@ import { useTranslations } from "next-intl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BondValue } from "../shared/bond-value";
 import { cn } from "@/lib/utils";
-import type { MatchParticipant } from "@/types";
 
-function ParticipantNode({ participant }: { participant: MatchParticipant }) {
+export interface BondParticipant {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  reputation?: { avg: number; count: number };
+  offer: string;
+  want: string;
+}
+
+function ParticipantNode({ participant }: { participant: BondParticipant }) {
   const t = useTranslations("Bonds");
   const reputation = participant.reputation;
 
@@ -79,7 +87,7 @@ export function MatchChain({
   participants,
   className,
 }: {
-  participants: MatchParticipant[];
+  participants: BondParticipant[];
   className?: string;
 }) {
   const t = useTranslations("Bonds");

@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageCircle, Star } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
@@ -9,25 +9,36 @@ import { Button } from "@/components/ui/button";
 import { RelativeTime } from "@/components/common/relative-time";
 import { successToast } from "@/lib/toast";
 import { getInitials } from "@/lib/utils";
-import type { BondLink } from "@/types";
+import type { RawBondLink } from "@/types";
 
-const STATUS_VARIANT = {
-  ongoing: "active",
-  completed: "completed",
-  cancelled: "rejected",
+const STATUS_DISPLAY = {
+  Ongoing: { variant: "active", key: "ongoing" },
+  Completed: { variant: "completed", key: "completed" },
+  Canceled: { variant: "rejected", key: "cancelled" },
 } as const;
 
-export function BondLinkCard({ link }: { link: BondLink }) {
+export function BondLinkCard({ link }: { link: RawBondLink }) {
   const t = useTranslations("Bonds");
-  const isOngoing = link.status === "ongoing";
-  const isCancelled = link.status === "cancelled";
+  const isOngoing = link.status === "Ongoing";
+  const isCancelled = link.status === "Canceled";
+
+  const uniqueUsers = new Map<string, { id: string; name: string }>();
+  for (const bond of link.requestedBonds ?? []) {
+    const user = bond.user;
+    if (user && typeof user === "object") {
+      uniqueUsers.set(user._id, { id: user._id, name: user.name ?? "" });
+    }
+  }
+
+  // The create response is not populated; fall back to raw participant ids.
+  const participants = uniqueUsers.size
+    ? [...uniqueUsers.values()]
+    : (link.participants ?? []).map((id) => ({ id, name: "" }));
+
+  const status = STATUS_DISPLAY[link.status];
 
   const handleOpenChat = () => {
     successToast(t("mockChatTitle"), t("mockChat", { name: link.name }));
-  };
-
-  const handleRate = () => {
-    successToast(t("mockRateTitle"), t("mockRate", { name: link.name }));
   };
 
   return (
@@ -38,19 +49,17 @@ export function BondLinkCard({ link }: { link: BondLink }) {
             {link.name}
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            {t("membersCount", { count: link.participants.length })}
+            {t("membersCount", { count: participants.length })}
             <span aria-hidden> · </span>
             {t("started")} <RelativeTime date={link.createdAt} />
           </p>
         </div>
 
-        <Badge variant={STATUS_VARIANT[link.status]}>
-          {t(`linkStatus.${link.status}`)}
-        </Badge>
+        <Badge variant={status.variant}>{t(`linkStatus.${status.key}`)}</Badge>
       </header>
 
       <AvatarGroup>
-        {link.participants.map((participant) => (
+        {participants.map((participant) => (
           <Avatar key={participant.id} size="sm" title={participant.name}>
             <AvatarFallback>{getInitials(participant.name)}</AvatarFallback>
           </Avatar>
@@ -63,20 +72,13 @@ export function BondLinkCard({ link }: { link: BondLink }) {
             ? t("linkOngoingHint")
             : isCancelled
               ? t("linkCancelledHint")
-              : link.pendingRating
-                ? t("ratingPending")
-                : t("linkCompletedHint")}
+              : t("linkCompletedHint")}
         </span>
 
         {isOngoing ? (
           <Button variant="outline" onClick={handleOpenChat}>
             <MessageCircle className="size-4" aria-hidden />
             {t("openChat")}
-          </Button>
-        ) : link.pendingRating ? (
-          <Button onClick={handleRate}>
-            <Star className="size-4" aria-hidden />
-            {t("rateNow")}
           </Button>
         ) : null}
       </div>

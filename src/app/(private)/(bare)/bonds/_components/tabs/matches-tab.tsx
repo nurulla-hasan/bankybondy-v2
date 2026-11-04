@@ -12,8 +12,17 @@ import { Spinner } from "@/components/ui/spinner";
 import { TabsContent } from "@/components/ui/tabs";
 import { useBondMatches, useBondRequest } from "@/services";
 import { cn } from "@/lib/utils";
+import type { RawBondMatch } from "@/types";
 
 import { MatchCard } from "../cards/match-card";
+
+function matchesSearchTerm(match: RawBondMatch, term: string) {
+  return match.matchRequest.some((entry) => {
+    const name = typeof entry.user === "object" ? entry.user?.name ?? "" : "";
+
+    return `${name} ${entry.offer} ${entry.want}`.toLowerCase().includes(term);
+  });
+}
 
 interface MatchesTabProps {
   requestFilterId: string | null;
@@ -39,19 +48,13 @@ export function MatchesTab({
     page,
   );
 
-  const matches = data?.items ?? [];
+  const matches = data?.data ?? [];
   const isComputing = data?.status === "computing";
   const term = searchTerm.trim();
   const normalizedTerm = term.toLowerCase();
 
   const searchedMatches = normalizedTerm
-    ? matches.filter((match) =>
-        match.participants.some((participant) =>
-          `${participant.name} ${participant.offer} ${participant.want}`
-            .toLowerCase()
-            .includes(normalizedTerm),
-        ),
-      )
+    ? matches.filter((match) => matchesSearchTerm(match, normalizedTerm))
     : matches;
 
   return (
@@ -116,7 +119,13 @@ export function MatchesTab({
               aria-busy={isFetching}
             >
               {searchedMatches.map((match) => (
-                <MatchCard key={match.id} match={match} />
+                <MatchCard
+                  key={match.matchRequest
+                    .map((entry) => entry._id)
+                    .sort()
+                    .join("|")}
+                  match={match}
+                />
               ))}
             </div>
           ) : term ? (
@@ -135,8 +144,11 @@ export function MatchesTab({
 
           {data && !isError && !isComputing ? (
             <CustomPagination
-              currentPage={data.meta.page}
-              totalPages={data.meta.totalPages}
+              currentPage={data.page}
+              totalPages={Math.max(
+                1,
+                Math.ceil(data.total / Math.max(data.limit, 1)),
+              )}
               updatePage={onPageChange}
             />
           ) : null}

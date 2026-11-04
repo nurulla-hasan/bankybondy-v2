@@ -7,13 +7,10 @@ import {
 
 import type {
   ApiResponse,
-  BondLink,
   BondLinkQueryParams,
-  BondMatch,
-  BondRequest,
   BondRequestQueryParams,
   CreateBondLinkInput,
-  PaginationMeta,
+  RawBondRequest,
   RawBondRequestList,
 } from "@/types";
 import type { CreateBondValues } from "@/validations";
@@ -27,30 +24,11 @@ import {
   getMyBondRequests,
   setBondRequestPaused,
 } from "../api";
-import { mapBondLink, mapBondMatch, mapBondRequest } from "../mappers/bond.mapper";
 
 export const BOND_REQUESTS_PAGE_SIZE = 12;
 export const BOND_LINKS_PAGE_SIZE = 12;
 export const BOND_MATCHES_PAGE_SIZE = 10;
 const MATCHES_POLL_MS = 3_000;
-
-export type BondRequestPage = {
-  items: BondRequest[];
-  meta: PaginationMeta;
-};
-
-export type BondLinkPage = {
-  items: BondLink[];
-  meta: PaginationMeta;
-};
-
-export type BondMatchPage = {
-  /** 'computing' means the robot is still producing matches; keep polling. */
-  status: "ready" | "computing";
-  reactivated: boolean;
-  items: BondMatch[];
-  meta: PaginationMeta;
-};
 
 export const bondKeys = {
   all: ["bonds"] as const,
@@ -88,10 +66,7 @@ export function useBondRequests(params: BondRequestQueryParams = {}) {
   return useQuery({
     queryKey: bondKeys.requestList(normalized),
     queryFn: () => getMyBondRequests(normalized),
-    select: (response): BondRequestPage => ({
-      items: response.data.result.map(mapBondRequest),
-      meta: response.data.meta,
-    }),
+    select: (response) => response.data,
     placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
   });
@@ -102,7 +77,7 @@ export function useBondRequest(id: string | null) {
     queryKey: bondKeys.requestDetail(id),
     queryFn: () => getBondRequestById(id as string),
     enabled: !!id,
-    select: (response) => mapBondRequest(response.data),
+    select: (response) => response.data,
     staleTime: 30 * 1000,
   });
 }
@@ -113,10 +88,7 @@ export function useBondLinks(params: BondLinkQueryParams = {}) {
   return useQuery({
     queryKey: bondKeys.linkList(normalized),
     queryFn: () => getMyBondLinks(normalized),
-    select: (response): BondLinkPage => ({
-      items: response.data.result.map(mapBondLink),
-      meta: response.data.meta,
-    }),
+    select: (response) => response.data,
     placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
   });
@@ -138,24 +110,7 @@ export function useBondMatches(requestId: string | null, page = 1) {
         limit: BOND_MATCHES_PAGE_SIZE,
       }),
     enabled: !!requestId,
-    select: (response): BondMatchPage => {
-      const raw = response.data;
-
-      return {
-        status: raw.status,
-        reactivated: raw.reactivated,
-        items: raw.data.map((match) => mapBondMatch(match, requestId as string)),
-        meta: {
-          page: raw.page,
-          limit: raw.limit,
-          total: raw.total,
-          totalPages: Math.max(
-            1,
-            Math.ceil(raw.total / Math.max(raw.limit, 1)),
-          ),
-        },
-      };
-    },
+    select: (response) => response.data,
     placeholderData: keepPreviousData,
     staleTime: 10 * 1000,
     refetchInterval: (query) =>
@@ -197,13 +152,13 @@ export function useToggleBondRequestPause() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (request: BondRequest) => {
+    mutationFn: async (request: RawBondRequest) => {
       const response = await setBondRequestPaused(
-        request.id,
-        request.status !== "paused",
+        request._id,
+        !request.isPause,
       );
 
-      return mapBondRequest(response.data);
+      return response.data;
     },
     onSuccess: (updated) => {
       queryClient.setQueriesData<ApiResponse<RawBondRequestList>>(
@@ -215,8 +170,8 @@ export function useToggleBondRequestPause() {
                 data: {
                   ...response.data,
                   result: response.data.result.map((item) =>
-                    item._id === updated.id
-                      ? { ...item, isPause: updated.status === "paused" }
+                    item._id === updated._id
+                      ? { ...item, isPause: updated.isPause }
                       : item,
                   ),
                 },
@@ -231,7 +186,7 @@ export function useDeleteBondRequest() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: BondRequest) => deleteBondRequest(request.id),
+    mutationFn: (request: RawBondRequest) => deleteBondRequest(request._id),
     onSuccess: (_response, request) => {
       queryClient.setQueriesData<ApiResponse<RawBondRequestList>>(
         { queryKey: bondKeys.requests() },
@@ -246,7 +201,7 @@ export function useDeleteBondRequest() {
                     total: Math.max(response.data.meta.total - 1, 0),
                   },
                   result: response.data.result.filter(
-                    (item) => item._id !== request.id,
+                    (item) => item._id !== request._id,
                   ),
                 },
               }

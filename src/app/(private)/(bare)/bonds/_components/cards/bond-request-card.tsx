@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Globe,
-  MapPin,
-  Pause,
-  Play,
-  Search,
-  Trash2,
-  Users,
-} from "lucide-react";
+import { Globe, MapPin, Pause, Play, Search, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -22,11 +14,11 @@ import {
 } from "@/services";
 import { successToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import type { BondRequest } from "@/types";
+import type { RawBondRequest } from "@/types";
 
 interface BondRequestCardProps {
-  request: BondRequest;
-  onFindMatch: (request: BondRequest) => void;
+  request: RawBondRequest;
+  onFindMatch: (request: RawBondRequest) => void;
 }
 
 export function BondRequestCard({
@@ -36,12 +28,12 @@ export function BondRequestCard({
   const t = useTranslations("Bonds");
   const togglePause = useToggleBondRequestPause();
   const deleteRequest = useDeleteBondRequest();
-  const isPaused = request.status === "paused";
+  const isPaused = request.isPause;
 
   const handleTogglePause = () => {
     togglePause.mutate(request, {
       onSuccess: (updated) => {
-        const paused = updated.status === "paused";
+        const paused = updated.isPause;
 
         successToast(
           paused ? t("pauseToastTitle") : t("resumeToastTitle"),
@@ -72,7 +64,7 @@ export function BondRequestCard({
       )}
     >
       <header className="flex items-center justify-between gap-3">
-        <BondStatusBadge status={request.status} />
+        <BondStatusBadge status={request.status} isPause={request.isPause} />
         <RelativeTime
           date={request.createdAt}
           className="shrink-0 text-xs text-muted-foreground"
@@ -96,15 +88,8 @@ export function BondRequestCard({
           )}
           {request.modality === "online"
             ? t("onlineGlobal")
-            : t("inPersonRadius", { km: request.radiusKm ?? 0 })}
+            : t("inPersonRadius", { km: request.radius ?? 0 })}
         </span>
-
-        {typeof request.matchCount === "number" ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
-            <Users className="size-3.5" aria-hidden />
-            {t("matchesCount", { count: request.matchCount })}
-          </span>
-        ) : null}
       </div>
 
       <div className="mt-auto flex items-center gap-2 border-t border-border/70 pt-3">

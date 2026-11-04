@@ -25,7 +25,7 @@ export function LinksTab({ searchTerm, page, onPageChange }: LinksTabProps) {
     page,
   });
 
-  const links = data?.items ?? [];
+  const links = data?.result ?? [];
   const term = searchTerm.trim();
 
   return (
@@ -53,7 +53,7 @@ export function LinksTab({ searchTerm, page, onPageChange }: LinksTabProps) {
           aria-busy={isFetching}
         >
           {links.map((link) => (
-            <BondLinkCard key={link.id} link={link} />
+            <BondLinkCard key={link._id} link={link} />
           ))}
         </div>
       ) : term ? (

@@ -9,13 +9,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
 import { useBondRequests } from "@/services";
 import { cn } from "@/lib/utils";
-import type { BondRequest } from "@/types";
+import type { RawBondRequest } from "@/types";
 
 import { BondRequestCard } from "../cards/bond-request-card";
 import { CreateBondDialog } from "../dialogs/create-bond-dialog";
 
 interface RequestsTabProps {
-  onFindMatch: (request: BondRequest) => void;
+  onFindMatch: (request: RawBondRequest) => void;
   searchTerm: string;
   page: number;
   onPageChange: (page: number) => void;
@@ -33,7 +33,7 @@ export function RequestsTab({
     page,
   });
 
-  const requests = data?.items ?? [];
+  const requests = data?.result ?? [];
   const term = searchTerm.trim();
 
   return (
@@ -62,7 +62,7 @@ export function RequestsTab({
         >
           {requests.map((request) => (
             <BondRequestCard
-              key={request.id}
+              key={request._id}
               request={request}
               onFindMatch={onFindMatch}
             />

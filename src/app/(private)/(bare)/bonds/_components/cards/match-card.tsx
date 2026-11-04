@@ -18,27 +18,92 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RelativeTime } from "@/components/common/relative-time";
 import { useCreateBondLink } from "@/services";
-import { MatchChain } from "./match-chain";
+import { MatchChain, type BondParticipant } from "./match-chain";
 import { MatchCycle } from "./match-cycle";
 import { MatchFactors } from "./match-factors";
 import { errorToast, successToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { proposeBondSchema, type ProposeBondValues } from "@/validations";
-import type { BondMatch, MatchSpecial } from "@/types";
+import type { RawBondMatch } from "@/types";
 
-const SPECIAL_DOT: Record<MatchSpecial, string> = {
+const SPECIAL_DOT = {
   gift: "bg-pink-accent",
   openSurprise: "bg-violet-accent",
   doubleSurprise: "bg-pink-accent",
-};
+} as const;
 
-export function MatchCard({ match }: { match: BondMatch }) {
+type MatchSpecial = keyof typeof SPECIAL_DOT;
+
+const SURPRISE_TOKEN = "surprise";
+
+const normalizeToken = (value?: string) => (value ?? "").trim().toLowerCase();
+
+const toPercent = (value: number) =>
+  Math.round(Math.max(0, Math.min(1, value)) * 100);
+
+function resolveParticipants(match: RawBondMatch): BondParticipant[] {
+  return match.matchRequest.map((entry) => {
+    const user =
+      entry.user && typeof entry.user === "object" ? entry.user : undefined;
+    const reputation =
+      typeof user?.reputation?.avg === "number" &&
+      typeof user?.reputation?.count === "number"
+        ? { avg: user.reputation.avg, count: user.reputation.count }
+        : undefined;
+
+    return {
+      id: user?._id ?? entry._id,
+      name: user?.name ?? "",
+      avatarUrl: user?.profile_image,
+      reputation,
+      offer: entry.offer,
+      want: entry.want,
+    };
+  });
+}
+
+function resolveSpecial(
+  match: RawBondMatch,
+  participants: BondParticipant[],
+): MatchSpecial | undefined {
+  if (match.type === "empty" || match.isFullEmpty) return "gift";
+  if (match.type !== "surprise") return undefined;
+
+  const hasSurprise = participants.some(
+    (participant) =>
+      normalizeToken(participant.offer) === SURPRISE_TOKEN ||
+      normalizeToken(participant.want) === SURPRISE_TOKEN,
+  );
+  if (!hasSurprise) return undefined;
+
+  // Double surprise = a pair where one side's want and the previous side's
+  // offer are both the 'surprise' token (same cycle rule as the backend).
+  const isDouble = participants.some((participant, index) => {
+    const previous =
+      participants[(index - 1 + participants.length) % participants.length];
+
+    return (
+      normalizeToken(participant.want) === SURPRISE_TOKEN &&
+      normalizeToken(previous.offer) === SURPRISE_TOKEN
+    );
+  });
+
+  return isDouble ? "doubleSurprise" : "openSurprise";
+}
+
+export function MatchCard({ match }: { match: RawBondMatch }) {
   const t = useTranslations("Bonds");
   const createLink = useCreateBondLink();
   const [whyOpen, setWhyOpen] = useState(false);
   const [proposeOpen, setProposeOpen] = useState(false);
+
+  const participants = resolveParticipants(match);
+  const bondIds = match.matchRequest.map((entry) => entry._id);
+  const participantIds = [...new Set(participants.map((p) => p.id))];
+  const matchId = [...bondIds].sort().join("|");
+  const score = toPercent(match.matchScore);
+  const special = resolveSpecial(match, participants);
 
   const proposeForm = useForm({
     defaultValues: { name: "" } as ProposeBondValues,
@@ -49,8 +114,8 @@ export function MatchCard({ match }: { match: BondMatch }) {
       createLink.mutate(
         {
           name: value.name,
-          participants: [...new Set(match.participantIds)],
-          requestedBonds: match.bondIds,
+          participants: participantIds,
+          requestedBonds: bondIds,
         },
         {
           onSuccess: () => {
@@ -74,27 +139,21 @@ export function MatchCard({ match }: { match: BondMatch }) {
     if (!open) proposeForm.reset();
   };
 
-  const scoreVariant =
-    match.score >= 90 ? "success" : match.score >= 85 ? "info" : "pending";
+  const scoreVariant = score >= 90 ? "success" : score >= 85 ? "info" : "pending";
 
   return (
     <article className="rounded-2xl border border-border bg-card p-5 transition-colors duration-300 hover:border-primary/30">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={scoreVariant}>
-            {t("matchScore", { score: match.score })}
-          </Badge>
+          <Badge variant={scoreVariant}>{t("matchScore", { score })}</Badge>
 
-          {match.special && (
+          {special && (
             <Badge variant="secondary">
               <span
-                className={cn(
-                  "size-1.5 rounded-full",
-                  SPECIAL_DOT[match.special],
-                )}
+                className={cn("size-1.5 rounded-full", SPECIAL_DOT[special])}
                 aria-hidden
               />
-              {t(`special.${match.special}`)}
+              {t(`special.${special}`)}
             </Badge>
           )}
         </div>
@@ -102,18 +161,12 @@ export function MatchCard({ match }: { match: BondMatch }) {
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Users className="size-3.5" aria-hidden />
-            {t("membersCount", { count: match.participants.length })}
+            {t("membersCount", { count: participants.length })}
           </span>
-          {match.createdAt ? (
-            <>
-              <span aria-hidden>·</span>
-              <RelativeTime date={match.createdAt} />
-            </>
-          ) : null}
         </div>
       </header>
 
-      <MatchChain participants={match.participants} className="mt-4" />
+      <MatchChain participants={participants} className="mt-4" />
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/70 pt-4">
         <Button
@@ -159,11 +212,11 @@ export function MatchCard({ match }: { match: BondMatch }) {
               <proposeForm.Field name="name">
                 {(field) => (
                   <div className="grid gap-2 py-2">
-                    <Label htmlFor={`bond-name-${match.id}`}>
+                    <Label htmlFor={`bond-name-${matchId}`}>
                       {t("groupName")}
                     </Label>
                     <Input
-                      id={`bond-name-${match.id}`}
+                      id={`bond-name-${matchId}`}
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
@@ -209,19 +262,17 @@ export function MatchCard({ match }: { match: BondMatch }) {
         <div className="mt-3 rounded-2xl border border-border/70 bg-muted/30 p-4 sm:p-5">
           <div className="flex flex-col items-center gap-6 lg:flex-row lg:gap-8">
             <MatchCycle
-              score={match.score}
-              participants={match.participants}
+              score={score}
+              participants={participants}
               className="shrink-0"
             />
 
-            {match.factors && (
-              <div className="w-full min-w-0 flex-1 space-y-3">
-                <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-                  {t("breakdown")}
-                </p>
-                <MatchFactors factors={match.factors} />
-              </div>
-            )}
+            <div className="w-full min-w-0 flex-1 space-y-3">
+              <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                {t("breakdown")}
+              </p>
+              <MatchFactors scoreParts={match.scoreParts} />
+            </div>
           </div>
         </div>
       )}

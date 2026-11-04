@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import type { MatchParticipant } from "@/types";
+import type { BondParticipant } from "./match-chain";
 
 const NODE_RADIUS = 35;
 const ARC_RADIUS = 43;
@@ -42,7 +42,7 @@ export function MatchCycle({
   score,
   className,
 }: {
-  participants: MatchParticipant[];
+  participants: BondParticipant[];
   score: number;
   className?: string;
 }) {

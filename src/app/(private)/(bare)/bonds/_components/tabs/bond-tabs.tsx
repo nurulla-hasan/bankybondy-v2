@@ -7,7 +7,7 @@ import { SearchInput } from "@/components/common/search-input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNextFilter } from "@/hooks/useNextFilter";
 import { useBondLinks, useBondMatches, useBondRequests } from "@/services";
-import type { BondRequest } from "@/types";
+import type { RawBondRequest } from "@/types";
 
 import { LinksTab } from "./links-tab";
 import { MatchesTab } from "./matches-tab";
@@ -40,8 +40,8 @@ export function BondTabs() {
     updateFilter("tab", tab === DEFAULT_TAB ? null : tab);
   };
 
-  const handleFindMatch = (request: BondRequest) => {
-    updateBatch({ tab: "matches", request: request.id });
+  const handleFindMatch = (request: RawBondRequest) => {
+    updateBatch({ tab: "matches", request: request._id });
   };
 
   const handlePageChange = (nextPage: number) => {
@@ -61,7 +61,7 @@ export function BondTabs() {
       id: "matches" as const,
       icon: <Sparkles className="size-4" aria-hidden />,
       label: t("tabs.matches"),
-      count: requestFilterId ? (matches?.meta.total ?? 0) : undefined,
+      count: requestFilterId ? (matches?.total ?? 0) : undefined,
     },
     {
       id: "links" as const,
