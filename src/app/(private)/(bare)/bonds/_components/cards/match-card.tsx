@@ -59,6 +59,8 @@ function resolveParticipants(match: RawBondMatch): BondParticipant[] {
       reputation,
       offer: entry.offer,
       want: entry.want,
+      offerColor: entry.offerColor,
+      wantColor: entry.wantColor,
     };
   });
 }
