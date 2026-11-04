@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -67,21 +68,22 @@ export function NavbarUserMenu({
           }
         />
         <DropdownMenuContent align="end" className="w-52">
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-semibold text-foreground leading-none">
-                {user.name || "User"}
-              </p>
-              <p className="text-xs text-muted-foreground leading-none truncate">
-                {user.email}
-              </p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem render={<Link href="/profile" />}>
-            <UserIcon className="size-4 mr-2" />
-            <span>{t("profile")}</span>
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-semibold text-foreground leading-none">
+                  {user.name || "User"}
+                </p>
+                <p className="text-xs text-muted-foreground leading-none truncate">
+                  {user.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuItem render={<Link href="/profile" />}>
+              <UserIcon className="size-4 mr-2" />
+              <span>{t("profile")}</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={handleLogout}

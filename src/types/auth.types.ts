@@ -43,7 +43,7 @@ export interface RegisterPayload {
 
 export interface VerifyCodePayload {
   email: string;
-  verifyCode: number | string;
+  verifyCode: number;
 }
 
 export interface ResendVerifyCodePayload {
@@ -56,7 +56,7 @@ export interface ForgotPasswordPayload {
 
 export interface VerifyResetOtpPayload {
   email: string;
-  resetCode: number | string;
+  resetCode: number;
 }
 
 export interface ResetPasswordPayload {

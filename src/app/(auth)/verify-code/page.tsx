@@ -57,10 +57,16 @@ function VerifyCodeContent() {
       errorToast("Please enter the verification code.");
       return;
     }
+    if (!/^\d+$/.test(code)) {
+      errorToast("The verification code must contain digits only.");
+      return;
+    }
+
+    const numericCode = Number(code);
 
     if (isResetMode) {
       verifyReset(
-        { email, resetCode: Number(code) || code },
+        { email, resetCode: numericCode },
         {
           onSuccess: () => {
             successToast(
@@ -78,7 +84,7 @@ function VerifyCodeContent() {
       );
     } else {
       verifySignup(
-        { email, verifyCode: code },
+        { email, verifyCode: numericCode },
         {
           onSuccess: () => {
             successToast("Account Verified", "Your account has been verified successfully!");
