@@ -25,7 +25,7 @@ export function Navbar({ className }: NavbarProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 w-full backdrop-blur-md transition-colors",
+        "sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md transition-colors",
         className,
       )}
     >

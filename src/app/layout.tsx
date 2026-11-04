@@ -3,7 +3,7 @@ import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
 import "./globals.css";
 import Providers from "@/provider";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -20,10 +20,15 @@ const outfit = Outfit({
 });
 
 
-export const metadata: Metadata = {
-  title: "BankyBondy — Red de Vínculos",
-  description: "Plataforma moderna de colaboración, trueques y comunidad.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({ locale, namespace: "Common" });
+
+  return {
+    title: `${t("brandName")} — ${t("brandTagline")}`,
+    description: t("brandDescription"),
+  };
+}
 
 export default async function RootLayout({
   children,

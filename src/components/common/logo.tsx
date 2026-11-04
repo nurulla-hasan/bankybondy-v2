@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { BrandLogoSvg } from "./brand-logo";
 
@@ -16,6 +17,7 @@ export function Logo({
   href?: string;
 }) {
   const svgSize = size === "lg" ? 44 : size === "md" ? 38 : 30;
+  const t = useTranslations("Common");
 
   return (
     <Link
@@ -45,7 +47,7 @@ export function Logo({
             Banky<span className="text-primary font-black">Bondy</span>
           </span>
           <span className="text-[9px] font-semibold text-muted-foreground/80 tracking-[0.18em] uppercase">
-            Red de Vínculos
+            {t("brandTagline")}
           </span>
         </div>
       )}
