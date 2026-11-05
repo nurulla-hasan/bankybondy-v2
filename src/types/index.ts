@@ -2,6 +2,7 @@ export * from "./api.types";
 export * from "./auth.types";
 export * from "./bond-api.types";
 export * from "./donate.types";
+export * from "./friend-api.types";
 export * from "./search.types";
 export * from "./notification.types";
 export * from "./people-api.types";
