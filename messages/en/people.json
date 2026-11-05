@@ -20,7 +20,6 @@
     "nearSortHint": "Turn off “Near me” to change the sort order."
   },
   "card": {
-    "viewProfile": "View profile",
     "distance": "{km} km away",
     "reviews": "{count, plural, =0 {No reviews} one {# review} other {# reviews}}",
     "skillsMore": "+{count}",

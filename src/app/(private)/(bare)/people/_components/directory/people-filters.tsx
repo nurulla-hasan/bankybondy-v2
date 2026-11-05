@@ -48,7 +48,7 @@ export function PeopleFilters({
 
         <Button
           type="button"
-          variant={online ? "secondary" : "outline"}
+          variant={online ? "default" : "outline"}
           aria-pressed={online}
           onClick={handleToggleOnline}
         >
@@ -58,7 +58,7 @@ export function PeopleFilters({
 
         <Button
           type="button"
-          variant={near ? "secondary" : "outline"}
+          variant={near ? "default" : "outline"}
           aria-pressed={near}
           aria-busy={nearPending}
           loading={nearPending}
@@ -70,11 +70,11 @@ export function PeopleFilters({
         </Button>
       </div>
 
-      {near ? (
+      {/* {near ? (
         <p className="text-xs text-muted-foreground">
           {t("filters.nearSortHint")}
         </p>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }

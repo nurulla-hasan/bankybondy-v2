@@ -6,9 +6,7 @@ import { useTranslations } from "next-intl";
 
 import CustomPagination from "@/components/common/custom-pagination";
 import { EmptyState } from "@/components/common/empty-state";
-import { SearchInput } from "@/components/common/search-input";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useNextFilter } from "@/hooks/useNextFilter";
 import { cn } from "@/lib/utils";
 import { PEOPLE_PAGE_SIZE, usePeople } from "@/services";
@@ -16,6 +14,7 @@ import type { PersonSort } from "@/types";
 
 import { PeopleFilters } from "./people-filters";
 import { PersonCard } from "./person-card";
+import { PersonCardSkeleton } from "./person-card-skeleton";
 import { useNearFilter } from "./use-near-filter";
 
 type PeopleFilterKey = "searchTerm" | "page" | "sort" | "online" | "near";
@@ -68,25 +67,25 @@ export function PeopleDirectory() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <SearchInput />
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+          {data && !isError && !needsLocation ? (
+            <>
+              <p aria-live="polite">
+                {t("resultCount", { count: data.meta.total })}
+              </p>
+              {online ? <span>{t("filters.onlineHint")}</span> : null}
+            </>
+          ) : null}
+        </div>
 
         <PeopleFilters nearPending={nearPending} onToggleNear={toggleNear} />
       </div>
 
-      {data && !isError && !needsLocation ? (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-          <p aria-live="polite">
-            {t("resultCount", { count: data.meta.total })}
-          </p>
-          {online ? <span>{t("filters.onlineHint")}</span> : null}
-        </div>
-      ) : null}
-
       {isPending ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-hidden>
           {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} className="h-64 rounded-2xl" />
+            <PersonCardSkeleton key={index} />
           ))}
         </div>
       ) : isError ? (

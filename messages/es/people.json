@@ -20,7 +20,6 @@
     "nearSortHint": "Desactiva «Cerca de mí» para cambiar el orden."
   },
   "card": {
-    "viewProfile": "Ver perfil",
     "distance": "A {km} km",
     "reviews": "{count, plural, =0 {Sin reseñas} one {# reseña} other {# reseñas}}",
     "skillsMore": "+{count}",

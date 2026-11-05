@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 
 import { PageWrapper } from "@/components/common/page-wrapper";
+import { SearchInput } from "@/components/common/search-input";
 import { SectionHeading } from "@/components/common/section-heading";
 import { PeopleDirectory } from "@/app/(private)/(bare)/people/_components/directory/people-directory";
 
@@ -17,7 +18,11 @@ export default function PeoplePage() {
         title={t("title")}
         description={t("subtitle")}
         descriptionClassName="max-w-2xl"
-      />
+      >
+        <Suspense fallback={null}>
+          <SearchInput />
+        </Suspense>
+      </SectionHeading>
 
       <Suspense fallback={null}>
         <PeopleDirectory />
