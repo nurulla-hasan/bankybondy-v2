@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { FormInput } from "@/components/common/form-input";
 import { GoogleLoginButton } from "@/components/common/google-login-button";
 import { useLogin, useLogout } from "@/services";
+import { readRoleFromAccessToken } from "@/lib/access-token";
 import { successToast, errorToast } from "@/lib/toast";
 import { loginSchema, type LoginSchemaType } from "@/validations";
 import { getErrorMessage } from "@/lib/error";
@@ -41,7 +42,7 @@ export default function LoginPage() {
     onSubmit: ({ value }) => {
       login(value, {
         onSuccess: (res) => {
-          const userRole = res?.data?.user?.role;
+          const userRole = readRoleFromAccessToken(res?.data?.accessToken);
           if (userRole && userRole !== "user") {
             logout(undefined, {
               onSettled: () => {

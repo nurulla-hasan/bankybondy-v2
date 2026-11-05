@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { useOAuthLogin, useLogout } from "@/services";
+import { readRoleFromAccessToken } from "@/lib/access-token";
 import { errorToast, successToast } from "@/lib/toast";
 import { getErrorMessage } from "@/lib/error";
 
@@ -99,7 +100,7 @@ export function GoogleLoginButton({ className = "" }: { className?: string }) {
         { provider: "google", token, role: "user" },
         {
           onSuccess: (res) => {
-            const userRole = res?.data?.user?.role;
+            const userRole = readRoleFromAccessToken(res?.data?.accessToken);
             if (userRole && userRole !== "user") {
               logout(undefined, {
                 onSettled: () => {

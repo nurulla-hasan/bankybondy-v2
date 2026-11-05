@@ -129,9 +129,11 @@ export function getMyProfile() {
 /**
  * 11. Change Password (Authenticated)
  * Endpoint: POST /auth/change-password
+ * The server also re-issues both tokens and rewrites the HttpOnly cookies, so
+ * the session survives the change instead of being logged out.
  */
 export function changePassword(payload: ChangePasswordPayload) {
-  return apiClient<ApiResponse<null>>("/auth/change-password", {
+  return apiClient<ApiResponse<LoginResponse>>("/auth/change-password", {
     method: "POST",
     body: payload,
   });
@@ -144,5 +146,17 @@ export function changePassword(payload: ChangePasswordPayload) {
 export function logoutUser() {
   return apiClient<ApiResponse<null>>("/auth/logout", {
     method: "POST",
+  });
+}
+
+/**
+ * 13. Delete the logged-in account and every profile, bond and rating hanging
+ * off it. The password is re-checked server-side; a wrong one returns 403.
+ * Endpoint: DELETE /user/delete-account
+ */
+export function deleteAccount(password: string) {
+  return apiClient<ApiResponse<null>>("/user/delete-account", {
+    method: "DELETE",
+    body: { password },
   });
 }

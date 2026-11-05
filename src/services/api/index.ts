@@ -7,5 +7,6 @@ export * from "./donate.api";
 export * from "./search.api";
 export * from "./notification.api";
 export * from "./people.api";
+export * from "./profile.api";
 
 

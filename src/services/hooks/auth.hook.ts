@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   changePassword,
+  deleteAccount,
   forgotPassword,
   getMyProfile,
   loginUser,
@@ -142,6 +143,30 @@ export function useLogout() {
     onSuccess: () => {
       queryClient.cancelQueries();
       queryClient.setQueryData(["auth", "profile"], null);
+      queryClient.clear();
+    },
+  });
+}
+
+/**
+ * Hook for deleting the logged-in account, permanently.
+ *
+ * `DELETE /user/delete-account` clears only the refresh cookie, and the edge
+ * proxy trusts the access token signature without re-reading the database, so
+ * the dead session would stay usable until it expires. Logging out right after
+ * wipes both cookies, which is what an erased account should mean.
+ */
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (password: string) => {
+      const result = await deleteAccount(password);
+      await logoutUser().catch(() => undefined);
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.cancelQueries();
       queryClient.clear();
     },
   });

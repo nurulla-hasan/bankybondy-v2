@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 
 interface BackButtonProps {
   className?: string;

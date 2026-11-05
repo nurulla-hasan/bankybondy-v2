@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, MapPin, Star } from "lucide-react";
+import { MapPin, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,9 +43,9 @@ export function PersonCard({ person }: { person: RawPerson }) {
   return (
     <Link
       href={`/people/${person._id}`}
-      className="block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <Card className="relative h-full gap-0 rounded-2xl py-0 shadow-md ring-border ease-out hover:scale-101 transition duration-300 hover:shadow-primary/15 hover:ring-primary/30 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+
+      <Card className="relative h-full gap-0 py-0">
         <span
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-linear-to-r from-transparent via-primary/60 to-transparent"
@@ -55,7 +55,7 @@ export function PersonCard({ person }: { person: RawPerson }) {
           {person.cover_image ? (
             <div
               aria-hidden
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-500 ease-out group-hover/card:scale-105 motion-reduce:transform-none"
+              className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url("${person.cover_image}")` }}
             />
           ) : (
@@ -126,11 +126,6 @@ export function PersonCard({ person }: { person: RawPerson }) {
               ) : null}
             </div>
           </div>
-
-          <ArrowRight
-            aria-hidden
-            className="mb-1.5 size-4 shrink-0 text-primary opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"
-          />
         </div>
 
         {visibleSkills.length ? (
@@ -150,6 +145,7 @@ export function PersonCard({ person }: { person: RawPerson }) {
           <div className="pb-4" aria-hidden />
         )}
       </Card>
+      
     </Link>
   );
 }

@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import type { ApiResponse } from "@/types";
+import type { ApiResponse, RawBondRequestStatus } from "@/types";
 import type {
   BondRequestQueryParams,
   CreateBondRequestInput,
@@ -16,6 +16,16 @@ export function getMyBondRequests(params?: BondRequestQueryParams) {
     "/bond-request/my-bond-requests",
     { method: "GET", query: params },
   );
+}
+
+/**
+ * Count the owner's requests sitting in one status: ask for a single row and
+ * read `meta.total`, which the backend computes from the same filter.
+ * Endpoint: GET /bond-request/my-bond-requests
+ */
+export async function countMyBondRequests(status: RawBondRequestStatus) {
+  const response = await getMyBondRequests({ status, page: 1, limit: 1 });
+  return response?.data?.meta?.total ?? 0;
 }
 
 /** Fetch a single bond request by id (owner or active/navigable).
