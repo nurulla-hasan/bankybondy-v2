@@ -28,12 +28,50 @@ export function PersonProfile({ id }: { id: string }) {
   if (isPending) {
     return (
       <PageWrapper className="space-y-6">
-        <Skeleton className="h-8 w-36" />
-        <Skeleton className="h-44 rounded-xl" />
-        <div className="space-y-3">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-full max-w-xl" />
-          <Skeleton className="h-4 w-full max-w-lg" />
+        <div aria-hidden className="animate-pulse space-y-6">
+          <section className="overflow-hidden rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10">
+            <Skeleton className="h-28 rounded-none sm:h-36" />
+            <div className="space-y-5 p-5 sm:p-6">
+              <div className="flex items-end gap-4">
+                <div className="-mt-10 shrink-0 rounded-full border-4 border-card bg-card">
+                  <Skeleton className="size-20 rounded-full" />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-6 w-44" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
+                <Skeleton className="h-9 w-28 rounded-lg" />
+              </div>
+              <div className="grid gap-5 border-t border-border/70 pt-5 sm:grid-cols-3">
+                <div className="space-y-2 sm:col-span-2">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-4/5" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-14" />
+                  <Skeleton className="h-5 w-4/5 rounded-full" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-9 w-56 rounded-lg" />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Skeleton className="h-48 rounded-xl" />
+              <Skeleton className="h-48 rounded-xl" />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-28" />
+            <Skeleton className="h-28 rounded-xl" />
+            <Skeleton className="h-28 rounded-xl" />
+          </div>
         </div>
       </PageWrapper>
     );

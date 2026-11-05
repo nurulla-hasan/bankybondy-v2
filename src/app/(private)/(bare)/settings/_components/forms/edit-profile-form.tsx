@@ -37,7 +37,9 @@ function toFormValues(profile: MyProfile) {
     name: profile.name ?? "",
     phone: profile.phone ?? "",
     gender: profile.gender ?? "",
-    dateOfBirth: profile.dateOfBirth ?? "",
+    // The API echoes Date docs as full ISO strings; the date input and the
+    // schema's max(10) both need plain yyyy-mm-dd.
+    dateOfBirth: profile.dateOfBirth ? profile.dateOfBirth.slice(0, 10) : "",
     address: profile.address ?? "",
     bio: profile.bio ?? "",
     skills: (profile.skills ?? []).map((skill) => skill._id),
@@ -436,50 +438,53 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
       </div>
 
       <div className="sticky bottom-0 -mx-4 flex flex-wrap items-center gap-3 border-t border-border/70 bg-background/85 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6">
-        <form.Subscribe selector={(state) => state.isDirty}>
-          {(isDirty) =>
-            isDirty ? (
-              <p className="mr-auto text-xs font-medium text-amber-accent">
-                {t("form.unsaved")}
-              </p>
-            ) : (
-              <p className="mr-auto text-xs text-muted-foreground">
-                {t("form.allSaved")}
-              </p>
-            )
-          }
-        </form.Subscribe>
-
-        <form.Subscribe selector={(state) => state.isDirty}>
-          {(isDirty) =>
-            isDirty ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  form.reset();
-                  clearPendingImages();
-                }}
-              >
-                {t("form.discard")}
-              </Button>
-            ) : null
-          }
-        </form.Subscribe>
-
         <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting, state.isDirty]}
+          selector={(state) => [
+            state.canSubmit,
+            state.isSubmitting,
+            state.isDirty,
+            Boolean(avatarFile || coverFile),
+          ]}
         >
-          {([canSubmit, isSubmitting, isDirty]) => (
-            <Button
-              type="submit"
-              disabled={!canSubmit || isSubmitting || !isDirty}
-              loading={isSaving}
-              loadingText={t("form.saving")}
-            >
-              {t("form.save")}
-            </Button>
-          )}
+          {([canSubmit, isSubmitting, isDirty, hasPendingImages]) => {
+            const changed = Boolean(isDirty) || hasPendingImages;
+
+            return (
+              <>
+                <p
+                  className={`mr-auto text-xs ${
+                    changed
+                      ? "font-medium text-amber-accent"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {changed ? t("form.unsaved") : t("form.allSaved")}
+                </p>
+
+                {changed ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      form.reset();
+                      clearPendingImages();
+                    }}
+                  >
+                    {t("form.discard")}
+                  </Button>
+                ) : null}
+
+                <Button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting || !changed}
+                  loading={isSaving}
+                  loadingText={t("form.saving")}
+                >
+                  {t("form.save")}
+                </Button>
+              </>
+            );
+          }}
         </form.Subscribe>
       </div>
     </form>
