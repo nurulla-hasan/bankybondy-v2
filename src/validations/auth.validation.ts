@@ -60,3 +60,30 @@ export const resetPasswordSchema = z
 
 export type ResetPasswordSchemaType = z.infer<typeof resetPasswordSchema>;
 
+/** The backend compares confirmNewPassword itself, so it is part of the payload. */
+export const changePasswordSchema = z
+  .object({
+    oldPassword: z.string().min(1, { error: "Current password is required" }),
+    newPassword: z.string().min(6, { error: "New password must be at least 6 characters" }),
+    confirmNewPassword: z.string().min(6, { error: "Please confirm your new password" }),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    error: "Passwords do not match",
+    path: ["confirmNewPassword"],
+  })
+  .refine((data) => data.newPassword !== data.oldPassword, {
+    error: "New password must be different from the current one",
+    path: ["newPassword"],
+  });
+
+export type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, { error: "Password is required" }),
+  confirmText: z.string().refine((value) => value === "DELETE", {
+    error: "Type DELETE to confirm",
+  }),
+});
+
+export type DeleteAccountValues = z.infer<typeof deleteAccountSchema>;
+

@@ -29,7 +29,8 @@ export interface RawPerson {
   address?: string;
   bio?: string;
   skills?: RawPersonSkill[];
-  socialLinks?: Record<string, string | undefined>;
+  /** Backend stores a flat array of URLs (`normalUser.validation.ts`: array of `string().url()`). */
+  socialLinks?: string[];
   bondsPublic?: boolean;
   listedInPeople?: boolean;
   reputation?: RawReputation;

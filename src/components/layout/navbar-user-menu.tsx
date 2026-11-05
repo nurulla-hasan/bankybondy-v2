@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowRight, LogOut, User as UserIcon } from "lucide-react";
+import { ArrowRight, LogOut, Settings, User as UserIcon } from "lucide-react";
 
 import { useGetMyProfile, useLogout } from "@/services";
 import { Button } from "@/components/ui/button";
@@ -80,6 +80,10 @@ export function NavbarUserMenu({
             <DropdownMenuItem render={<Link href="/profile" />}>
               <UserIcon className="size-4 mr-2" />
               <span>{t("profile")}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/settings" />}>
+              <Settings className="size-4 mr-2" />
+              <span>{t("settings")}</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />

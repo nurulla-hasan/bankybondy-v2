@@ -23,6 +23,7 @@ export default getRequestConfig(async () => {
       Footer: (await import(`../../messages/${locale}/footer.json`)).default,
       Bonds: (await import(`../../messages/${locale}/bonds.json`)).default,
       People: (await import(`../../messages/${locale}/people.json`)).default,
+      Profile: (await import(`../../messages/${locale}/profile.json`)).default,
     },
   };
 

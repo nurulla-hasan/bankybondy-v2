@@ -5,3 +5,4 @@ export * from "./donate.types";
 export * from "./search.types";
 export * from "./notification.types";
 export * from "./people-api.types";
+export * from "./profile.types";
