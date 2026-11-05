@@ -200,10 +200,12 @@ function routeFor(item: NotificationItem): string | null {
       // redirectId is the reviewer's profile id (bondRating.service.ts:127).
       return item.redirectId ? `/people/${item.redirectId}` : "/profile";
     case "FRIEND_REQUEST":
-      // No friends page in v2 yet.
-      return null;
+      // redirectId is the sender's profile id (friendRequest.service.ts:75-81);
+      // the requests tab is where the request gets answered.
+      return "/friends?tab=requests";
     case "FRIEND_ACCEPTED":
-      return item.redirectId ? `/people/${item.redirectId}` : "/people";
+      // redirectId is the accepting user's profile id (service.ts:111-118).
+      return item.redirectId ? `/people/${item.redirectId}` : "/friends?tab=friends";
     default:
       return null;
   }

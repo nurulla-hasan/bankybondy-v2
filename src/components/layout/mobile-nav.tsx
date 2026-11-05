@@ -4,7 +4,13 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowRight, LogOut, Menu, User as UserIcon } from "lucide-react";
+import {
+  ArrowRight,
+  LogOut,
+  Menu,
+  User as UserIcon,
+  Users,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useGetMyProfile, useLogout } from "@/services";
@@ -149,6 +155,14 @@ export function MobileNav({
                   >
                     <UserIcon className="size-4 shrink-0" />
                     <span>{t("profile")}</span>
+                  </Link>
+                  <Link
+                    href="/friends"
+                    onClick={() => setOpen(false)}
+                    className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                  >
+                    <Users className="size-4 shrink-0" />
+                    <span>{t("friends")}</span>
                   </Link>
                   <button
                     type="button"

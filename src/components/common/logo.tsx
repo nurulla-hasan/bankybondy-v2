@@ -44,7 +44,7 @@ export function Logo({
               size === "sm" && "text-base"
             )}
           >
-            Banky<span className="text-primary font-black">Bondy</span>
+            Banky<span className="text-primary font-black">bondy</span>
           </span>
           <span className="text-[9px] font-semibold text-muted-foreground/80 tracking-[0.18em] uppercase">
             {t("brandTagline")}
