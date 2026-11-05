@@ -28,4 +28,3 @@ backend wins and this doc gets corrected.
   `src/services/hooks/*.hook.ts`. Forms: `@tanstack/react-form` + Zod v4 in
   `src/validations/`. UI: shadcn/Base UI primitives only. Copy in `messages/{en,es}` via
   next-intl.
-- Mock UI first for a design pass, then the real data layer — never both at once.

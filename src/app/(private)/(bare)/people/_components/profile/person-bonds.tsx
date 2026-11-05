@@ -77,8 +77,8 @@ export function PersonBonds({ personId }: { personId: string }) {
       </div>
 
       {isPending ? (
-        <div className="grid gap-4 sm:grid-cols-2" aria-hidden>
-          {Array.from({ length: 2 }, (_, index) => (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-hidden>
+          {Array.from({ length: 3 }, (_, index) => (
             <Skeleton key={index} className="h-48 rounded-xl" />
           ))}
         </div>
@@ -106,7 +106,7 @@ export function PersonBonds({ personId }: { personId: string }) {
       ) : bonds.length ? (
         <div
           className={cn(
-            "grid gap-4 sm:grid-cols-2",
+            "grid gap-4 sm:grid-cols-2 xl:grid-cols-3",
             isFetching && "opacity-60 transition-opacity",
           )}
           aria-busy={isFetching}

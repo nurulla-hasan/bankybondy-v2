@@ -38,7 +38,7 @@ export function PublicBondCard({ bond }: { bond: RawPublicBond }) {
         </span>
       </header>
 
-      <div className="space-y-3 rounded-xl border border-border/70 bg-muted/20 px-3.5 py-3">
+      <div className="flex flex-1 flex-col justify-center gap-3 rounded-xl border border-border/70 bg-muted/20 px-3.5 py-3">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             <span

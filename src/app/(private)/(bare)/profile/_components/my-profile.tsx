@@ -93,13 +93,13 @@ export function MyProfileView() {
         <div className="space-y-4 lg:col-span-2">
           <AccountDetailsCard profile={profile} />
           <LocationCard profile={profile} />
-          <LinksCard profile={profile} />
         </div>
 
         <div className="space-y-4 lg:col-span-3">
           <AboutCard profile={profile} />
           <SkillsCard profile={profile} />
           <SecurityCard />
+          <LinksCard profile={profile} />
         </div>
       </div>
     </div>

@@ -89,13 +89,13 @@ export function ProfileDetailsGridSkeleton() {
       <div className="space-y-4 lg:col-span-2">
         <RowCardSkeleton rows={5} titleWidth="h-5 w-40" />
         <LocationCardSkeleton />
-        <RowCardSkeleton rows={3} titleWidth="h-5 w-16" />
       </div>
 
       <div className="space-y-4 lg:col-span-3">
         <BlockCardSkeleton titleWidth="h-5 w-24" lines={3} />
         <BlockCardSkeleton titleWidth="h-5 w-16" lines={2} />
         <BlockCardSkeleton titleWidth="h-5 w-44" lines={4} />
+        <RowCardSkeleton rows={3} titleWidth="h-5 w-16" />
       </div>
     </div>
   );
