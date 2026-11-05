@@ -1,78 +1,93 @@
-# Implementation Plan: Bond Rating UI Flow (mark-as-complete → rate counterpart)
+# Implementation Plan: Friends Management (v2)
 
 ## Overview
 
-Close the reputation loop on the Bonds → Links tab. Today `BondLinkCard`
-(`src/app/(private)/(bare)/bonds/_components/cards/bond-link-card.tsx`) is mock
-UI: an "Open chat" toast, no way to complete a bond or rate the counterpart.
-This feature wires the two real backend endpoints and adds a rating dialog:
-each participant marks their side of the trade complete, then rates the other
-side (1–5 stars + optional comment, editable via upsert).
+Give v2 a `/friends` page and the actions around it, so a user can see incoming friend
+requests, requests they sent, and their accepted friends — and accept, reject, cancel or
+unfriend from the UI. Today v2 only wires `POST /friend-request/send`
+(`src/services/api/people.api.ts:72`); the other seven backend endpoints are unused, and
+`FRIEND_REQUEST` notifications resolve to `routeFor → null`
+(`src/components/layout/navbar-notifications.tsx`), so a request arrives that the user can
+neither see nor answer.
 
-## Backend spec (source of truth: `../bb-api-src-inst-20260929`)
+## Key finding that shapes the UI
 
-| Fact | Citation |
-| --- | --- |
-| `POST /bond-link/mark-as-complete/:id`, auth user; adds caller to `markAsCompletedBy`; link flips to `Completed` only when ALL participants marked; returns the updated BondLink doc | `bondLink.routes.ts:28-32`, `bondLink.service.ts:492-546`, `bondLink.controller.ts:44-55` |
-| Already marked → no-op returns link; `Canceled` link → 400 | `bondLink.service.ts:508-525` |
-| `POST /bond-rating/add-rating` body `{ userId, bondLink, rating, comment? }`; `rating` integer 1–5; `comment` trimmed max 500, optional | `bondRating.routes.ts:10-15`, `bondRating.validation.ts:3-15` |
-| Guards: no self-rating; rater must be a participant AND be in `markAsCompletedBy`; rated `userId` must own one of the link's `requestedBonds` | `bondRating.service.ts:23`, `:30-37`, `:55-63`, `:67-76` |
-| Rating is an idempotent upsert per `(ratedBy, rated, bondLink)` — re-submitting edits stars/comment | `bondRating.service.ts:78-113` |
-| Rating stays `applied:false` (no reputation impact) until the whole link completes; applied in bulk at completion — UI must not assume a rating counts immediately | `bondRating.interface.ts:12-17`, `bondRating.service.ts:96-100` |
-| Public ratings view `GET /bond-rating/public/:userId` — already wired in v2 (`people.api.ts:56-63`) | `bondRating.routes.ts:19-23` |
+Backend `friendRequest` has **no follower graph** — only requests and accepted pairs
+(`friendRequest.enum.ts:1-5`). The endpoint names are misleading:
 
-## Architecture decisions
+| Endpoint | Actually returns | Sorted/filtered by |
+| --- | --- | --- |
+| `GET /friend-request/followers` | **incoming Pending** requests (receiver = me) | `service.ts:322-339` |
+| `GET /friend-request/following` | **outgoing Pending** requests (sender = me) | `service.ts:413-430` |
+| `GET /friend-request/friends` | **Accepted** pairs, blocked excluded | `service.ts:211-274` |
 
-- **Entry point = the link card, not a new page.** "Mark as complete" on an
-  Ongoing link (self not yet in `markAsCompletedBy`) → on success opens
-  `RateBondLinkDialog`. Once self has marked, the card shows a "Rate" /
-  "Edit ratings" action instead — matches the backend's per-person timing
-  (you rate when you're done, not when everyone is).
-- **Counterparts derived client-side**: owners of `requestedBonds` minus self
-  (same set the backend accepts, `bondRating.service.ts:67-76`). Chain links
-  with 2+ counterparts get a person switcher in the dialog; each person's
-  rating saves independently (upsert-safe).
-- **No optimistic rating writes.** Rating mutates cached reputation
-  server-side; invalidate links + people-ratings queries on success.
-- **Mock chat button stays** — messaging is a separate feature, out of scope.
-- **UI constraints** (AGENTS.md): shadcn `dialog.tsx` primitive, star control
-  uses `amber-accent` token (already in `globals.css:96`), no `size="sm"`
-  buttons, Zod v4 schema in `src/validations/`, ofetch client in
-  `src/services/api/`, hooks in `src/services/hooks/`, copy in
-  `messages/{en,es}/bonds.json`.
+So v1's four tabs (friends / followers / following / pending) collapse to **three real
+tabs**: `requests` (incoming pending), `sent` (outgoing pending), `friends`. We label them
+that way instead of copying "Followers/Following", which would promise a follow graph the
+backend cannot serve.
+
+## Architecture Decisions
+
+- **REST only, no Socket.IO.** All eight endpoints are plain HTTP
+  (`friendRequest.routes.ts:10-55`), unlike chat. No new dependency.
+- **ID trap, documented once here.** `PATCH /accept-reject/:id` takes the
+  **FriendRequest `_id`** (`service.ts:93-101`), while `DELETE /cancel/:receiverId` and
+  `DELETE /unfriend/:friendId` take the **other user's profileId**
+  (`service.ts:457-479`). Every list item carries both (`item._id` and
+  `item.friendInfo/_id`), so we must pick the right one per action.
+- **Status strings are capitalized enums** — the frontend sends `"Accepted"` /
+  `"Rejected"` in a `{ status }` body (`friendRequest.validation.ts:10-16`). Not lowercase,
+  not a query flag.
+- **Pagination meta lives inside `data`** (`{ meta, result }`), because controllers never
+  pass top-level meta (`sendResponse.ts:18-25`). Matches the existing
+  `RawPeopleList` shape (`src/types/people-api.types.ts:44-48`), so `CustomPagination` and
+  the `select: r => r.data` hook style carry over unchanged.
+- **Populated person shape is narrow**: `{ _id, name, profile_image, skills: string[] }`
+  where `skills` is an array of **name strings**, not `RawPersonSkill` objects — different
+  from `RawPerson.skills`. Needs its own interface, not a reuse of `RawPerson`.
+- **No Zod schema.** The project rule ties Zod v4 to TanStack Form. There is no form here —
+  bodies are one enum field and the rest are path params — so we type the input instead.
+- **Entry point = the profile dropdown, not the nav bar.** `Friends` is added beside
+  Profile and Settings in `src/components/layout/navbar-user-menu.tsx:80-87`, plus the
+  mobile equivalent at `mobile-nav.tsx:146`. The design-ordered nav array
+  (`nav-items.ts:41-46`) stays untouched.
+- **Invalidation, never optimistic writes.** Follows `useSendFriendRequest`
+  (`src/services/hooks/people.hook.ts:126-148`) and the repo's mutation style.
+- **Blocked users are already filtered server-side** (`getBlockedIdsFor`,
+  `userBlock.service.ts:16,39`) — no client-side block filtering.
+- **`cancel` / `unfriend` are idempotent** (200 + `data: null` even if nothing matched,
+  `service.ts:457-479`), so the UI cannot rely on the response to know work was done — it
+  must trust the refetch.
+- **New i18n namespace `Friends`**: `messages/{en,es}/friends.json` plus one registration
+  line in `src/i18n/request.ts` (namespaces are listed by hand, lines 18-26).
 
 ## Task List
 
-### Phase 1: Data layer (Types → Validations → API → Hooks)
+- [ ] Task 1: Friend-request types + API client (contract layer)
+- [ ] Task 2: Query/mutation hooks with invalidation
+- [ ] Checkpoint: Contract layer
+- [ ] Task 3: `/friends` page shell with three URL-synced tabs (read-only lists)
+- [ ] Task 4: Accept, reject, cancel, unfriend actions + confirmation + `Friends` i18n copy
+- [ ] Checkpoint: Page works
+- [ ] Task 5: Entry points — pending-count badge, notification route, profile link
+- [ ] Checkpoint: Complete
 
-- [x] Task 1: Types + Zod schema for the rating payload
-- [x] Task 2: API client — `markAsCompleteBond`, new `bond-rating.api.ts` with `addRating`
-- [x] Task 3: Hooks — `useMarkBondLinkComplete`, `useAddBondRating` + invalidation
-
-### Checkpoint: Data layer
-- [x] `npm run lint` + `npm run build` clean; hook signatures match card needs
-
-### Phase 2: UI slice
-
-- [x] Task 4: `RateBondLinkDialog` — star row, comment field, counterpart switcher, per-person save; en/es copy
-- [x] Task 5: `BondLinkCard` actions — mark-complete → dialog, rate/edit path, "you marked" hint
-
-### Checkpoint: Complete
-- [ ] Lint + build clean
-- [ ] Manual e2e on dev server: mark complete → rate → re-open → edit rating; verify links list refresh and people-profile reviews reflect applied ratings (completed links only)
-- [ ] Code review pass (5-axis) before reporting done
+Full acceptance criteria and verification per task: `tasks/todo.md`.
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| `markAsCompletedBy`/`participants` are raw ObjectId arrays — mismatch with auth `user._id` shape | High | Derive "self" from `useAuth()`; compare via `String(id)` like the backend does |
-| Rating a counterpart who has no bond in `requestedBonds` (deleted bond edge) → 404 from backend | Med | Only offer counterparts parsed from `requestedBonds` owners |
-| User expects rating to change reputation instantly (it's `applied:false` until link completes) | Med | Dialog copy: rating counts when the trade is fully completed; edit path exists |
-| next-intl key drift en vs es | Low | Add both locales in the same task, keys mirrored |
+| Passing profileId to `accept-reject/:id` (or the request id to `cancel`) → silent 400 | High | Task 1 names the params distinctly (`requestId` vs `personId`) and Task 4 cites `friendRequest.service.ts:93-101,457-479` in the call sites |
+| `friendInfo` / `followerInfo` / `followingInfo` key differs per endpoint | Medium | One item interface with the three optional keys; each tab reads the key its own endpoint returns |
+| Sending lowercase `"accepted"` fails enum validation | Medium | Task 1 defines `FriendRequestStatus = "Pending" \| "Accepted" \| "Rejected"` from the enum file, not from memory |
+| Badge poll adds a per-focus request | Low | `staleTime` + invalidation from accept/reject/cancel; no `refetchInterval` until someone asks for it |
+| Nav design list (`nav-items.ts:41-46`) is intentional and has dead `/messages`, `/chatting` links | Low | Out of scope here — see Open Questions; we do not touch that array |
 
 ## Open Questions
 
-- Should completed links also surface a "Rate" action even when self marked
-  long ago (yes per backend — upsert always allowed after self-mark; plan
-  assumes yes).
+- Badge freshness is focus-driven (`staleTime` + invalidation), no `refetchInterval`
+  polling.
+- Rejected requests: the backend keeps the row with `status: "Rejected"` and there is no
+  "seen/replied" list endpoint, so a rejected request just disappears from the incoming
+  list. Confirm that's acceptable versus surfacing history.
