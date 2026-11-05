@@ -27,6 +27,8 @@ import { PROFILE_LIMITS, profileSchema } from "@/validations";
 import type { MultiSelectOption } from "@/components/common/multi-select";
 import type { Gender, MyProfile } from "@/types";
 
+import { BlockedUsersDialog } from "../blocked-users-dialog";
+
 /** The schema hands the submit handler a plain string, so re-narrow here. */
 function toGender(value: string): Gender | "" {
   return value === "MALE" || value === "FEMALE" ? value : "";
@@ -434,6 +436,8 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
               </form.Field>
             </CardContent>
           </Card>
+
+          <BlockedUsersDialog />
         </div>
       </div>
 

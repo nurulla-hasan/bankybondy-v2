@@ -123,5 +123,18 @@
   "modality": {
     "online": "Online",
     "physical": "In person"
+  },
+  "blocked": {
+    "title": "Blocked users",
+    "subtitle": "People you blocked. Unblock someone here to make them visible to each other again.",
+    "manage": "Manage",
+    "emptyTitle": "No blocked users",
+    "emptyDescription": "Anyone you block from a profile page shows up here so you can undo it.",
+    "loadErrorTitle": "Couldn't load your blocked users",
+    "loadErrorDescription": "Check your connection and try again.",
+    "unblock": "Unblock",
+    "unblockedTitle": "User unblocked",
+    "unblocked": "{name} can find you in People again.",
+    "unblockFailed": "Couldn't unblock this user"
   }
 }

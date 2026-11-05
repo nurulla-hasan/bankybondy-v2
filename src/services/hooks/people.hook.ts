@@ -7,6 +7,7 @@ import {
 
 import type {
   ApiResponse,
+  BlockedListQueryParams,
   PeopleQueryParams,
   PersonBondsQueryParams,
   PersonRatingsQueryParams,
@@ -17,18 +18,23 @@ import type {
 } from "@/types";
 import {
   blockUser,
+  getBlockedUsers,
   getPeople,
   getPerson,
   getPersonBonds,
   getPersonRatings,
   reportUser,
   sendFriendRequest,
+  unblockUser,
   updateMyLocation,
 } from "../api";
 
 export const PEOPLE_PAGE_SIZE = 12;
 export const PERSON_BONDS_PAGE_SIZE = 6;
 export const PERSON_RATINGS_PAGE_SIZE = 5;
+// The blocked list is read whole inside a dialog, so it asks for more rows than
+// the backend's default of 10.
+export const BLOCKED_PAGE_SIZE = 50;
 
 export const peopleKeys = {
   all: ["people"] as const,
@@ -36,6 +42,8 @@ export const peopleKeys = {
   list: (params: PeopleQueryParams) =>
     [...peopleKeys.lists(), params] as const,
   details: () => [...peopleKeys.all, "detail"] as const,
+  blocked: (params: BlockedListQueryParams) =>
+    [...peopleKeys.all, "blocked", params] as const,
   detail: (id: string) => [...peopleKeys.details(), id] as const,
   bonds: (id: string, params: PersonBondsQueryParams) =>
     [...peopleKeys.detail(id), "bonds", params] as const,
@@ -66,6 +74,11 @@ const normalizeBondParams = (params: PersonBondsQueryParams = {}) => ({
 const normalizeRatingParams = (params: PersonRatingsQueryParams = {}) => ({
   page: params.page && params.page > 0 ? params.page : 1,
   limit: params.limit ?? PERSON_RATINGS_PAGE_SIZE,
+});
+
+const normalizeBlockedParams = (params: BlockedListQueryParams = {}) => ({
+  page: params.page && params.page > 0 ? params.page : 1,
+  limit: params.limit ?? BLOCKED_PAGE_SIZE,
 });
 
 export function usePeople(params: PeopleQueryParams = {}) {
@@ -159,8 +172,33 @@ export function useBlockUser() {
   });
 }
 
-export function useReportUser() {
+export function useBlockedUsers(params: BlockedListQueryParams = {}) {
+  const normalized = normalizeBlockedParams(params);
+
+  return useQuery({
+    queryKey: peopleKeys.blocked(normalized),
+    queryFn: () => getBlockedUsers(normalized),
+    select: (response) => response.data,
+    placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useUnblockUser() {
+  const queryClient = useQueryClient();
+
   return useMutation({
+    mutationFn: (id: string) => unblockUser(id),
+    onSuccess: (_response, id) => {
+      queryClient.invalidateQueries({ queryKey: [...peopleKeys.all, "blocked"] });
+      // The directory hides blocked profiles, so the person can reappear there.
+      queryClient.invalidateQueries({ queryKey: peopleKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: peopleKeys.detail(id) });
+    },
+  });
+}
+
+export function useReportUser() {  return useMutation({
     mutationFn: (input: ReportUserInput) => reportUser(input),
   });
 }

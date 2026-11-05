@@ -123,5 +123,18 @@
   "modality": {
     "online": "En línea",
     "physical": "En persona"
+  },
+  "blocked": {
+    "title": "Usuarios bloqueados",
+    "subtitle": "Las personas que bloqueaste. Desbloquea a alguien acá para que vuelvan a verse.",
+    "manage": "Gestionar",
+    "emptyTitle": "No hay usuarios bloqueados",
+    "emptyDescription": "Quien bloquees desde un perfil aparecerá acá para que puedas revertirlo.",
+    "loadErrorTitle": "No pudimos cargar tus usuarios bloqueados",
+    "loadErrorDescription": "Revisa tu conexión e inténtalo de nuevo.",
+    "unblock": "Desbloquear",
+    "unblockedTitle": "Usuario desbloqueado",
+    "unblocked": "{name} puede volver a encontrarte en Personas.",
+    "unblockFailed": "No pudimos desbloquear este usuario"
   }
 }

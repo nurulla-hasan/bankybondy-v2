@@ -154,3 +154,26 @@ export interface UpdateLocationInput {
   lng: number;
   mode?: "auto" | "manual";
 }
+
+/**
+ * `GET /user-block/my-blocked-users` row — the UserBlock doc with the target
+ * populated as `name profile_image` only (`userBlock.service.ts:133-140`).
+ * `_id` is the block doc id; `blocked._id` is the profile id unblock needs.
+ */
+export interface RawBlockedUser {
+  _id: string;
+  blocker: string;
+  blocked: Pick<RawPerson, "_id" | "name" | "profile_image"> | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface RawBlockedList {
+  meta: PaginationMeta;
+  result: RawBlockedUser[];
+}
+
+export interface BlockedListQueryParams {
+  page?: number;
+  limit?: number;
+}

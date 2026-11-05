@@ -8,6 +8,7 @@ import {
   ArrowRight,
   LogOut,
   Menu,
+  Settings,
   User as UserIcon,
   Users,
 } from "lucide-react";
@@ -163,6 +164,14 @@ export function MobileNav({
                   >
                     <Users className="size-4 shrink-0" />
                     <span>{t("friends")}</span>
+                  </Link>
+                  <Link
+                    href="/settings"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  >
+                    <Settings className="size-4 shrink-0" />
+                    <span>{t("settings")}</span>
                   </Link>
                   <button
                     type="button"

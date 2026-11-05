@@ -11,7 +11,11 @@ import {
   Users,
 } from "lucide-react";
 
-import { useGetMyProfile, useLogout, usePendingFriendRequestCount } from "@/services";
+import {
+  useGetMyProfile,
+  useLogout,
+  usePendingFriendRequestCount,
+} from "@/services";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -87,6 +91,7 @@ export function NavbarUserMenu({
                 </p>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
             <DropdownMenuItem render={<Link href="/profile" />}>
               <UserIcon className="size-4 mr-2" />
               <span>{t("profile")}</span>
@@ -101,7 +106,9 @@ export function NavbarUserMenu({
                 </span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-44">
-                <DropdownMenuItem render={<Link href="/friends?tab=requests" />}>
+                <DropdownMenuItem
+                  render={<Link href="/friends?tab=requests" />}
+                >
                   <span>{t("friendRequests")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem render={<Link href="/friends?tab=sent" />}>

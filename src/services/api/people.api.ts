@@ -1,9 +1,12 @@
 import { apiClient } from "@/lib/api-client";
 import type {
   ApiResponse,
+  BlockedListQueryParams,
   PeopleQueryParams,
   PersonBondsQueryParams,
   PersonRatingsQueryParams,
+  RawBlockedList,
+  RawBlockedUser,
   RawPeopleList,
   RawPersonProfile,
   RawRatingsPage,
@@ -88,10 +91,36 @@ export function blockUser(id: string) {
 }
 
 /**
+ * List the profiles I blocked, newest first.
+ * Endpoint: GET /user-block/my-blocked-users
+ */
+export function getBlockedUsers(params?: BlockedListQueryParams) {
+  return apiClient<ApiResponse<RawBlockedList>>(
+    "/user-block/my-blocked-users",
+    {
+      method: "GET",
+      query: params,
+    },
+  );
+}
+
+/**
+ * Unblock by the blocked user's profile id — not the block doc id. Throws 404
+ * "This user is not in your block list" when there is no such pair
+ * (`userBlock.service.ts:114-126`).
+ * Endpoint: DELETE /user-block/unblock/:id
+ */
+export function unblockUser(id: string) {
+  return apiClient<ApiResponse<RawBlockedUser | null>>(
+    `/user-block/unblock/${encodeURIComponent(id)}`,
+    { method: "DELETE" },
+  );
+}
+
+/**
  * Report a NormalUser/profile id.
  * Endpoint: POST /report/create-report
- */
-export function reportUser(input: ReportUserInput) {
+ */ export function reportUser(input: ReportUserInput) {
   return apiClient<ApiResponse<unknown>>("/report/create-report", {
     method: "POST",
     body: input,
