@@ -7,7 +7,6 @@ import CustomPagination from "@/components/common/custom-pagination";
 import { EmptyState } from "@/components/common/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { TabsContent } from "@/components/ui/tabs";
 import { useBondMatches, useBondRequest } from "@/services";
@@ -15,6 +14,7 @@ import { cn } from "@/lib/utils";
 import type { RawBondMatch } from "@/types";
 
 import { MatchCard } from "../cards/match-card";
+import { MatchCardSkeleton } from "../cards/match-card-skeleton";
 
 function matchesSearchTerm(match: RawBondMatch, term: string) {
   return match.matchRequest.some((entry) => {
@@ -95,7 +95,7 @@ export function MatchesTab({
           {isPending ? (
             <div className="space-y-4" aria-hidden>
               {Array.from({ length: 3 }, (_, index) => (
-                <Skeleton key={index} className="h-64 rounded-2xl" />
+                <MatchCardSkeleton key={index} />
               ))}
             </div>
           ) : isError ? (

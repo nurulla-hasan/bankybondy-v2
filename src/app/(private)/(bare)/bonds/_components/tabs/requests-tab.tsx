@@ -5,13 +5,13 @@ import { useTranslations } from "next-intl";
 
 import CustomPagination from "@/components/common/custom-pagination";
 import { EmptyState } from "@/components/common/empty-state";
-import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
 import { useBondRequests } from "@/services";
 import { cn } from "@/lib/utils";
 import type { RawBondRequest } from "@/types";
 
 import { BondRequestCard } from "../cards/bond-request-card";
+import { BondRequestCardSkeleton } from "../cards/bond-request-card-skeleton";
 import { CreateBondDialog } from "../dialogs/create-bond-dialog";
 
 interface RequestsTabProps {
@@ -43,7 +43,7 @@ export function RequestsTab({
       {isPending ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-hidden>
           {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} className="h-80 rounded-2xl" />
+            <BondRequestCardSkeleton key={index} />
           ))}
         </div>
       ) : isError ? (

@@ -5,12 +5,12 @@ import { useTranslations } from "next-intl";
 
 import CustomPagination from "@/components/common/custom-pagination";
 import { EmptyState } from "@/components/common/empty-state";
-import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
 import { useBondLinks } from "@/services";
 import { cn } from "@/lib/utils";
 
 import { BondLinkCard } from "../cards/bond-link-card";
+import { BondLinkCardSkeleton } from "../cards/bond-link-card-skeleton";
 
 interface LinksTabProps {
   searchTerm: string;
@@ -35,7 +35,7 @@ export function LinksTab({ searchTerm, page, onPageChange }: LinksTabProps) {
       {isPending ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-hidden>
           {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} className="h-60 rounded-2xl" />
+            <BondLinkCardSkeleton key={index} />
           ))}
         </div>
       ) : isError ? (
