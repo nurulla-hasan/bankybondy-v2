@@ -1,31 +1,22 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 import { PageWrapper } from "@/components/common/page-wrapper";
-import { SectionHeading } from "@/components/common/section-heading";
 import { Button } from "@/components/ui/button";
 import { MySettings } from "@/app/(private)/(bare)/settings/_components/my-settings";
 
 export default function SettingsPage() {
-  const t = useTranslations("Profile");
-
   return (
-    <PageWrapper className="space-y-6">
-      <SectionHeading
-        as="h3"
-        alignment="left"
-        constrain={false}
-        title={t("settings.title")}
-        description={t("settings.subtitle")}
-        descriptionClassName="max-w-2xl"
+    <PageWrapper className="space-y-6 relative">
+      <Button
+        size="icon"
+        variant="secondary"
+        className="absolute left-2 top-2 z-10"
+        render={<Link href="/profile" />}
       >
-        <Button variant="outline" render={<Link href="/profile" />}>
-          <ArrowLeft className="size-4" aria-hidden />
-          {t("settings.backToProfile")}
-        </Button>
-      </SectionHeading>
+        <ArrowLeft aria-hidden />
+      </Button>
 
       <Suspense fallback={null}>
         <MySettings />

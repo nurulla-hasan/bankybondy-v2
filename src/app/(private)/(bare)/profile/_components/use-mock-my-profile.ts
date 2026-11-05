@@ -2,24 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import {
-  MOCK_BONDS,
-  MOCK_PROFILE,
-  MOCK_REVIEWS,
-  mockDelay,
-} from "@/mocks/profile.mock";
-import type { MyProfile, RawPublicBond, RawPublicRating } from "@/types";
+import { MOCK_BONDS, MOCK_PROFILE, mockDelay } from "@/mocks/profile.mock";
+import type { MyProfile, RawPublicBond } from "@/types";
 
 export interface MyProfileData {
   profile: MyProfile;
   bonds: RawPublicBond[];
-  reviews: RawPublicRating[];
 }
 
 const INITIAL: MyProfileData = {
   profile: MOCK_PROFILE,
   bonds: MOCK_BONDS,
-  reviews: MOCK_REVIEWS,
 };
 
 /** Stands in for `useMyProfile` until the real query exists. */

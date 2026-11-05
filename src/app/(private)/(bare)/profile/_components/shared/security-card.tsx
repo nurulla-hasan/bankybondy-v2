@@ -1,8 +1,16 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { KeyRound, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ChangePasswordDialog } from "../dialogs/change-password-dialog";
 import { DeleteAccountDialog } from "../dialogs/delete-account-dialog";
 
@@ -13,14 +21,14 @@ function SecurityRow({
   action,
   tone = "default",
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   description: string;
-  action: React.ReactNode;
+  action: ReactNode;
   tone?: "default" | "danger";
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 py-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 py-4 first:pt-0">
       <div className="flex min-w-0 flex-1 items-start gap-3">
         <span
           className={
@@ -33,7 +41,7 @@ function SecurityRow({
           {icon}
         </span>
         <div className="min-w-0 space-y-1">
-          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+          <h3 className="text-sm font-medium text-foreground">{title}</h3>
           <p className="text-xs leading-5 text-muted-foreground">{description}</p>
         </div>
       </div>
@@ -47,13 +55,13 @@ export function SecurityCard() {
   const t = useTranslations("Profile");
 
   return (
-    <section className="rounded-2xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6">
-      <h2 className="font-heading text-base font-semibold">{t("security.title")}</h2>
-      <p className="mt-1 text-sm leading-6 text-muted-foreground">
-        {t("security.description")}
-      </p>
+    <Card className="rounded-2xl">
+      <CardHeader>
+        <CardTitle>{t("security.title")}</CardTitle>
+        <CardDescription>{t("security.description")}</CardDescription>
+      </CardHeader>
 
-      <div className="mt-2 divide-y divide-border/70">
+      <CardContent className="divide-y divide-border/70">
         <SecurityRow
           icon={<KeyRound className="size-4" aria-hidden />}
           title={t("security.passwordTitle")}
@@ -68,7 +76,7 @@ export function SecurityCard() {
           description={t("security.dangerDescription")}
           action={<DeleteAccountDialog />}
         />
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }

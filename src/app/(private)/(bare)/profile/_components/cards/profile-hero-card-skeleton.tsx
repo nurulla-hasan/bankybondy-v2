@@ -1,13 +1,11 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProfileHeroCardSkeleton() {
   return (
-    <section
-      aria-hidden
-      className="overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10"
-    >
+    <Card aria-hidden className="gap-0 rounded-2xl py-0">
       <Skeleton className="h-36 w-full rounded-none sm:h-44" />
 
       <div className="space-y-6 p-5 sm:p-6">
@@ -46,6 +44,6 @@ export function ProfileHeroCardSkeleton() {
           <Skeleton className="h-1.5 w-full rounded-full" />
         </div>
       </div>
-    </section>
+    </Card>
   );
 }

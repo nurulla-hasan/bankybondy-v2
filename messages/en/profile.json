@@ -1,6 +1,4 @@
 {
-  "title": "My profile",
-  "subtitle": "This is what other members see, and what you can change about it.",
   "selfBadge": "This is you",
   "viewPublic": "View public profile",
   "edit": "Edit profile",
@@ -9,16 +7,10 @@
   "completeness": "Profile strength",
   "completenessHint": "Add a photo, your city and a couple of skills to rank higher in matches.",
   "emailLocked": "Your email is your login and can't be changed.",
-  "tabsLabel": "Profile sections",
   "stat": {
     "activeBonds": "Active bonds",
     "completedBonds": "Completed",
     "rating": "Rating · {count} reviews"
-  },
-  "tabs": {
-    "overview": "Overview",
-    "bonds": "Bonds",
-    "reviews": "Reviews"
   },
   "visibility": {
     "title": "Visibility",
@@ -49,20 +41,6 @@
     "skillsEmpty": "No skills added yet. Skills are what matching looks at.",
     "links": "Links"
   },
-  "bonds": {
-    "hiddenNote": "Only you can see these bonds right now.",
-    "emptyTitle": "No bonds yet",
-    "emptyDescription": "Create your first exchange and start building reputation.",
-    "emptyCta": "Create a bond"
-  },
-  "reviews": {
-    "anonymous": "Anonymous member",
-    "rating": "{rating} out of 5",
-    "offer": "Offer",
-    "want": "Want",
-    "count": "Based on {count} reviews",
-    "empty": "No reviews yet — they appear after a completed bond."
-  },
   "form": {
     "savedTitle": "Profile saved",
     "savedDescription": "Your changes are live.",
@@ -73,6 +51,7 @@
     "addCover": "Add cover",
     "changeCover": "Change cover",
     "identity": "Identity",
+    "details": "Details",
     "name": "Name",
     "namePlaceholder": "How members should see you",
     "email": "Email",
@@ -105,8 +84,17 @@
     "save": "Save changes",
     "cancel": "Cancel"
   },
+  "security": {
+    "title": "Security and account",
+    "description": "Change your password or delete your account.",
+    "passwordTitle": "Password",
+    "passwordDescription": "At least 6 characters. Changing it signs out your other devices.",
+    "dangerTitle": "Delete account",
+    "dangerDescription": "Removes your profile, bonds and reputation permanently."
+  },
   "password": {
     "title": "Password",
+    "action": "Change password",
     "description": "Use at least 6 characters. Changing it signs out your other sessions.",
     "current": "Current password",
     "new": "New password",
@@ -118,8 +106,6 @@
     "savedDescription": "Other sessions now need the new password."
   },
   "danger": {
-    "title": "Delete account",
-    "description": "Your profile, bonds and reputation are removed. This cannot be undone from the app.",
     "consequence1": "Bonds still open with other members are left without you.",
     "consequence2": "Your reviews and rating disappear with the account.",
     "consequence3": "You can register the same email again later, but the history will not come back.",
@@ -135,9 +121,6 @@
     "title": "Settings",
     "subtitle": "Everything you can change about your account.",
     "backToProfile": "Back to profile",
-    "tabsLabel": "Settings sections",
-    "tabProfile": "Profile",
-    "tabSecurity": "Security",
-    "tabAccount": "Account"
+    "securityHint": "Password and account deletion live on your profile page."
   }
 }

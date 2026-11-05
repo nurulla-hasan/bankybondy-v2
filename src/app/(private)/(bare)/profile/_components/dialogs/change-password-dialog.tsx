@@ -37,7 +37,6 @@ export function ChangePasswordDialog() {
     <Modal
       open={open}
       onOpenChange={handleOpenChange}
-      size="sm"
       title={t("password.title")}
       description={t("password.description")}
       actionTrigger={

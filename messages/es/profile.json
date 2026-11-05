@@ -1,6 +1,4 @@
 {
-  "title": "Mi perfil",
-  "subtitle": "Esto es lo que ven los demás miembros y lo que puedes cambiar.",
   "selfBadge": "Eres tú",
   "viewPublic": "Ver perfil público",
   "edit": "Editar perfil",
@@ -9,16 +7,10 @@
   "completeness": "Progreso del perfil",
   "completenessHint": "Añade foto, ciudad y un par de habilidades para subir posiciones en las coincidencias.",
   "emailLocked": "Tu correo es tu acceso y no se puede cambiar.",
-  "tabsLabel": "Secciones del perfil",
   "stat": {
     "activeBonds": "Bonos activos",
     "completedBonds": "Completados",
     "rating": "Valoración · {count} reseñas"
-  },
-  "tabs": {
-    "overview": "Resumen",
-    "bonds": "Bonos",
-    "reviews": "Reseñas"
   },
   "visibility": {
     "title": "Visibilidad",
@@ -49,20 +41,6 @@
     "skillsEmpty": "Aún no has añadido habilidades. Las coincidencias se basan en ellas.",
     "links": "Enlaces"
   },
-  "bonds": {
-    "hiddenNote": "Ahora mismo solo tú puedes ver estos bonos.",
-    "emptyTitle": "Sin bonos todavía",
-    "emptyDescription": "Crea tu primer intercambio y empieza a construir reputación.",
-    "emptyCta": "Crear un bono"
-  },
-  "reviews": {
-    "anonymous": "Miembro anónimo",
-    "rating": "{rating} de 5",
-    "offer": "Ofrece",
-    "want": "Pide",
-    "count": "Basado en {count} reseñas",
-    "empty": "Aún no hay reseñas; aparecen cuando un bono se completa."
-  },
   "form": {
     "savedTitle": "Perfil guardado",
     "savedDescription": "Tus cambios ya están publicados.",
@@ -73,6 +51,7 @@
     "addCover": "Añadir portada",
     "changeCover": "Cambiar portada",
     "identity": "Identidad",
+    "details": "Datos",
     "name": "Nombre",
     "namePlaceholder": "Cómo quieren verte los demás",
     "email": "Correo",
@@ -105,8 +84,17 @@
     "save": "Guardar cambios",
     "cancel": "Cancelar"
   },
+  "security": {
+    "title": "Seguridad y cuenta",
+    "description": "Cambia tu contraseña o elimina tu cuenta.",
+    "passwordTitle": "Contraseña",
+    "passwordDescription": "Mínimo 6 caracteres. Al cambiarla se cierran las demás sesiones.",
+    "dangerTitle": "Eliminar cuenta",
+    "dangerDescription": "Borra tu perfil, tus bonos y tu reputación para siempre."
+  },
   "password": {
     "title": "Contraseña",
+    "action": "Cambiar contraseña",
     "description": "Usa al menos 6 caracteres. Al cambiarla se cierran tus otras sesiones.",
     "current": "Contraseña actual",
     "new": "Nueva contraseña",
@@ -118,8 +106,6 @@
     "savedDescription": "Las otras sesiones necesitarán la nueva contraseña."
   },
   "danger": {
-    "title": "Eliminar cuenta",
-    "description": "Se borran tu perfil, tus bonos y tu reputación. No se puede deshacer desde la app.",
     "consequence1": "Los bonos abiertos con otros miembros quedan sin ti.",
     "consequence2": "Tus reseñas y tu valoración desaparecen con la cuenta.",
     "consequence3": "Puedes registrarte otra vez con el mismo correo, pero el historial no vuelve.",
@@ -135,9 +121,6 @@
     "title": "Ajustes",
     "subtitle": "Todo lo que puedes cambiar de tu cuenta.",
     "backToProfile": "Volver al perfil",
-    "tabsLabel": "Secciones de ajustes",
-    "tabProfile": "Perfil",
-    "tabSecurity": "Seguridad",
-    "tabAccount": "Cuenta"
+    "securityHint": "La contraseña y la eliminación de la cuenta están en tu perfil."
   }
 }

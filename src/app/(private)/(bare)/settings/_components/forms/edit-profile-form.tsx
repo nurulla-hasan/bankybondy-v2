@@ -9,6 +9,13 @@ import { FormInput } from "@/components/common/form-input";
 import { ImageCropDialog } from "@/components/common/image-crop-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MOCK_SKILLS, mockDelay } from "@/mocks/profile.mock";
@@ -91,7 +98,7 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
         void form.handleSubmit();
       }}
     >
-      <section className="overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10">
+      <Card className="gap-0 rounded-2xl py-0">
         <div className="relative h-32 bg-linear-to-br from-primary/25 via-primary/10 to-transparent sm:h-40">
           {coverPreview || profile.cover_image ? (
             <div
@@ -172,7 +179,7 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
             onChange={(event) => handleCoverFile(event.target.files?.[0])}
           />
         </div>
-      </section>
+      </Card>
 
       <ImageCropDialog
         open={Boolean(cropSource)}
@@ -184,156 +191,176 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
         onCropComplete={handleCropped}
       />
 
-      <section className="space-y-5 rounded-2xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6">
-        <h2 className="font-heading text-base font-semibold">{t("form.identity")}</h2>
+      <div className="grid items-start gap-5 lg:grid-cols-2">
+        <div className="space-y-5">
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle>{t("form.identity")}</CardTitle>
+            </CardHeader>
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <FormInput
-            form={form}
-            name="name"
-            label={t("form.name")}
-            placeholder={t("form.namePlaceholder")}
-            autoComplete="name"
-            maxLength={PROFILE_LIMITS.nameMax}
-          />
+            <CardContent className="space-y-4">
+              <FormInput
+                form={form}
+                name="name"
+                label={t("form.name")}
+                placeholder={t("form.namePlaceholder")}
+                autoComplete="name"
+                maxLength={PROFILE_LIMITS.nameMax}
+              />
 
-          <div className="space-y-2">
-            <Label htmlFor="profile-email">{t("form.email")}</Label>
-            <Input id="profile-email" value={profile.email ?? ""} readOnly disabled />
-            <p className="text-xs leading-5 text-muted-foreground">
-              {t("emailLocked")}
-            </p>
-          </div>
+              <FormInput
+                form={form}
+                name="phone"
+                label={t("form.phone")}
+                type="tel"
+                placeholder={t("form.phonePlaceholder")}
+                autoComplete="tel"
+                maxLength={PROFILE_LIMITS.phoneMax}
+              />
 
-          <FormInput
-            form={form}
-            name="phone"
-            label={t("form.phone")}
-            type="tel"
-            placeholder={t("form.phonePlaceholder")}
-            autoComplete="tel"
-            maxLength={PROFILE_LIMITS.phoneMax}
-          />
+              <FormInput
+                form={form}
+                name="gender"
+                type="select"
+                label={t("form.gender")}
+                placeholder={t("form.genderUnspecified")}
+                options={[
+                  { value: "", label: t("form.genderUnspecified") },
+                  { value: "MALE", label: t("form.genderMale") },
+                  { value: "FEMALE", label: t("form.genderFemale") },
+                ]}
+              />
+            </CardContent>
+          </Card>
 
-          <FormInput
-            form={form}
-            name="address"
-            label={t("form.location")}
-            placeholder={t("form.locationPlaceholder")}
-            maxLength={PROFILE_LIMITS.addressMax}
-          />
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle>{t("form.story")}</CardTitle>
+            </CardHeader>
 
-          <FormInput
-            form={form}
-            name="gender"
-            type="select"
-            label={t("form.gender")}
-            placeholder={t("form.genderUnspecified")}
-            options={[
-              { value: "", label: t("form.genderUnspecified") },
-              { value: "MALE", label: t("form.genderMale") },
-              { value: "FEMALE", label: t("form.genderFemale") },
-            ]}
-          />
+            <CardContent className="space-y-4">
+              <FormInput
+                form={form}
+                name="bio"
+                type="textarea"
+                label={t("form.bio")}
+                placeholder={t("form.bioPlaceholder")}
+                maxLength={PROFILE_LIMITS.bioMax}
+                description={t("form.bioModerated")}
+              />
 
-          <FormInput
-            form={form}
-            name="dateOfBirth"
-            type="date"
-            label={t("form.birthdate")}
-            placeholder={t("form.birthdatePlaceholder")}
-          />
-        </div>
-      </section>
-
-      <section className="space-y-5 rounded-2xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6">
-        <h2 className="font-heading text-base font-semibold">{t("form.story")}</h2>
-
-        <FormInput
-          form={form}
-          name="bio"
-          type="textarea"
-          label={t("form.bio")}
-          placeholder={t("form.bioPlaceholder")}
-          maxLength={PROFILE_LIMITS.bioMax}
-          description={t("form.bioModerated")}
-        />
-
-        <FormInput
-          form={form}
-          name="skills"
-          type="multi-select"
-          label={t("form.skills")}
-          placeholder={t("form.skillsPlaceholder")}
-          options={SKILL_OPTIONS}
-          description={t("form.skillsHint", { max: PROFILE_LIMITS.skillsMax })}
-        />
-      </section>
-
-      <section className="space-y-4 rounded-2xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <h2 className="font-heading text-base font-semibold">{t("form.links")}</h2>
-            <p className="text-xs leading-5 text-muted-foreground">
-              {t("form.linksHint", { max: PROFILE_LIMITS.linksMax })}
-            </p>
-          </div>
+              <FormInput
+                form={form}
+                name="skills"
+                type="multi-select"
+                label={t("form.skills")}
+                placeholder={t("form.skillsPlaceholder")}
+                options={SKILL_OPTIONS}
+                description={t("form.skillsHint", { max: PROFILE_LIMITS.skillsMax })}
+              />
+            </CardContent>
+          </Card>
         </div>
 
-        <form.Field name="socialLinks">
-          {(field) => (
-            <div className="space-y-2">
-              {field.state.value.map((link, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    value={link}
-                    inputMode="url"
-                    placeholder="https://"
-                    aria-label={t("form.linkAria", { index: index + 1 })}
-                    onChange={(event) =>
-                      field.handleChange(
-                        field.state.value.map((current, position) =>
-                          position === index ? event.target.value : current,
-                        ),
-                      )
-                    }
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t("form.removeLink")}
-                    onClick={() =>
-                      field.handleChange(
-                        field.state.value.filter((_, position) => position !== index),
-                      )
-                    }
-                  >
-                    <Trash2 className="size-4" aria-hidden />
-                  </Button>
-                </div>
-              ))}
+        <div className="space-y-5">
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle>{t("form.details")}</CardTitle>
+            </CardHeader>
 
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={field.state.value.length >= PROFILE_LIMITS.linksMax}
-                onClick={() => field.handleChange([...field.state.value, ""])}
-              >
-                <Plus className="size-3.5" aria-hidden />
-                {t("form.addLink")}
-              </Button>
-
-              {field.state.meta.errors.length ? (
-                <p className="text-xs text-destructive">
-                  {String(field.state.meta.errors[0])}
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="profile-email">{t("form.email")}</Label>
+                <Input id="profile-email" value={profile.email ?? ""} readOnly disabled />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {t("emailLocked")}
                 </p>
-              ) : null}
-            </div>
-          )}
-        </form.Field>
-      </section>
+              </div>
+
+              <FormInput
+                form={form}
+                name="address"
+                label={t("form.location")}
+                placeholder={t("form.locationPlaceholder")}
+                maxLength={PROFILE_LIMITS.addressMax}
+              />
+
+              <FormInput
+                form={form}
+                name="dateOfBirth"
+                type="date"
+                label={t("form.birthdate")}
+                placeholder={t("form.birthdatePlaceholder")}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle>{t("form.links")}</CardTitle>
+              <CardDescription>
+                {t("form.linksHint", { max: PROFILE_LIMITS.linksMax })}
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <form.Field name="socialLinks">
+                {(field) => (
+                  <div className="space-y-2">
+                    {field.state.value.map((link, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          value={link}
+                          inputMode="url"
+                          placeholder="https://"
+                          aria-label={t("form.linkAria", { index: index + 1 })}
+                          onChange={(event) =>
+                            field.handleChange(
+                              field.state.value.map((current, position) =>
+                                position === index ? event.target.value : current,
+                              ),
+                            )
+                          }
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t("form.removeLink")}
+                          onClick={() =>
+                            field.handleChange(
+                              field.state.value.filter((_, position) => position !== index),
+                            )
+                          }
+                        >
+                          <Trash2 className="size-4" aria-hidden />
+                        </Button>
+                      </div>
+                    ))}
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={field.state.value.length >= PROFILE_LIMITS.linksMax}
+                      onClick={() => field.handleChange([...field.state.value, ""])}
+                    >
+                      <Plus className="size-3.5" aria-hidden />
+                      {t("form.addLink")}
+                    </Button>
+
+                    {field.state.meta.errors.length ? (
+                      <p className="text-xs text-destructive">
+                        {String(field.state.meta.errors[0])}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+              </form.Field>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       <div className="sticky bottom-0 -mx-4 flex flex-wrap items-center gap-3 border-t border-border/70 bg-background/85 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6">
         <form.Subscribe selector={(state) => state.isDirty}>

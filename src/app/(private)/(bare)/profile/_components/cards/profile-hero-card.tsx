@@ -8,8 +8,8 @@ import { StatStrip } from "@/components/common/stat-strip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDate, getInitials } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import { cn, formatDate, getInitials } from "@/lib/utils";
 import type { MyProfile } from "@/types";
 
 const COMPLETENESS_FIELDS: ((profile: MyProfile) => boolean)[] = [
@@ -47,7 +47,7 @@ export function ProfileHeroCard({
   ];
 
   return (
-    <section className="overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10">
+    <Card className="gap-0 rounded-2xl py-0">
       <div className="relative h-36 overflow-hidden sm:h-44">
         {profile.cover_image ? (
           <div
@@ -179,6 +179,6 @@ export function ProfileHeroCard({
           ) : null}
         </div>
       </div>
-    </section>
+    </Card>
   );
 }

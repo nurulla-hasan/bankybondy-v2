@@ -5,7 +5,6 @@
 import type {
   MyProfile,
   RawPublicBond,
-  RawPublicRating,
   RawPersonSkill,
 } from "@/types";
 
@@ -94,51 +93,6 @@ export const MOCK_BONDS: RawPublicBond[] = [
     radius: 10,
     status: "CANCELED",
     createdAt: "2026-07-21T11:20:00.000Z",
-  },
-];
-
-const rater = (
-  _id: string,
-  name: string,
-  profile_image?: string,
-): RawPublicRating["ratedBy"] => ({
-  _id,
-  name,
-  profile_image,
-  reputation: { avg: 4.5, count: 7 },
-});
-
-export const MOCK_REVIEWS: RawPublicRating[] = [
-  {
-    _id: "6711c0000000000000000001",
-    rating: 5,
-    comment:
-      "Entregó la interfaz antes de lo previsto y explicó cada decisión. Repetiría sin dudar.",
-    offer: "2 sesiones de diseño de interfaz",
-    want: "Sesión de fotos de producto",
-    ratedBy: rater("66f0a1b2c3d4e5f611111111", "Marta Cebrián"),
-    createdAt: "2026-10-24T09:15:00.000Z",
-  },
-  {
-    _id: "6711c0000000000000000002",
-    rating: 5,
-    comment: "Traducción impecable, comunicación clara durante todo el cambio.",
-    offer: "Traducción de catálogo (500 palabras)",
-    want: "Revisión de mi CV en inglés",
-    ratedBy: rater(
-      "66f0a1b2c3d4e5f622222222",
-      "Tomás Iriarte",
-      "/mock/avatar-nadia.svg",
-    ),
-    createdAt: "2026-09-30T17:40:00.000Z",
-  },
-  {
-    _id: "6711c0000000000000000003",
-    rating: 4,
-    comment: "Muy buen trabajo; sólo tardó un día más de lo acordado.",
-    want: "Clases de guitarra para principiantes",
-    ratedBy: null,
-    createdAt: "2026-08-14T12:00:00.000Z",
   },
 ];
 

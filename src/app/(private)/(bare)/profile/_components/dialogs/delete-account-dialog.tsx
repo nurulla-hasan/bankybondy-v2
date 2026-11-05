@@ -37,7 +37,6 @@ export function DeleteAccountDialog() {
     <Modal
       open={open}
       onOpenChange={handleOpenChange}
-      size="sm"
       title={t("danger.confirmTitle")}
       description={t("danger.confirmDescription")}
       actionTrigger={

@@ -151,10 +151,14 @@ in the browser. **There is no test runner in this repo** (`package.json` has onl
 - `_components/cards/profile-hero-card.tsx` + `profile-hero-card-skeleton.tsx` —
   avatar-forward, cover band, reputation pill, one-line skills with `+N`, exactly the
   `person-card` geometry.
-- `_components/tabs/profile-tabs.tsx` — Bonds / Reviews / About, reusing
-  `people/_components/profile/person-bonds.tsx` and `person-reviews.tsx`.
-- `SectionHeading` with the Edit-profile action right-aligned (people/bonds idiom);
-  `aria-busy` + `isFetching` opacity on the grid.
+- **No tabs on this page** (decided in the mock pass): hero → visibility → details grid.
+  Left column `AccountDetailsCard` + `LinksCard`, right column `AboutCard` +
+  `SkillsCard` + `SecurityCard`. Bonds/Reviews stay on the public profile
+  (`people/_components/profile/person-bonds.tsx`, `person-reviews.tsx`) only.
+- `SecurityCard` = password row + delete-account row; each button opens a modal
+  (`dialogs/change-password-dialog.tsx`, `dialogs/delete-account-dialog.tsx`).
+- No page `SectionHeading` (the hero carries name + actions); `aria-busy` +
+  `isFetching` opacity on the grid.
 - Done when: visiting `/profile` from the navbar menu shows the real profile with
   loading, empty, and error states, and the skeleton matches the card pixel-for-pixel.
 
@@ -169,15 +173,20 @@ in the browser. **There is no test runner in this repo** (`package.json` has onl
   for a different account while `/profile` keeps working for the owner.
 
 ### Slice 4 — `/settings`
-- `src/app/(private)/(bare)/settings/page.tsx` + `_components/tabs/settings-tabs.tsx`.
-- Edit-profile form: TanStack `useForm` + `profileSchema`, grouped fieldsets
-  (identity / about / skills + links), `image-crop-dialog` for the avatar,
-  `useFieldArray` for `socialLinks`, unsaved-changes guard (v1 had none),
+- `src/app/(private)/(bare)/settings/page.tsx` + `_components/forms/edit-profile-form.tsx`.
+  Settings is the edit form only — no tabs; password and account deletion live in the
+  `SecurityCard` modals on `/profile` (Slice 2).
+- Edit-profile form: TanStack `useForm` + `profileSchema`, two side-by-side columns of
+  cards (left: identity, about + skills — right: locked email, location, birthdate,
+  links), `image-crop-dialog` for the avatar, `useFieldArray` for `socialLinks`,
+  unsaved-changes guard (v1 had none),
   `form.reset(defaultValues)` on refetch instead of the v1 stale-closure reset.
-- Password tab: three-field form, on success invalidate auth and let the cookie
+- Password modal (`profile/_components/dialogs/change-password-dialog.tsx`): three-field
+  form, on success invalidate auth and let the cookie
   rotation settle; if a `PASSWORD_CHANGED` 403 arrives, send the user to `/login`
   deliberately rather than showing a generic error.
-- Danger zone: `confirmation-modal` + password → `DELETE /user/delete-account`, then
+- Danger zone (`profile/_components/dialogs/delete-account-dialog.tsx`): password +
+  `DELETE` confirmation → `DELETE /user/delete-account`, then
   clear the query cache and `router.replace("/login")` (no `window.location.href`).
 - Done when: an unsaved edit warns before leaving, avatar crop→upload lands in S3 and
   the new URL is in the profile, and password change keeps the session alive.
