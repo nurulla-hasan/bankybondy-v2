@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
+import { useRouter } from "next/navigation";
 import { TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -9,22 +10,33 @@ import { FormInput } from "@/components/common/form-input";
 import { Modal } from "@/components/common/modal";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { mockDelay } from "@/mocks/profile.mock";
-import { successToast } from "@/lib/toast";
+import { getErrorMessage } from "@/lib/error";
+import { errorToast, successToast } from "@/lib/toast";
+import { useDeleteAccount } from "@/services";
 import { deleteAccountSchema } from "@/validations";
 
 export function DeleteAccountDialog() {
   const t = useTranslations("Profile");
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const { mutate: deleteAccount, isPending } = useDeleteAccount();
 
   const form = useForm({
     defaultValues: { password: "", confirmText: "" },
     validators: { onChange: deleteAccountSchema },
-    onSubmit: async ({ value }) => {
-      await mockDelay(value, 900);
-      setOpen(false);
-      form.reset();
-      successToast(t("danger.mockTitle"), t("danger.mockDescription"));
+    onSubmit: ({ value }) => {
+      deleteAccount(value.password, {
+        onSuccess: () => {
+          setOpen(false);
+          form.reset();
+          successToast(t("danger.deletedTitle"), t("danger.deletedDescription"));
+          // The account is gone; the hook already wiped the cache and the
+          // cookies, so the only way back into the app is a fresh sign-up.
+          router.replace("/login");
+        },
+        onError: (error) =>
+          errorToast(t("danger.deleteFailed"), getErrorMessage(error)),
+      });
     },
   });
 
@@ -89,8 +101,10 @@ export function DeleteAccountDialog() {
                 type="submit"
                 variant="destructive"
                 disabled={!canSubmit || isSubmitting}
+                loading={isPending}
+                loadingText={t("form.saving")}
               >
-                {isSubmitting ? t("form.saving") : t("danger.action")}
+                {t("danger.action")}
               </Button>
             )}
           </form.Subscribe>

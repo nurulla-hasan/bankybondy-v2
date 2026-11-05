@@ -1,23 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { useMockMyProfile } from "@/app/(private)/(bare)/profile/_components/use-mock-my-profile";
+import { EmptyState } from "@/components/common/empty-state";
+import { Button } from "@/components/ui/button";
+import { useMyProfile } from "@/services";
 
 import { EditProfileForm } from "./forms/edit-profile-form";
 import { EditProfileFormSkeleton } from "./forms/edit-profile-form-skeleton";
 
 export function MySettings() {
   const t = useTranslations("Profile");
-  const { data, isPending } = useMockMyProfile();
+  const { data: profile, isPending, isError, refetch } = useMyProfile();
 
-  if (isPending || !data) return <EditProfileFormSkeleton />;
+  if (isPending) return <EditProfileFormSkeleton />;
+
+  if (isError || !profile) {
+    return (
+      <EmptyState
+        icon={<WifiOff className="size-5" aria-hidden />}
+        title={t("empty.errorTitle")}
+        description={t("empty.errorDescription")}
+        action={
+          <Button variant="outline" onClick={() => refetch()}>
+            {t("empty.retry")}
+          </Button>
+        }
+      />
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <EditProfileForm profile={data.profile} />
+      <EditProfileForm profile={profile} />
 
       <p className="text-xs leading-5 text-muted-foreground">
         <Link

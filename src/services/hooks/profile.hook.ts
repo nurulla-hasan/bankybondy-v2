@@ -47,7 +47,15 @@ export function useMyProfile() {
     isFetching: identity.isFetching || profile.isFetching,
     isError: identity.isError || profile.isError,
     error: identity.error ?? profile.error,
-    refetch: profile.refetch,
+    /**
+     * Retry both halves: without a profile id there is nothing to point
+     * `single-user/:id` at, so the identity call has to come back first.
+     */
+    refetch: async () => {
+      const identityResult = await identity.refetch();
+      if (!identityResult.data?.data?._id) return identityResult;
+      return profile.refetch();
+    },
   };
 }
 

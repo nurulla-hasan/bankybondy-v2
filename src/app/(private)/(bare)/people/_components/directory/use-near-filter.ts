@@ -4,6 +4,11 @@ import { useCallback } from "react";
 import { useTranslations } from "next-intl";
 
 import { useNextFilter } from "@/hooks/useNextFilter";
+import {
+  getGeolocationFailure,
+  requestCoordinates,
+  type Coordinates,
+} from "@/lib/geolocation";
 import { getErrorMessage } from "@/lib/error";
 import { errorToast, successToast } from "@/lib/toast";
 import { useUpdateMyLocation } from "@/services";
@@ -16,50 +21,40 @@ export function useNearFilter() {
   const near = getFilter("near") === "true";
 
   const requestLocation = useCallback(
-    (onSuccess?: () => void) => {
-      if (typeof navigator === "undefined" || !navigator.geolocation) {
-        errorToast(t("filters.nearUnsupported"));
-        return;
-      }
-
-      if (!window.isSecureContext) {
-        errorToast(t("filters.nearUnavailable"));
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          updateLocation.mutate(
-            {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-              mode: "auto",
-            },
-            {
-              onSuccess: () => {
-                successToast(
-                  t("filters.nearUpdated"),
-                  t("filters.nearUpdatedDescription"),
-                );
-                onSuccess?.();
-              },
-              onError: (error) =>
-                errorToast(t("filters.nearDenied"), getErrorMessage(error)),
-            },
-          );
-        },
-        (error) => {
-          if (error.code === error.TIMEOUT) {
-            errorToast(t("filters.nearTimeout"));
-            return;
-          }
-
+    async (onSuccess?: () => void) => {
+      let coords: Coordinates | null = null;
+      try {
+        coords = await requestCoordinates();
+      } catch (error) {
+        const failure = getGeolocationFailure(error);
+        if (failure === "timeout") {
+          errorToast(t("filters.nearTimeout"));
+        } else if (failure === "unsupported") {
+          errorToast(t("filters.nearUnsupported"));
+        } else if (failure === "insecure") {
+          errorToast(t("filters.nearUnavailable"));
+        } else {
           errorToast(
             t("filters.nearDenied"),
             t("filters.nearDeniedDescription"),
           );
+        }
+        return;
+      }
+
+      updateLocation.mutate(
+        { lat: coords.lat, lng: coords.lng, mode: "auto" },
+        {
+          onSuccess: () => {
+            successToast(
+              t("filters.nearUpdated"),
+              t("filters.nearUpdatedDescription"),
+            );
+            onSuccess?.();
+          },
+          onError: (error) =>
+            errorToast(t("filters.nearDenied"), getErrorMessage(error)),
         },
-        { timeout: 10_000, maximumAge: 300_000 },
       );
     },
     [t, updateLocation],
@@ -71,7 +66,7 @@ export function useNearFilter() {
       return;
     }
 
-    requestLocation(() => {
+    void requestLocation(() => {
       updateBatch({ near: "true", sort: null, page: null }, { resetPage: false });
     });
   };

@@ -54,11 +54,41 @@ function BlockCardSkeleton({
   );
 }
 
+function LocationCardSkeleton() {
+  return (
+    <Card aria-hidden className="rounded-2xl">
+      <CardHeader className="flex-row items-start gap-3">
+        <Skeleton className="size-9 shrink-0 rounded-xl" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-4 w-full max-w-sm" />
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        <Skeleton className="h-4 w-40" />
+
+        <div className="space-y-3 rounded-xl bg-muted/40 p-3">
+          <Skeleton className="h-9 w-full rounded-lg" />
+          <div className="grid grid-cols-2 gap-2">
+            <Skeleton className="h-9 rounded-lg" />
+            <Skeleton className="h-9 rounded-lg" />
+          </div>
+          <Skeleton className="h-9 w-full rounded-lg" />
+        </div>
+
+        <Skeleton className="h-4 w-full" />
+      </CardContent>
+    </Card>
+  );
+}
+
 export function ProfileDetailsGridSkeleton() {
   return (
     <div className="grid gap-4 lg:grid-cols-5">
       <div className="space-y-4 lg:col-span-2">
         <RowCardSkeleton rows={5} titleWidth="h-5 w-40" />
+        <LocationCardSkeleton />
         <RowCardSkeleton rows={3} titleWidth="h-5 w-16" />
       </div>
 

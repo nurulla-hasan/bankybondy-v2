@@ -7,6 +7,11 @@
   "completeness": "Progreso del perfil",
   "completenessHint": "Añade foto, ciudad y un par de habilidades para subir posiciones en las coincidencias.",
   "emailLocked": "Tu correo es tu acceso y no se puede cambiar.",
+  "empty": {
+    "errorTitle": "No pudimos cargar tu perfil",
+    "errorDescription": "Revisa tu conexión e inténtalo de nuevo.",
+    "retry": "Reintentar"
+  },
   "stat": {
     "activeBonds": "Bonos activos",
     "completedBonds": "Completados",
@@ -22,9 +27,35 @@
     "bondsHint": "Tus bonos activos y pasados se listan en tu perfil público.",
     "bondsHiddenHint": "Tus bonos quedan privados; las visitas solo ven tu nombre y tu reputación.",
     "savedTitle": "Visibilidad actualizada",
+    "saveFailed": "No se pudo actualizar la visibilidad",
     "listedInPeopleSaved": "Se guardó tu configuración de aparición.",
     "bondsPublicSaved": "Se guardó la visibilidad de tus bonos.",
     "hiddenNote": "Estos ajustes también aplican al enlace directo: un perfil oculto muestra un aviso de bloqueo en lugar de tus datos."
+  },
+  "location": {
+    "title": "Ubicación",
+    "description": "Las coordenadas deciden quién aparece como cercano. Solo alimentan las coincidencias; en tu perfil no se muestra ninguna.",
+    "empty": "Todavía no hay coordenadas guardadas.",
+    "updated": "Actualizada",
+    "mode": {
+      "auto": "De tu dispositivo",
+      "manual": "Escritas por ti"
+    },
+    "useMyLocation": "Usar mi ubicación actual",
+    "locating": "Buscándote…",
+    "lat": "Latitud",
+    "lng": "Longitud",
+    "saveManual": "Guardar estas coordenadas",
+    "savedTitle": "Ubicación guardada",
+    "savedAuto": "Las coincidencias cercanas ya usan la posición de tu dispositivo.",
+    "savedManual": "Las coincidencias cercanas ya usan las coordenadas que escribiste.",
+    "saveFailed": "No se pudo guardar tu ubicación",
+    "privateNote": "Nadie ve las coordenadas crudas: guardadas, solo se convierten en una distancia.",
+    "unsupported": "Este navegador no puede compartir ubicación.",
+    "insecure": "La ubicación necesita una página segura (https).",
+    "denied": "Se denegó el permiso de ubicación.",
+    "unavailable": "Ahora mismo no se pudo leer ninguna posición.",
+    "timeout": "El dispositivo tardó demasiado en responder."
   },
   "detail": {
     "contactTitle": "Datos de la cuenta",
@@ -44,6 +75,7 @@
   "form": {
     "savedTitle": "Perfil guardado",
     "savedDescription": "Tus cambios ya están publicados.",
+    "saveFailed": "No se pudo guardar tu perfil",
     "photoHint": "Imagen cuadrada, mínimo 400×400 px. JPG, PNG o WebP.",
     "addPhoto": "Añadir foto",
     "changePhoto": "Cambiar foto",
@@ -103,7 +135,10 @@
     "sessionsHint": "Se cierra la sesión en los demás dispositivos. Tu perfil y tu historial de bonos no cambian.",
     "update": "Actualizar contraseña",
     "savedTitle": "Contraseña actualizada",
-    "savedDescription": "Las otras sesiones necesitarán la nueva contraseña."
+    "savedDescription": "Las otras sesiones necesitarán la nueva contraseña.",
+    "saveFailed": "No se pudo actualizar la contraseña",
+    "sessionExpiredTitle": "Vuelve a entrar",
+    "sessionExpiredDescription": "Este dispositivo quedó cerrado porque la contraseña cambió en otro sitio."
   },
   "danger": {
     "consequence1": "Los bonos abiertos con otros miembros quedan sin ti.",
@@ -114,8 +149,9 @@
     "confirmDescription": "Escribe DELETE y tu contraseña para confirmar.",
     "password": "Contraseña",
     "confirmPhrase": "Confirmación",
-    "mockTitle": "No se borró nada",
-    "mockDescription": "Esto es un flujo de ejemplo; el borrado real llega con la integración de la API."
+    "deletedTitle": "Cuenta eliminada",
+    "deletedDescription": "Tu perfil, tus bonos y tus reseñas han desaparecido.",
+    "deleteFailed": "No se pudo eliminar la cuenta"
   },
   "settings": {
     "title": "Ajustes",

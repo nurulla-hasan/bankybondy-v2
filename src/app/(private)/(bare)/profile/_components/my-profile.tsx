@@ -1,23 +1,27 @@
 "use client";
 
+import { WifiOff } from "lucide-react";
+import { useTranslations } from "next-intl";
+
 import {
   Card,
   CardContent,
   CardHeader,
 } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/empty-state";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMyBondCounts, useMyProfile } from "@/services";
 import { ProfileHeroCard } from "./cards/profile-hero-card";
 import { ProfileHeroCardSkeleton } from "./cards/profile-hero-card-skeleton";
 import { AccountDetailsCard } from "./shared/account-details-card";
 import { AboutCard } from "./shared/about-card";
 import { LinksCard } from "./shared/links-card";
+import { LocationCard } from "./shared/location-card";
 import { ProfileDetailsGridSkeleton } from "./shared/profile-details-grid-skeleton";
 import { SecurityCard } from "./shared/security-card";
 import { SkillsCard } from "./shared/skills-card";
 import { VisibilityCard } from "./shared/visibility-card";
-import { useMockMyProfile } from "./use-mock-my-profile";
-
-const ACTIVE_STATUSES = new Set(["ONGOING", "WAITING_FOR_LINK"]);
 
 function VisibilityCardSkeleton() {
   return (
@@ -46,9 +50,11 @@ function VisibilityCardSkeleton() {
 }
 
 export function MyProfileView() {
-  const { data, isPending, patchProfile } = useMockMyProfile();
+  const t = useTranslations("Profile");
+  const { data: profile, isPending, isError, refetch } = useMyProfile();
+  const { data: bondCounts } = useMyBondCounts();
 
-  if (isPending || !data) {
+  if (isPending) {
     return (
       <div className="space-y-6">
         <ProfileHeroCardSkeleton />
@@ -58,24 +64,35 @@ export function MyProfileView() {
     );
   }
 
-  const { profile, bonds } = data;
-  const activeBonds = bonds.filter((bond) =>
-    ACTIVE_STATUSES.has(bond.status),
-  ).length;
+  if (isError || !profile) {
+    return (
+      <EmptyState
+        icon={<WifiOff className="size-5" aria-hidden />}
+        title={t("empty.errorTitle")}
+        description={t("empty.errorDescription")}
+        action={
+          <Button variant="outline" onClick={() => refetch()}>
+            {t("empty.retry")}
+          </Button>
+        }
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
       <ProfileHeroCard
         profile={profile}
-        activeBonds={activeBonds}
-        completedBonds={bonds.filter((bond) => bond.status === "COMPLETED").length}
+        activeBonds={bondCounts?.active ?? 0}
+        completedBonds={bondCounts?.completed ?? 0}
       />
 
-      <VisibilityCard profile={profile} onPatch={patchProfile} />
+      <VisibilityCard profile={profile} />
 
       <div className="grid gap-4 lg:grid-cols-5">
         <div className="space-y-4 lg:col-span-2">
           <AccountDetailsCard profile={profile} />
+          <LocationCard profile={profile} />
           <LinksCard profile={profile} />
         </div>
 

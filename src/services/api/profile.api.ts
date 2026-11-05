@@ -3,7 +3,6 @@ import type {
   ApiResponse,
   BondsVisibilityInput,
   EditProfileValues,
-  MyProfile,
   PeopleVisibilityInput,
   UpdateProfileInput,
 } from "@/types";
@@ -43,8 +42,13 @@ export function buildProfileFormData(input: UpdateProfileInput) {
   return formData;
 }
 
+/**
+ * The response echoes the updated document, including the raw GeoJSON
+ * `location`, so nothing is taken from it: the caller invalidates and refetches
+ * `single-user/:id`, which is the response the UI is typed against.
+ */
 export function updateMyProfile(input: UpdateProfileInput) {
-  return apiClient<ApiResponse<MyProfile>>("/normal-user/update-profile", {
+  return apiClient<ApiResponse<unknown>>("/normal-user/update-profile", {
     method: "PATCH",
     body: buildProfileFormData(input),
   });
@@ -52,22 +56,22 @@ export function updateMyProfile(input: UpdateProfileInput) {
 
 /**
  * Show or hide the owner's bonds on their public profile.
- * Endpoint: PATCH /normal-user/bonds-visibility
+ * Endpoint: PATCH /normal-user/bonds-visibility (answers `{ bondsPublic }`)
  */
 export function updateBondsVisibility(input: BondsVisibilityInput) {
-  return apiClient<ApiResponse<MyProfile>>("/normal-user/bonds-visibility", {
-    method: "PATCH",
-    body: input,
-  });
+  return apiClient<ApiResponse<BondsVisibilityInput>>(
+    "/normal-user/bonds-visibility",
+    { method: "PATCH", body: input },
+  );
 }
 
 /**
  * Appear in the People directory or not.
- * Endpoint: PATCH /normal-user/people-visibility
+ * Endpoint: PATCH /normal-user/people-visibility (answers `{ listedInPeople }`)
  */
 export function updatePeopleVisibility(input: PeopleVisibilityInput) {
-  return apiClient<ApiResponse<MyProfile>>("/normal-user/people-visibility", {
-    method: "PATCH",
-    body: input,
-  });
+  return apiClient<ApiResponse<PeopleVisibilityInput>>(
+    "/normal-user/people-visibility",
+    { method: "PATCH", body: input },
+  );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { EyeOff, Link2, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -13,11 +12,10 @@ import {
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import { successToast } from "@/lib/toast";
-import { mockDelay } from "@/mocks/profile.mock";
-import type { MyProfile } from "@/types";
-
-type VisibilityKey = "listedInPeople" | "bondsPublic";
+import { getErrorMessage } from "@/lib/error";
+import { errorToast, successToast } from "@/lib/toast";
+import { useUpdateVisibility } from "@/services";
+import type { MyProfile, VisibilityKey } from "@/types";
 
 function ToggleRow({
   id,
@@ -62,22 +60,25 @@ function ToggleRow({
   );
 }
 
-export function VisibilityCard({
-  profile,
-  onPatch,
-}: {
-  profile: MyProfile;
-  onPatch: (patch: Partial<MyProfile>) => void;
-}) {
+export function VisibilityCard({ profile }: { profile: MyProfile }) {
   const t = useTranslations("Profile");
-  const [saving, setSaving] = useState<VisibilityKey | null>(null);
+  const updateVisibility = useUpdateVisibility();
 
-  const handleToggle = async (key: VisibilityKey, next: boolean) => {
-    setSaving(key);
-    await mockDelay(next, 600);
-    onPatch({ [key]: next });
-    setSaving(null);
-    successToast(t("visibility.savedTitle"), t(`visibility.${key}Saved`));
+  const isSaving = (key: VisibilityKey) =>
+    updateVisibility.isPending && updateVisibility.variables?.key === key;
+
+  const handleToggle = (key: VisibilityKey, next: boolean) => {
+    updateVisibility.mutate(
+      { key, value: next },
+      {
+        onSuccess: () =>
+          successToast(t("visibility.savedTitle"), t(`visibility.${key}Saved`)),
+        // The hook already rolled the switch back to the saved value, so the
+        // only job left here is saying why.
+        onError: (error) =>
+          errorToast(t("visibility.saveFailed"), getErrorMessage(error)),
+      },
+    );
   };
 
   return (
@@ -103,7 +104,7 @@ export function VisibilityCard({
                 : t("visibility.peopleHiddenHint")
             }
             checked={Boolean(profile.listedInPeople)}
-            isSaving={saving === "listedInPeople"}
+            isSaving={isSaving("listedInPeople")}
             onCheckedChange={(next) => handleToggle("listedInPeople", next)}
           />
 
@@ -116,7 +117,7 @@ export function VisibilityCard({
                 : t("visibility.bondsHiddenHint")
             }
             checked={Boolean(profile.bondsPublic)}
-            isSaving={saving === "bondsPublic"}
+            isSaving={isSaving("bondsPublic")}
             onCheckedChange={(next) => handleToggle("bondsPublic", next)}
           />
         </div>

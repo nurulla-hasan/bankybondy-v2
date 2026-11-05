@@ -7,6 +7,11 @@
   "completeness": "Profile strength",
   "completenessHint": "Add a photo, your city and a couple of skills to rank higher in matches.",
   "emailLocked": "Your email is your login and can't be changed.",
+  "empty": {
+    "errorTitle": "We could not load your profile",
+    "errorDescription": "Check your connection and try again.",
+    "retry": "Try again"
+  },
   "stat": {
     "activeBonds": "Active bonds",
     "completedBonds": "Completed",
@@ -22,9 +27,35 @@
     "bondsHint": "Your active and past bonds are listed on your public profile.",
     "bondsHiddenHint": "Your bonds stay private; visitors only see your name and reputation.",
     "savedTitle": "Visibility updated",
+    "saveFailed": "Visibility not updated",
     "listedInPeopleSaved": "Your listing setting was saved.",
     "bondsPublicSaved": "Your bond visibility was saved.",
     "hiddenNote": "These settings apply to the direct link as well: hidden profiles show a locked notice instead of your data."
+  },
+  "location": {
+    "title": "Location",
+    "description": "Coordinates decide who shows up as nearby. They feed matching only; nothing prints them on your profile.",
+    "empty": "No coordinates saved yet.",
+    "updated": "Updated",
+    "mode": {
+      "auto": "From your device",
+      "manual": "Entered by you"
+    },
+    "useMyLocation": "Use my current location",
+    "locating": "Looking for you…",
+    "lat": "Latitude",
+    "lng": "Longitude",
+    "saveManual": "Save these coordinates",
+    "savedTitle": "Location saved",
+    "savedAuto": "Nearby matches now use your device position.",
+    "savedManual": "Nearby matches now use the coordinates you typed.",
+    "saveFailed": "Could not save your location",
+    "privateNote": "Raw coordinates are never shown to anyone — stored here, they only ever turn into a distance.",
+    "unsupported": "This browser cannot share a location.",
+    "insecure": "Location needs a secure (https) page.",
+    "denied": "Location permission was denied.",
+    "unavailable": "No position could be read right now.",
+    "timeout": "The device took too long to answer."
   },
   "detail": {
     "contactTitle": "Account details",
@@ -44,6 +75,7 @@
   "form": {
     "savedTitle": "Profile saved",
     "savedDescription": "Your changes are live.",
+    "saveFailed": "Could not save your profile",
     "photoHint": "Square image, at least 400×400 px. JPG, PNG or WebP.",
     "addPhoto": "Add photo",
     "changePhoto": "Change photo",
@@ -103,7 +135,10 @@
     "sessionsHint": "Every other device is logged out. Your profile and bond history stay untouched.",
     "update": "Update password",
     "savedTitle": "Password updated",
-    "savedDescription": "Other sessions now need the new password."
+    "savedDescription": "Other sessions now need the new password.",
+    "saveFailed": "Could not update your password",
+    "sessionExpiredTitle": "Sign in again",
+    "sessionExpiredDescription": "This device was signed out because the password changed elsewhere."
   },
   "danger": {
     "consequence1": "Bonds still open with other members are left without you.",
@@ -114,8 +149,9 @@
     "confirmDescription": "Type DELETE and your password to confirm.",
     "password": "Password",
     "confirmPhrase": "Confirmation",
-    "mockTitle": "Nothing was deleted",
-    "mockDescription": "This is a mock flow; the real deletion comes with the API wiring."
+    "deletedTitle": "Account deleted",
+    "deletedDescription": "Your profile, bonds and reviews are gone.",
+    "deleteFailed": "Could not delete your account"
   },
   "settings": {
     "title": "Settings",

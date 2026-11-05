@@ -8,10 +8,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# BankyBondy V2 — Engineering Rules & Constraints
-
-This project follows the strict engineering standards established in `L2B7A7-main` and Addy Osmani's agent skills.
-
 ## 📚 Documentation & Knowledge Rules
 
 1. DO NOT rely on outdated pre-trained knowledge.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Camera, ImagePlus, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -18,16 +18,19 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MOCK_SKILLS, mockDelay } from "@/mocks/profile.mock";
-import { successToast } from "@/lib/toast";
+import { useDebounce } from "@/hooks/useUtilityHooks";
+import { getErrorMessage } from "@/lib/error";
+import { errorToast, successToast } from "@/lib/toast";
 import { getInitials } from "@/lib/utils";
+import { useGetInfiniteSkills, useUpdateMyProfile } from "@/services";
 import { PROFILE_LIMITS, profileSchema } from "@/validations";
-import type { MyProfile } from "@/types";
+import type { MultiSelectOption } from "@/components/common/multi-select";
+import type { Gender, MyProfile } from "@/types";
 
-const SKILL_OPTIONS = MOCK_SKILLS.map((skill) => ({
-  label: skill.name,
-  value: skill._id,
-}));
+/** The schema hands the submit handler a plain string, so re-narrow here. */
+function toGender(value: string): Gender | "" {
+  return value === "MALE" || value === "FEMALE" ? value : "";
+}
 
 function toFormValues(profile: MyProfile) {
   return {
@@ -62,14 +65,75 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
   const [cropSource, setCropSource] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useObjectUrl();
   const [coverPreview, setCoverPreview] = useObjectUrl();
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [skillSearch, setSkillSearch] = useState("");
+  const debouncedSkillSearch = useDebounce(skillSearch, 400);
+
+  const {
+    data: skillsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useGetInfiniteSkills({ limit: 10, searchTerm: debouncedSkillSearch });
+
+  const { mutate: saveProfile, isPending: isSaving } = useUpdateMyProfile();
+
+  const clearPendingImages = () => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setCoverFile(null);
+    setCoverPreview(null);
+  };
+
+  /**
+   * Only the first page of skills is loaded, so the saved ones are merged in by
+   * id: without that their chips would show the raw ObjectId.
+   */
+  const skillOptions = useMemo(() => {
+    const options: MultiSelectOption[] = [];
+    const seen = new Set<string>();
+
+    for (const page of skillsData?.pages ?? []) {
+      for (const skill of page?.data?.result ?? []) {
+        if (skill?._id && !seen.has(skill._id)) {
+          seen.add(skill._id);
+          options.push({ label: skill.name, value: skill._id });
+        }
+      }
+    }
+
+    for (const skill of profile.skills ?? []) {
+      if (skill?._id && !seen.has(skill._id)) {
+        seen.add(skill._id);
+        options.push({ label: skill.name, value: skill._id });
+      }
+    }
+
+    return options;
+  }, [skillsData, profile.skills]);
 
   const form = useForm({
     defaultValues: toFormValues(profile),
     validators: { onChange: profileSchema },
-    onSubmit: async ({ value }) => {
-      await mockDelay(value, 900);
-      form.reset(value);
-      successToast(t("form.savedTitle"), t("form.savedDescription"));
+    onSubmit: ({ value }) => {
+      saveProfile(
+        {
+          ...value,
+          gender: toGender(value.gender),
+          profileImageFile: avatarFile ?? undefined,
+          coverImageFile: coverFile ?? undefined,
+        },
+        {
+          onSuccess: () => {
+            form.reset(value);
+            clearPendingImages();
+            successToast(t("form.savedTitle"), t("form.savedDescription"));
+          },
+          onError: (error) =>
+            errorToast(t("form.saveFailed"), getErrorMessage(error)),
+        },
+      );
     },
   });
 
@@ -81,11 +145,13 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
   const handleCropped = (cropped: File) => {
     if (cropSource) URL.revokeObjectURL(cropSource);
     setCropSource(null);
+    setAvatarFile(cropped);
     setAvatarPreview(URL.createObjectURL(cropped));
   };
 
   const handleCoverFile = (file: File | undefined) => {
     if (!file) return;
+    setCoverFile(file);
     setCoverPreview(URL.createObjectURL(file));
   };
 
@@ -156,7 +222,10 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => setAvatarPreview(null)}
+                onClick={() => {
+                  setAvatarFile(null);
+                  setAvatarPreview(null);
+                }}
               >
                 <Trash2 className="size-4" aria-hidden />
                 {t("form.removePhoto")}
@@ -255,7 +324,11 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
                 type="multi-select"
                 label={t("form.skills")}
                 placeholder={t("form.skillsPlaceholder")}
-                options={SKILL_OPTIONS}
+                options={skillOptions}
+                onSearchChange={setSkillSearch}
+                onLoadMore={() => fetchNextPage()}
+                hasMore={Boolean(hasNextPage)}
+                isLoadingMore={isFetchingNextPage}
                 description={t("form.skillsHint", { max: PROFILE_LIMITS.skillsMax })}
               />
             </CardContent>
@@ -385,8 +458,7 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
                 variant="outline"
                 onClick={() => {
                   form.reset();
-                  setAvatarPreview(null);
-                  setCoverPreview(null);
+                  clearPendingImages();
                 }}
               >
                 {t("form.discard")}
@@ -399,8 +471,13 @@ export function EditProfileForm({ profile }: { profile: MyProfile }) {
           selector={(state) => [state.canSubmit, state.isSubmitting, state.isDirty]}
         >
           {([canSubmit, isSubmitting, isDirty]) => (
-            <Button type="submit" disabled={!canSubmit || isSubmitting || !isDirty}>
-              {isSubmitting ? t("form.saving") : t("form.save")}
+            <Button
+              type="submit"
+              disabled={!canSubmit || isSubmitting || !isDirty}
+              loading={isSaving}
+              loadingText={t("form.saving")}
+            >
+              {t("form.save")}
             </Button>
           )}
         </form.Subscribe>

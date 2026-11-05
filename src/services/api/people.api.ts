@@ -25,11 +25,13 @@ export function getPeople(params?: PeopleQueryParams) {
 }
 
 /**
- * Fetch one public profile by NormalUser/profile id.
+ * Fetch one profile by NormalUser/profile id. The owner's own view keeps the
+ * PII and location fields the directory strips, hence the payload type is a
+ * parameter (`RawPersonProfile` for other people, `MyProfile` for yourself).
  * Endpoint: GET /normal-user/single-user/:id
  */
-export function getPerson(id: string) {
-  return apiClient<ApiResponse<RawPersonProfile>>(
+export function getPerson<T = RawPersonProfile>(id: string) {
+  return apiClient<ApiResponse<T>>(
     `/normal-user/single-user/${encodeURIComponent(id)}`,
     { method: "GET" },
   );

@@ -38,6 +38,8 @@ export interface BondRequestQueryParams {
   page?: number;
   limit?: number;
   sort?: string;
+  /** Server-side filter (`QueryBuilder.filter()`); not part of the list page yet. */
+  status?: RawBondRequestStatus;
 }
 
 export interface CreateBondRequestInput {

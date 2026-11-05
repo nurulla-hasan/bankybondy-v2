@@ -17,6 +17,7 @@ import type { CreateBondValues } from "@/validations";
 import {
   createBondLink,
   createBondRequest,
+  countMyBondRequests,
   deleteBondRequest,
   getBondMatches,
   getBondRequestById,
@@ -50,6 +51,7 @@ const normalizeRequestParams = (params: BondRequestQueryParams = {}) => ({
   limit: params.limit ?? BOND_REQUESTS_PAGE_SIZE,
   searchTerm: params.searchTerm?.trim() || undefined,
   sort: params.sort ?? "-createdAt",
+  status: params.status,
 });
 
 const normalizeLinkParams = (params: BondLinkQueryParams = {}) => ({
@@ -68,6 +70,26 @@ export function useBondRequests(params: BondRequestQueryParams = {}) {
     queryFn: () => getMyBondRequests(normalized),
     select: (response) => response.data,
     placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
+  });
+}
+
+/**
+ * The profile hero's two bond numbers. Counted server-side per status with a
+ * one-row page each, instead of pulling the whole list into the browser.
+ */
+export function useMyBondCounts() {
+  return useQuery({
+    queryKey: [...bondKeys.all, "counts"] as const,
+    queryFn: async () => {
+      const [ongoing, waiting, completed] = await Promise.all([
+        countMyBondRequests("ONGOING"),
+        countMyBondRequests("WAITING_FOR_LINK"),
+        countMyBondRequests("COMPLETED"),
+      ]);
+
+      return { active: ongoing + waiting, completed };
+    },
     staleTime: 30 * 1000,
   });
 }

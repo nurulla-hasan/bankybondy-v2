@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
+import { useRouter } from "next/navigation";
 import { KeyRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -9,22 +10,49 @@ import { FormInput } from "@/components/common/form-input";
 import { Modal } from "@/components/common/modal";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { mockDelay } from "@/mocks/profile.mock";
-import { successToast } from "@/lib/toast";
+import { getErrorMessage, isPasswordChangedError } from "@/lib/error";
+import { errorToast, successToast } from "@/lib/toast";
+import { useChangePassword, useLogout } from "@/services";
 import { changePasswordSchema } from "@/validations";
 
 export function ChangePasswordDialog() {
   const t = useTranslations("Profile");
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const { mutate: changePassword, isPending } = useChangePassword();
+  const { mutate: logout } = useLogout();
 
   const form = useForm({
     defaultValues: { oldPassword: "", newPassword: "", confirmNewPassword: "" },
     validators: { onChange: changePasswordSchema },
-    onSubmit: async ({ value }) => {
-      await mockDelay(value, 900);
-      setOpen(false);
-      form.reset();
-      successToast(t("password.savedTitle"), t("password.savedDescription"));
+    onSubmit: ({ value }) => {
+      changePassword(value, {
+        onSuccess: () => {
+          setOpen(false);
+          form.reset();
+          successToast(t("password.savedTitle"), t("password.savedDescription"));
+        },
+        onError: (error) => {
+          // 403 PASSWORD_CHANGED means this device is presenting a token issued
+          // before a password change, so it is already signed out everywhere.
+          if (isPasswordChangedError(error)) {
+            setOpen(false);
+            form.reset();
+            logout(undefined, {
+              onSettled: () => {
+                errorToast(
+                  t("password.sessionExpiredTitle"),
+                  t("password.sessionExpiredDescription"),
+                );
+                router.replace("/login");
+              },
+            });
+            return;
+          }
+
+          errorToast(t("password.saveFailed"), getErrorMessage(error));
+        },
+      });
     },
   });
 
@@ -92,8 +120,13 @@ export function ChangePasswordDialog() {
             selector={(state) => [state.canSubmit, state.isSubmitting]}
           >
             {([canSubmit, isSubmitting]) => (
-              <Button type="submit" disabled={!canSubmit || isSubmitting}>
-                {isSubmitting ? t("form.saving") : t("password.update")}
+              <Button
+                type="submit"
+                disabled={!canSubmit || isSubmitting}
+                loading={isPending}
+                loadingText={t("form.saving")}
+              >
+                {t("password.update")}
               </Button>
             )}
           </form.Subscribe>
