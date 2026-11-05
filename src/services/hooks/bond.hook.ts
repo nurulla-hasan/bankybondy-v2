@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 
 import type {
+  AddRatingInput,
   ApiResponse,
   BondLinkQueryParams,
   BondRequestQueryParams,
@@ -15,6 +16,7 @@ import type {
 } from "@/types";
 import type { CreateBondValues } from "@/validations";
 import {
+  addBondRating,
   createBondLink,
   createBondRequest,
   countMyBondRequests,
@@ -23,8 +25,10 @@ import {
   getBondRequestById,
   getMyBondLinks,
   getMyBondRequests,
+  markAsCompleteBond,
   setBondRequestPaused,
 } from "../api";
+import { peopleKeys } from "./people.hook";
 
 export const BOND_REQUESTS_PAGE_SIZE = 12;
 export const BOND_LINKS_PAGE_SIZE = 12;
@@ -166,6 +170,30 @@ export function useCreateBondLink() {
     mutationFn: (input: CreateBondLinkInput) => createBondLink(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bondKeys.links() });
+    },
+  });
+}
+
+export function useMarkBondLinkComplete() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (bondLinkId: string) => markAsCompleteBond(bondLinkId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bondKeys.links() });
+    },
+  });
+}
+
+export function useAddBondRating() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: AddRatingInput) => addBondRating(input),
+    onSuccess: (_response, input) => {
+      queryClient.invalidateQueries({ queryKey: bondKeys.links() });
+      // The rated counterpart's public reviews/reputation changed.
+      queryClient.invalidateQueries({ queryKey: peopleKeys.detail(input.userId) });
     },
   });
 }

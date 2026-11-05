@@ -103,6 +103,17 @@ export interface CreateBondLinkInput {
   requestedBonds: string[];
 }
 
+/**
+ * POST /bond-rating/add-rating body (bondRating.validation.ts:3-15).
+ * `rating` is an integer 1-5; `comment` is optional, max 500 chars.
+ */
+export interface AddRatingInput {
+  userId: string;
+  bondLink: string;
+  rating: number;
+  comment?: string;
+}
+
 /** Backend match classification (bondMatch.interface.ts). */
 export type RawMatchType = "entry" | "surprise" | "empty";
 

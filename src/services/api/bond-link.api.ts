@@ -37,3 +37,15 @@ export function createBondLink(input: CreateBondLinkInput) {
     body: input,
   });
 }
+
+/**
+ * Mark the caller's side of the trade complete. The link flips to
+ * "Completed" only once every participant has marked (service:546).
+ * Endpoint: POST /bond-link/mark-as-complete/:id (bondLink.routes.ts:28-32)
+ */
+export function markAsCompleteBond(bondLinkId: string) {
+  return apiClient<ApiResponse<RawBondLink>>(
+    `/bond-link/mark-as-complete/${encodeURIComponent(bondLinkId)}`,
+    { method: "POST" },
+  );
+}

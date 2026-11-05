@@ -280,12 +280,15 @@ export function CreateBondDialog() {
             {t("cancel")}
           </Button>
 
-          <form.Subscribe
-            selector={(state) => [state.canSubmit, state.isSubmitting]}
-          >
-            {([canSubmit, isSubmitting]) => (
-              <Button type="submit" disabled={!canSubmit || isSubmitting}>
-                {isSubmitting ? t("submitting") : t("createButton")}
+          <form.Subscribe selector={(state) => state.canSubmit}>
+            {(canSubmit) => (
+              <Button
+                type="submit"
+                disabled={!canSubmit}
+                loading={createRequest.isPending}
+                loadingText={t("submitting")}
+              >
+                {t("createButton")}
               </Button>
             )}
           </form.Subscribe>

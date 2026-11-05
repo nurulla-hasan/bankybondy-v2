@@ -177,10 +177,13 @@ function relativeTime(dateStr: string, locale: string): string {
 function routeFor(item: NotificationItem): string | null {
   switch (item.type as NotificationType) {
     case "MATCH":
-    case "GENERAL":
+      // redirectId is the bond request whose matches changed
+      // (matching.notify.ts:116-117); the links tab opens by request id.
       return item.redirectId
-        ? `/bonds/all-bonds?match=${item.redirectId}`
-        : "/bonds/all-bonds";
+        ? `/bonds?tab=matches&request=${item.redirectId}`
+        : "/bonds?tab=matches";
+    case "GENERAL":
+      return "/bonds";
     case "TRADE_PROPOSED":
     case "TRADE_COMPLETED":
     case "GIFT_RECEIVED":
@@ -188,15 +191,19 @@ function routeFor(item: NotificationItem): string | null {
     case "DOUBLE_SURPRISE":
     case "ENCOUNTER":
     case "TRADE_REMINDER":
-      return "/messages";
+      // Chat isn't built yet; the links tab is where these trades live.
+      return "/bonds?tab=links";
     case "SUBSCRIPTION":
-      return "/subscriptions";
+      // No subscriptions page in v2 yet.
+      return null;
     case "REVIEW":
-      return "/profile";
+      // redirectId is the reviewer's profile id (bondRating.service.ts:127).
+      return item.redirectId ? `/people/${item.redirectId}` : "/profile";
     case "FRIEND_REQUEST":
-      return "/friends";
+      // No friends page in v2 yet.
+      return null;
     case "FRIEND_ACCEPTED":
-      return item.redirectId ? `/people/${item.redirectId}` : "/friends";
+      return item.redirectId ? `/people/${item.redirectId}` : "/people";
     default:
       return null;
   }

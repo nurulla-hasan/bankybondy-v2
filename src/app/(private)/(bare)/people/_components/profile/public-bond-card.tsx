@@ -23,7 +23,7 @@ export function PublicBondCard({ bond }: { bond: RawPublicBond }) {
   const isOnline = modality === "online";
 
   return (
-    <article className="group flex h-full flex-col gap-4 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10 transition-colors duration-300 hover:ring-primary/30">
+    <article className="group flex h-full flex-col gap-3 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10 transition-colors duration-300 hover:ring-primary/30">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant={status.variant}>
           {t(`bondStatus.${status.key}`)}
@@ -38,7 +38,7 @@ export function PublicBondCard({ bond }: { bond: RawPublicBond }) {
         </span>
       </header>
 
-      <div className="flex flex-1 flex-col justify-center gap-3 rounded-xl border border-border/70 bg-muted/20 px-3.5 py-3">
+      <div className="flex flex-1 flex-col justify-center gap-2 rounded-xl border border-border/70 bg-muted/20 px-3 py-2">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             <span
@@ -73,7 +73,7 @@ export function PublicBondCard({ bond }: { bond: RawPublicBond }) {
       </div>
 
       {bond.description ? (
-        <p className="line-clamp-2 leading-6 text-muted-foreground">
+        <p className="line-clamp-2 leading-5 text-muted-foreground">
           {bond.description}
         </p>
       ) : null}

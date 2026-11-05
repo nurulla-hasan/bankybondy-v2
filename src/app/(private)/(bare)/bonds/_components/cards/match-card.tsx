@@ -248,8 +248,13 @@ export function MatchCard({ match }: { match: RawBondMatch }) {
                     const isPending = isSubmitting || createLink.isPending;
 
                     return (
-                      <Button type="submit" disabled={!canSubmit || isPending}>
-                        {isPending ? t("proposing") : t("propose")}
+                      <Button
+                        type="submit"
+                        disabled={!canSubmit}
+                        loading={isPending}
+                        loadingText={t("proposing")}
+                      >
+                        {t("propose")}
                       </Button>
                     );
                   }}

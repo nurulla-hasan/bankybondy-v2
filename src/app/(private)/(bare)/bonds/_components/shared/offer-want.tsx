@@ -20,7 +20,7 @@ function ExchangeRow({
   const isGive = tone === "give";
 
   return (
-    <div className={cn("min-w-0 px-3.5 py-3", className)}>
+    <div className={cn("min-w-0 px-3 py-2", className)}>
       <p className="flex items-center gap-1.5 text-xs font-semibold tracking-widest uppercase">
         <span
           aria-hidden
@@ -60,7 +60,7 @@ export function OfferWant({
     >
       <ExchangeRow label={t("give")} value={offer} tone="give" />
 
-      <div className="flex items-center gap-2 px-3.5" aria-hidden>
+      <div className="flex items-center gap-2 px-3" aria-hidden>
         <span className="h-px flex-1 bg-border/70" />
         <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm">
           <ArrowDownUp className="size-3" />

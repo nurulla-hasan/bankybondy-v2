@@ -34,3 +34,17 @@ export const proposeBondSchema = z.object({
 });
 
 export type ProposeBondValues = z.infer<typeof proposeBondSchema>;
+
+/** Mirrors backend addRatingValidation (bondRating.validation.ts:3-15). */
+export const ratingSchema = z.object({
+  userId: z.string().min(1, { error: "Who are you rating?" }),
+  bondLink: z.string().min(1, { error: "Missing bond link" }),
+  rating: z
+    .number()
+    .int({ error: "Use whole stars only" })
+    .min(1, { error: "Pick at least one star" })
+    .max(5, { error: "Five stars is the maximum" }),
+  comment: z.string().trim().max(500, { error: "Keep it under 500 characters" }).optional(),
+});
+
+export type RatingValues = z.infer<typeof ratingSchema>;

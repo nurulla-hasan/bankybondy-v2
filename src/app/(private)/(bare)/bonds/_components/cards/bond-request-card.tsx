@@ -12,7 +12,8 @@ import {
   useDeleteBondRequest,
   useToggleBondRequestPause,
 } from "@/services";
-import { successToast } from "@/lib/toast";
+import { successToast, errorToast } from "@/lib/toast";
+import { getErrorMessage } from "@/lib/error";
 import { cn } from "@/lib/utils";
 import type { RawBondRequest } from "@/types";
 
@@ -29,6 +30,8 @@ export function BondRequestCard({
   const togglePause = useToggleBondRequestPause();
   const deleteRequest = useDeleteBondRequest();
   const isPaused = request.isPause;
+  const isPausing =
+    togglePause.isPending && togglePause.variables?._id === request._id;
 
   const handleTogglePause = () => {
     togglePause.mutate(request, {
@@ -42,24 +45,28 @@ export function BondRequestCard({
             : t("resumeToast", { offer: request.offer }),
         );
       },
+      onError: (error) =>
+        errorToast(t("pauseFailed"), getErrorMessage(error, t("pauseFailed"))),
     });
   };
 
-  const handleDelete = () => {
-    deleteRequest.mutate(request, {
-      onSuccess: () => {
-        successToast(
-          t("deletedToastTitle"),
-          t("deletedToast", { offer: request.offer }),
-        );
-      },
-    });
+  // Returned to ConfirmationModal, which awaits it to drive its spinner.
+  const handleDelete = async () => {
+    try {
+      await deleteRequest.mutateAsync(request);
+      successToast(
+        t("deletedToastTitle"),
+        t("deletedToast", { offer: request.offer }),
+      );
+    } catch (error) {
+      errorToast(t("deleteFailed"), getErrorMessage(error, t("deleteFailed")));
+    }
   };
 
   return (
     <article
       className={cn(
-        "group flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5",
+        "group flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5",
         isPaused && "border-dashed bg-muted/30",
       )}
     >
@@ -72,12 +79,6 @@ export function BondRequestCard({
       </header>
 
       <OfferWant offer={request.offer} want={request.want} />
-
-      {request.description ? (
-        <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
-          {request.description}
-        </p>
-      ) : null}
 
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
@@ -102,6 +103,7 @@ export function BondRequestCard({
           variant="outline"
           size="icon"
           onClick={handleTogglePause}
+          loading={isPausing}
           aria-label={isPaused ? t("resume") : t("pause")}
           title={isPaused ? t("resume") : t("pause")}
         >

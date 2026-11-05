@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function BondLinkCardSkeleton() {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5">
+    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-2">
           <Skeleton className="h-4 w-40" />
@@ -23,7 +23,7 @@ export function BondLinkCardSkeleton() {
         ))}
       </div>
 
-      <div className="mt-auto flex items-center justify-between gap-3 border-t border-border/70 pt-4">
+      <div className="mt-auto flex items-center justify-between gap-3 border-t border-border/70 pt-3">
         <Skeleton className="h-3 w-32" />
         <Skeleton className="h-9 w-28" />
       </div>
