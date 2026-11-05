@@ -1,0 +1,20 @@
+{
+  "title": "Amigos",
+  "subtitle": "Solicitudes que te esperan, solicitudes que enviaste y las personas con las que ya son amigos.",
+  "tabsLabel": "Listas de amigos",
+  "tabs": {
+    "requests": "Solicitudes",
+    "sent": "Enviadas",
+    "friends": "Amigos"
+  },
+  "loadErrorTitle": "No pudimos cargar esta lista",
+  "loadErrorDescription": "Revisá tu conexión y volvé a intentarlo.",
+  "empty": {
+    "requestsTitle": "No hay solicitudes esperando",
+    "requestsDescription": "Cuando alguien te envíe una solicitud de amistad, aparecerá acá.",
+    "sentTitle": "No enviaste solicitudes",
+    "sentDescription": "Envía una solicitud desde el perfil de alguien y quedará acá esperando su respuesta.",
+    "friendsTitle": "Todavía no tenés amigos",
+    "friendsDescription": "Las solicitudes aceptadas llegan acá, y podés quitar a alguien de esta lista."
+  }
+}

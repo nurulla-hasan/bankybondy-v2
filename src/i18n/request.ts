@@ -22,6 +22,7 @@ export default getRequestConfig(async () => {
       DonateUs: (await import(`../../messages/${locale}/donate.json`)).default,
       Footer: (await import(`../../messages/${locale}/footer.json`)).default,
       Bonds: (await import(`../../messages/${locale}/bonds.json`)).default,
+      Friends: (await import(`../../messages/${locale}/friends.json`)).default,
       People: (await import(`../../messages/${locale}/people.json`)).default,
       Profile: (await import(`../../messages/${locale}/profile.json`)).default,
     },

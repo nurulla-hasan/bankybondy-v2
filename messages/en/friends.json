@@ -1,0 +1,20 @@
+{
+  "title": "Friends",
+  "subtitle": "Requests waiting on you, requests you sent, and the people you trade with as friends.",
+  "tabsLabel": "Friend lists",
+  "tabs": {
+    "requests": "Requests",
+    "sent": "Sent",
+    "friends": "Friends"
+  },
+  "loadErrorTitle": "Couldn't load this list",
+  "loadErrorDescription": "Check your connection and try again.",
+  "empty": {
+    "requestsTitle": "No requests waiting",
+    "requestsDescription": "When someone sends you a friend request, it shows up here.",
+    "sentTitle": "No requests sent",
+    "sentDescription": "Send a request from someone's profile and it will wait here for their answer.",
+    "friendsTitle": "No friends yet",
+    "friendsDescription": "Accepted requests land here, and you can unfriend someone from this list."
+  }
+}
