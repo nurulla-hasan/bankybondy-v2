@@ -16,5 +16,23 @@
     "sentDescription": "Envía una solicitud desde el perfil de alguien y quedará acá esperando su respuesta.",
     "friendsTitle": "Todavía no tenés amigos",
     "friendsDescription": "Las solicitudes aceptadas llegan acá, y podés quitar a alguien de esta lista."
-  }
+  },
+  "accept": "Aceptar",
+  "reject": "Rechazar",
+  "withdrawing": "Cancelar",
+  "unfriend": "Quitar",
+  "unfriendTitle": "¿Quitar a {name} de tus amigos?",
+  "unfriendDescription": "Esto solo afecta tu lista de amigos; después podés enviar otra solicitud.",
+  "cancel": "Cancelar",
+  "acceptedTitle": "Solicitud aceptada",
+  "accepted": "{name} ahora es tu amigo.",
+  "rejectedTitle": "Solicitud rechazada",
+  "rejected": "Rechazaste la solicitud de {name}.",
+  "withdrawnTitle": "Solicitud cancelada",
+  "withdrawn": "Cancelaste tu solicitud a {name}.",
+  "unfriendedTitle": "Amigo eliminado",
+  "unfriended": "{name} ya no está en tu lista de amigos.",
+  "respondFailed": "No pudimos responder esta solicitud",
+  "withdrawFailed": "No pudimos cancelar tu solicitud",
+  "unfriendFailed": "No pudimos quitar este amigo"
 }

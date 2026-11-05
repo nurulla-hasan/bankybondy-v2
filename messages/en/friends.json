@@ -16,5 +16,23 @@
     "sentDescription": "Send a request from someone's profile and it will wait here for their answer.",
     "friendsTitle": "No friends yet",
     "friendsDescription": "Accepted requests land here, and you can unfriend someone from this list."
-  }
+  },
+  "accept": "Accept",
+  "reject": "Reject",
+  "withdrawing": "Cancel",
+  "unfriend": "Remove",
+  "unfriendTitle": "Remove {name} as a friend?",
+  "unfriendDescription": "This only affects your friend list — you can send a new request later.",
+  "cancel": "Cancel",
+  "acceptedTitle": "Request accepted",
+  "accepted": "{name} is now your friend.",
+  "rejectedTitle": "Request declined",
+  "rejected": "{name}'s request was declined.",
+  "withdrawnTitle": "Request canceled",
+  "withdrawn": "Your request to {name} was canceled.",
+  "unfriendedTitle": "Friend removed",
+  "unfriended": "{name} is no longer in your friend list.",
+  "respondFailed": "Couldn't answer this request",
+  "withdrawFailed": "Couldn't cancel your request",
+  "unfriendFailed": "Couldn't remove this friend"
 }

@@ -17,6 +17,8 @@ import type {
   RawFriendRequestItem,
 } from "@/types";
 
+import { FriendActions } from "./friend-actions";
+
 // Each list returns its person under a different key (friendRequest.service.ts:211-430).
 const PERSON_KEY = {
   requests: "followerInfo",
@@ -105,6 +107,13 @@ export function FriendList({
                   {person.name}
                 </span>
               </Link>
+
+              <FriendActions
+                kind={kind}
+                requestId={item._id}
+                personId={person._id}
+                personName={person.name}
+              />
             </div>
           ))}
         </div>
