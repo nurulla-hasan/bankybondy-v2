@@ -14,6 +14,20 @@
   --color-amber-accent: var(--amber-accent);
   --color-violet-accent: var(--violet-accent);
   --color-pink-accent: var(--pink-accent);
+  --color-tone-red: var(--tone-red);
+  --color-tone-red-ink: var(--tone-red-ink);
+  --color-tone-green: var(--tone-green);
+  --color-tone-green-ink: var(--tone-green-ink);
+  --color-tone-sky: var(--tone-sky);
+  --color-tone-sky-ink: var(--tone-sky-ink);
+  --color-tone-violet: var(--tone-violet);
+  --color-tone-violet-ink: var(--tone-violet-ink);
+  --color-tone-amber: var(--tone-amber);
+  --color-tone-amber-ink: var(--tone-amber-ink);
+  --color-tone-fuchsia: var(--tone-fuchsia);
+  --color-tone-fuchsia-ink: var(--tone-fuchsia-ink);
+  --color-tone-orange: var(--tone-orange);
+  --color-tone-orange-ink: var(--tone-orange-ink);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-overlay: var(--overlay);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -57,36 +71,53 @@
 :root {
   /* High-Trust Modern FinTech Palette (Stripe/Linear/Revolut Grade) */
   --radius: 0.625rem;
-  --background: oklch(0.99 0.002 240);          /* Pure Clean Tech White */
-  --foreground: oklch(0.18 0.03 260);          /* Deep High-Contrast Obsidian */
+  --background: oklch(0.99 0.002 240); /* Pure Clean Tech White */
+  --foreground: oklch(0.18 0.03 260); /* Deep High-Contrast Obsidian */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.03 260);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.03 260);
-  --primary: oklch(0.55 0.22 265);             /* Vibrant Royal Electric Indigo (Trust & Banking) */
+  --primary: oklch(
+    0.55 0.22 265
+  ); /* Vibrant Royal Electric Indigo (Trust & Banking) */
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.01 260);           /* Soft Slate Tint */
+  --secondary: oklch(0.96 0.01 260); /* Soft Slate Tint */
   --secondary-foreground: oklch(0.24 0.03 260);
   --muted: oklch(0.96 0.008 260);
   --muted-foreground: oklch(0.52 0.03 260);
   --accent: oklch(0.95 0.02 260);
   --accent-foreground: oklch(0.18 0.03 260);
-  --destructive: oklch(0.60 0.22 25);
-  --border: oklch(0.91 0.01 260);              /* Crisp Slate Border */
+  --destructive: oklch(0.6 0.22 25);
+  --border: oklch(0.91 0.01 260); /* Crisp Slate Border */
   --input: oklch(0.91 0.01 260);
   --ring: oklch(0.55 0.22 265);
-  --emerald-accent: oklch(0.68 0.17 155);      /* Vibrant Growth Emerald */
-  --cyan-glow: oklch(0.72 0.14 205);           /* Modern Cyan */
-  --amber-accent: oklch(0.76 0.15 75);         /* Warning / Pending Amber */
-  --violet-accent: oklch(0.60 0.20 300);       /* Social Violet */
-  --pink-accent: oklch(0.62 0.24 350);         /* Surprise Pink */
+  --emerald-accent: oklch(0.68 0.17 155); /* Vibrant Growth Emerald */
+  --cyan-glow: oklch(0.72 0.14 205); /* Modern Cyan */
+  --amber-accent: oklch(0.76 0.15 75); /* Warning / Pending Amber */
+  --violet-accent: oklch(0.6 0.2 300); /* Social Violet */
+  --pink-accent: oklch(0.62 0.24 350); /* Surprise Pink */
+  /* Match-chain exchange tones — hue paired by the backend palette; -ink is the readable text shade. */
+  --tone-red: oklch(0.63 0.21 25); /* ≈ red-500 */
+  --tone-red-ink: oklch(0.52 0.19 25); /* ≈ red-700 */
+  --tone-green: oklch(0.72 0.17 153); /* ≈ green-500 */
+  --tone-green-ink: oklch(0.6 0.15 153); /* ≈ green-700 */
+  --tone-sky: oklch(0.69 0.14 232); /* ≈ sky-500 */
+  --tone-sky-ink: oklch(0.58 0.13 232); /* ≈ sky-700 */
+  --tone-violet: oklch(0.59 0.24 300); /* ≈ violet-500 */
+  --tone-violet-ink: oklch(0.49 0.22 300); /* ≈ violet-700 */
+  --tone-amber: oklch(0.77 0.15 70); /* ≈ amber-500 */
+  --tone-amber-ink: oklch(0.65 0.15 70); /* ≈ amber-700 */
+  --tone-fuchsia: oklch(0.65 0.24 325); /* ≈ fuchsia-500 */
+  --tone-fuchsia-ink: oklch(0.55 0.22 325); /* ≈ fuchsia-700 */
+  --tone-orange: oklch(0.71 0.17 62); /* ≈ orange-500 */
+  --tone-orange-ink: oklch(0.6 0.17 62); /* ≈ orange-700 */
   --destructive-foreground: oklch(0.99 0 0);
   --overlay: oklch(0 0 0 / 0.3);
   --chart-1: oklch(0.55 0.22 265);
   --chart-2: oklch(0.68 0.17 155);
   --chart-3: oklch(0.72 0.14 205);
   --chart-4: oklch(0.75 0.15 75);
-  --chart-5: oklch(0.60 0.22 25);
+  --chart-5: oklch(0.6 0.22 25);
   --sidebar: oklch(0.98 0.005 260);
   --sidebar-foreground: oklch(0.18 0.03 260);
   --sidebar-primary: oklch(0.55 0.22 265);
@@ -99,13 +130,15 @@
 
 .dark {
   /* Obsidian Deep FinTech Theme */
-  --background: oklch(0.14 0.02 265);          /* Ultra-deep High-Tech Slate/Black #0a0d14 */
-  --foreground: oklch(0.96 0.01 260);          /* Crisp White Text */
-  --card: oklch(0.18 0.025 265);               /* Elevated Sleek Card Surface */
+  --background: oklch(
+    0.14 0.02 265
+  ); /* Ultra-deep High-Tech Slate/Black #0a0d14 */
+  --foreground: oklch(0.96 0.01 260); /* Crisp White Text */
+  --card: oklch(0.18 0.025 265); /* Elevated Sleek Card Surface */
   --card-foreground: oklch(0.96 0.01 260);
   --popover: oklch(0.18 0.025 265);
   --popover-foreground: oklch(0.96 0.01 260);
-  --primary: oklch(0.62 0.24 265);             /* Glowing Electric Indigo */
+  --primary: oklch(0.62 0.24 265); /* Glowing Electric Indigo */
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.23 0.025 265);
   --secondary-foreground: oklch(0.96 0.01 260);
@@ -113,22 +146,37 @@
   --muted-foreground: oklch(0.65 0.03 260);
   --accent: oklch(0.25 0.03 265);
   --accent-foreground: oklch(0.96 0.01 260);
-  --destructive: oklch(0.65 0.20 25);
-  --border: oklch(0.26 0.025 265);             /* Subtle Premium Border */
+  --destructive: oklch(0.65 0.2 25);
+  --border: oklch(0.26 0.025 265); /* Subtle Premium Border */
   --input: oklch(0.26 0.025 265);
   --ring: oklch(0.62 0.24 265);
   --emerald-accent: oklch(0.72 0.17 155);
   --cyan-glow: oklch(0.75 0.14 205);
-  --amber-accent: oklch(0.80 0.15 75);
-  --violet-accent: oklch(0.68 0.20 300);
-  --pink-accent: oklch(0.70 0.22 350);
+  --amber-accent: oklch(0.8 0.15 75);
+  --violet-accent: oklch(0.68 0.2 300);
+  --pink-accent: oklch(0.7 0.22 350);
+  /* Match-chain exchange tones — lighter ink for dark surfaces. */
+  --tone-red: oklch(0.68 0.19 25);
+  --tone-red-ink: oklch(0.72 0.17 25);
+  --tone-green: oklch(0.77 0.15 153);
+  --tone-green-ink: oklch(0.79 0.13 153);
+  --tone-sky: oklch(0.74 0.12 232);
+  --tone-sky-ink: oklch(0.76 0.11 232);
+  --tone-violet: oklch(0.65 0.22 300);
+  --tone-violet-ink: oklch(0.69 0.19 300);
+  --tone-amber: oklch(0.82 0.14 70);
+  --tone-amber-ink: oklch(0.83 0.12 70);
+  --tone-fuchsia: oklch(0.71 0.2 325);
+  --tone-fuchsia-ink: oklch(0.74 0.17 325);
+  --tone-orange: oklch(0.76 0.15 62);
+  --tone-orange-ink: oklch(0.78 0.13 62);
   --destructive-foreground: oklch(0.99 0 0);
   --overlay: oklch(0 0 0 / 0.5);
   --chart-1: oklch(0.62 0.24 265);
   --chart-2: oklch(0.72 0.17 155);
   --chart-3: oklch(0.75 0.14 205);
   --chart-4: oklch(0.78 0.15 75);
-  --chart-5: oklch(0.65 0.20 25);
+  --chart-5: oklch(0.65 0.2 25);
   --sidebar: oklch(0.16 0.025 265);
   --sidebar-foreground: oklch(0.96 0.01 260);
   --sidebar-primary: oklch(0.62 0.24 265);
@@ -138,8 +186,6 @@
   --sidebar-border: oklch(0.26 0.025 265);
   --sidebar-ring: oklch(0.62 0.24 265);
 }
-
-
 
 @layer base {
   * {
@@ -152,8 +198,7 @@
     @apply font-sans;
   }
 
-
-     /* Scrollbar Styles */
+  /* Scrollbar Styles */
   *::-webkit-scrollbar {
     width: 6px;
     height: 6px;

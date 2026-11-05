@@ -21,50 +21,51 @@ export interface BondParticipant {
 }
 
 /**
- * Same tint recipe as the Badge custom variants: 15% fill, -700 ink on light,
- * -400 ink on dark, so pair hues stay readable in both themes.
+ * Exchange hues from the `--tone-*` tokens in globals.css (same tint recipe as
+ * the Badge custom variants: 15% fill, token ink carries the light/dark shade,
+ * so pair hues stay readable in both themes without palette values here).
  */
 const TONES = {
   red: {
     block:
-      "bg-red-500/15 text-red-700 border-red-500/20 dark:text-red-400 dark:border-red-500/30",
-    dot: "bg-red-500",
+      "bg-tone-red/15 text-tone-red-ink border-tone-red/20 dark:border-tone-red/30",
+    dot: "bg-tone-red",
   },
   green: {
     block:
-      "bg-green-500/15 text-green-700 border-green-500/20 dark:text-green-400 dark:border-green-500/30",
-    dot: "bg-green-500",
+      "bg-tone-green/15 text-tone-green-ink border-tone-green/20 dark:border-tone-green/30",
+    dot: "bg-tone-green",
   },
   sky: {
     block:
-      "bg-sky-500/15 text-sky-700 border-sky-500/20 dark:text-sky-400 dark:border-sky-500/30",
-    dot: "bg-sky-500",
+      "bg-tone-sky/15 text-tone-sky-ink border-tone-sky/20 dark:border-tone-sky/30",
+    dot: "bg-tone-sky",
   },
   violet: {
     block:
-      "bg-violet-500/15 text-violet-700 border-violet-500/20 dark:text-violet-400 dark:border-violet-500/30",
-    dot: "bg-violet-500",
+      "bg-tone-violet/15 text-tone-violet-ink border-tone-violet/20 dark:border-tone-violet/30",
+    dot: "bg-tone-violet",
   },
   amber: {
     block:
-      "bg-amber-500/15 text-amber-700 border-amber-500/20 dark:text-amber-400 dark:border-amber-500/30",
-    dot: "bg-amber-500",
+      "bg-tone-amber/15 text-tone-amber-ink border-tone-amber/20 dark:border-tone-amber/30",
+    dot: "bg-tone-amber",
   },
   fuchsia: {
     block:
-      "bg-fuchsia-500/15 text-fuchsia-700 border-fuchsia-500/20 dark:text-fuchsia-400 dark:border-fuchsia-500/30",
-    dot: "bg-fuchsia-500",
+      "bg-tone-fuchsia/15 text-tone-fuchsia-ink border-tone-fuchsia/20 dark:border-tone-fuchsia/30",
+    dot: "bg-tone-fuchsia",
   },
   orange: {
     block:
-      "bg-orange-500/15 text-orange-700 border-orange-500/20 dark:text-orange-400 dark:border-orange-500/30",
-    dot: "bg-orange-500",
+      "bg-tone-orange/15 text-tone-orange-ink border-tone-orange/20 dark:border-tone-orange/30",
+    dot: "bg-tone-orange",
   },
 } as const;
 
 type Tone = keyof typeof TONES;
 
-/** Backend palette (matching.colors.ts) mapped to the badge tone families. */
+/** Backend palette (matching.colors.ts) mapped to the exchange tone families. */
 const HEX_TONES: Record<string, Tone> = {
   ea9999: "red",
   b6d7a8: "green",
@@ -114,12 +115,9 @@ function ParticipantNode({ participant }: { participant: BondParticipant }) {
       <div className="flex items-center gap-3">
         <Avatar size="lg" title={participant.name}>
           {participant.avatarUrl && (
-            <AvatarImage
-              src={participant.avatarUrl}
-              alt={participant.name}
-            />
+            <AvatarImage src={participant.avatarUrl} alt={participant.name} />
           )}
-          <AvatarFallback/>
+          <AvatarFallback />
         </Avatar>
         <div className="min-w-0">
           <p
@@ -150,7 +148,10 @@ function ParticipantNode({ participant }: { participant: BondParticipant }) {
             {t("gives")}
           </dt>
           <dd className="min-w-0">
-            <ValueBlock value={participant.offer} color={participant.offerColor} />
+            <ValueBlock
+              value={participant.offer}
+              color={participant.offerColor}
+            />
           </dd>
         </div>
         <div className="space-y-1">
@@ -158,7 +159,10 @@ function ParticipantNode({ participant }: { participant: BondParticipant }) {
             {t("wants")}
           </dt>
           <dd className="min-w-0">
-            <ValueBlock value={participant.want} color={participant.wantColor} />
+            <ValueBlock
+              value={participant.want}
+              color={participant.wantColor}
+            />
           </dd>
         </div>
       </dl>
