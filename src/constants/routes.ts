@@ -4,7 +4,7 @@ export const PRIVATE_ROUTES = [
   "/bonds",
   "/people",
   "/chatting",
-  "/message",
+  "/messages",
   "/friends",
 ] as const;
 

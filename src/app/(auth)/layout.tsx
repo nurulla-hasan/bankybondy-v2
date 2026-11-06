@@ -14,7 +14,7 @@ export default async function AuthLayout({
 
   return (
     <div className="min-h-screen w-full grid lg:grid-cols-2 bg-background">
-      {/* Left Column: Visual & BankyBondy Branding */}
+      {/* Left Column: Visual & Bankybondy Branding */}
       <div className="relative hidden lg:flex flex-col justify-between p-12 bg-muted/20 border-r border-border overflow-hidden">
         {/* Subtle Decorative Background Glow using theme tokens */}
         <div className="pointer-events-none absolute -top-40 -left-40 size-96 rounded-full bg-primary/15 blur-3xl opacity-70" />
@@ -69,7 +69,7 @@ export default async function AuthLayout({
         {/* Bottom Tagline */}
         <div className="relative z-10 text-xs text-muted-foreground flex items-center justify-between border-t border-border pt-6">
           <span>&ldquo;{t("authTagline")}&rdquo;</span>
-          <span className="font-mono">BankyBondy v2.0</span>
+          <span className="font-mono">Bankybondy v2.0</span>
         </div>
       </div>
 

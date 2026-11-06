@@ -7,7 +7,7 @@ interface LogoProps extends React.SVGProps<SVGSVGElement> {
 }
 
 /**
- * BankyBondy Ultra-Modern FinTech Brand Mark
+ * Bankybondy Ultra-Modern FinTech Brand Mark
  * Design:
  * - 3D Isometric Intertwined Prism Loops (Bank + Bond)
  * - Rich layered gradients (Vibrant Electric Violet-Indigo & Glowing Neon Mint-Cyan)
@@ -22,7 +22,7 @@ export function BrandLogoSvg({ className, size = 38, ...props }: LogoProps) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="BankyBondy Brand Logo"
+      aria-label="Bankybondy Brand Logo"
       className={cn("shrink-0 select-none", className)}
       {...props}
     >

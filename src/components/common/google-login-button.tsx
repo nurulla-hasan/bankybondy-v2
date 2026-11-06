@@ -110,7 +110,7 @@ export function GoogleLoginButton({ className = "" }: { className?: string }) {
               return;
             }
 
-            successToast(t("loginTitle"), "Welcome to BankyBondy!");
+            successToast(t("loginTitle"), "Welcome to Bankybondy!");
             router.replace("/");
           },
           onError: (err) => {
