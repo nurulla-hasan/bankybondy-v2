@@ -214,3 +214,19 @@
     background: color-mix(in oklch, var(--muted-foreground), transparent 20%);
   }
 }
+
+/*
+ * MotionConfig only speaks for framer-motion. Tailwind transitions, `animate-*`
+ * and the scrollbar hover above are CSS, so the OS setting needs its own reset.
+ * 0.01ms rather than 0 keeps `animationend` firing — dialogs depend on it.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

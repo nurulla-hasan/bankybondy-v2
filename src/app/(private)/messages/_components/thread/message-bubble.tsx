@@ -32,9 +32,17 @@ interface MessageBubbleProps {
   message: RawChatMessage;
   /** Group threads name the sender, a 1-a-1 chat does not need it. */
   showAuthor: boolean;
+  /** Identity belongs to the top of a run, timestamps to its bottom. */
+  firstOfRun: boolean;
+  lastOfRun: boolean;
 }
 
-export function MessageBubble({ message, showAuthor }: MessageBubbleProps) {
+export function MessageBubble({
+  message,
+  showAuthor,
+  firstOfRun,
+  lastOfRun,
+}: MessageBubbleProps) {
   const t = useTranslations("Messages");
   const locale = useLocale();
   const hydrated = useHydrated();
@@ -53,7 +61,9 @@ export function MessageBubble({ message, showAuthor }: MessageBubbleProps) {
     >
       <Message align={mine ? "end" : "start"}>
         {author ? (
-          <MessageAvatar>
+          /* The gutter stays reserved on every row so a run lines up; only its
+             top row shows who the messages came from. */
+          <MessageAvatar className={firstOfRun ? undefined : "invisible"}>
             <Avatar>
               <AvatarImage
                 src={message.userDetails.profile_image}
@@ -65,7 +75,9 @@ export function MessageBubble({ message, showAuthor }: MessageBubbleProps) {
         ) : null}
 
         <MessageContent>
-          {author ? <MessageHeader>{message.userDetails.name}</MessageHeader> : null}
+          {author && firstOfRun ? (
+            <MessageHeader>{message.userDetails.name}</MessageHeader>
+          ) : null}
 
           {message.isDeleted ? (
             <Bubble variant="muted">
@@ -130,11 +142,13 @@ export function MessageBubble({ message, showAuthor }: MessageBubbleProps) {
             </>
           )}
 
-          <MessageFooter>
-            {hydrated && message.createdAt
-              ? formatChatClock(message.createdAt, locale)
-              : "\u00A0"}
-          </MessageFooter>
+          {lastOfRun ? (
+            <MessageFooter>
+              {hydrated && message.createdAt
+                ? formatChatClock(message.createdAt, locale)
+                : "\u00A0"}
+            </MessageFooter>
+          ) : null}
         </MessageContent>
       </Message>
     </motion.div>

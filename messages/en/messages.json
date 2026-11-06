@@ -19,6 +19,8 @@
   "attachmentPdf": "{count, plural, one {PDF} other {# PDFs}}",
   "actions": "Chat actions",
   "loadOlder": "Load older messages",
+  "jumpToLatest": "Latest",
+  "newMessages": "{count, plural, one {# new message} other {# new messages}}",
   "hide": "Hide chat",
   "composerPlaceholder": "Write a message",
   "emoji": "Emoji",
