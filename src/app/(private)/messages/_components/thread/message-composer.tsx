@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Paperclip, Send, Smile, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -69,6 +70,7 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
   const [text, setText] = useState("");
   const [pending, setPending] = useState<PendingFile[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   // Leaving the thread drops the drafts, so their blobs go with them.
   useEffect(() => {
@@ -106,6 +108,15 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
 
   const canSend = !isPending && Boolean(text.trim() || pending.length);
 
+  // `height` is not a transform, so MotionConfig leaves it alone — opt out by hand.
+  const panelMotion = reduceMotion
+    ? {}
+    : {
+        initial: { height: 0, opacity: 0 },
+        animate: { height: "auto", opacity: 1 },
+        exit: { height: 0, opacity: 0 },
+      };
+
   return (
     <form
       className="flex shrink-0 flex-col gap-2 border-t border-border px-3 py-3"
@@ -116,61 +127,81 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
     >
       {pending.length ? (
         <AttachmentGroup aria-label={t("attachmentsPending")}>
-          {pending.map((file) => (
-            <Attachment
-              key={file.url}
-              size="xs"
-              orientation={file.isPdf ? "horizontal" : "vertical"}
-            >
-              <AttachmentMedia variant={file.isPdf ? "icon" : "image"}>
-                {file.isPdf ? null : (
-                  <Image src={file.url} alt="" width={96} height={96} unoptimized />
-                )}
-              </AttachmentMedia>
-
-              <AttachmentContent>
-                <AttachmentTitle>{file.name}</AttachmentTitle>
-              </AttachmentContent>
-
-              <AttachmentActions>
-                <AttachmentAction
-                  variant="secondary"
-                  aria-label={t("removeAttachment")}
-                  onClick={() => {
-                    URL.revokeObjectURL(file.url);
-                    track(pending.filter((item) => item.url !== file.url));
-                  }}
+          <AnimatePresence>
+            {pending.map((file) => (
+              <motion.div
+                key={file.url}
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                className="flex-none"
+              >
+                <Attachment
+                  size="xs"
+                  orientation={file.isPdf ? "horizontal" : "vertical"}
                 >
-                  <X />
-                </AttachmentAction>
-              </AttachmentActions>
-            </Attachment>
-          ))}
+                  <AttachmentMedia variant={file.isPdf ? "icon" : "image"}>
+                    {file.isPdf ? null : (
+                      <Image src={file.url} alt="" width={96} height={96} unoptimized />
+                    )}
+                  </AttachmentMedia>
+
+                  <AttachmentContent>
+                    <AttachmentTitle>{file.name}</AttachmentTitle>
+                  </AttachmentContent>
+
+                  <AttachmentActions>
+                    <AttachmentAction
+                      variant="secondary"
+                      aria-label={t("removeAttachment")}
+                      onClick={() => {
+                        URL.revokeObjectURL(file.url);
+                        track(pending.filter((item) => item.url !== file.url));
+                      }}
+                    >
+                      <X />
+                    </AttachmentAction>
+                  </AttachmentActions>
+                </Attachment>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </AttachmentGroup>
       ) : null}
 
-      {showEmoji ? (
-        <div
-          role="group"
-          aria-label={t("emojiPicker")}
-          className="max-h-44 overflow-y-auto rounded-xl border border-border bg-muted/30 p-2"
-        >
-          <div className="flex flex-wrap gap-1">
-            {EMOJIS.map((emoji) => (
-              <Button
-                key={emoji}
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="text-base"
-                onClick={() => addEmoji(emoji)}
+      <AnimatePresence>
+        {showEmoji ? (
+          <motion.div
+            key="emoji-panel"
+            {...panelMotion}
+            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="overflow-hidden"
+          >
+            <div className="max-h-44 overflow-y-auto rounded-xl border border-border bg-muted/30 p-2">
+              <div
+                role="group"
+                aria-label={t("emojiPicker")}
+                className="flex flex-wrap gap-1"
               >
-                {emoji}
-              </Button>
-            ))}
-          </div>
-        </div>
-      ) : null}
+                {EMOJIS.map((emoji) => (
+                  <Button
+                    key={emoji}
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-base"
+                    onClick={() => addEmoji(emoji)}
+                  >
+                    {emoji}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <div className="flex items-end gap-2">
         <input

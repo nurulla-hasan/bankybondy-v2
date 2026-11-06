@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/provider";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { Navbar } from "@/components/layout/navbar";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -18,7 +19,6 @@ const outfit = Outfit({
   weight: ["400", "500", "600"],
   display: "swap",
 });
-
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -47,6 +47,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
+            <Navbar />
             {children}
           </Providers>
         </NextIntlClientProvider>
@@ -54,5 +55,3 @@ export default async function RootLayout({
     </html>
   );
 }
-
-

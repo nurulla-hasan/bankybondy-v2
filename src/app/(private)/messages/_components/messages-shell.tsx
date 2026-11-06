@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 
 import { SearchInput } from "@/components/common/search-input";
@@ -94,20 +95,30 @@ export function MessagesShell() {
           )}
         >
           {conversation ? (
-            <MessageThread
-              conversation={conversation}
-              data={thread.data}
-              isPending={thread.isPending}
-              isError={thread.isError}
-              isSending={send.isPending}
-              onBack={deselect}
-              onHide={() => {
-                list.hide(conversation._id);
-                deselect();
-              }}
-              onRetry={thread.refetch}
-              onSend={(payload) => send.mutate(conversation._id, payload)}
-            />
+            /* Keyed by the thread, so switching conversations cross-fades and a
+               draft never follows you from one chat into another. */
+            <motion.div
+              key={conversation._id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.14, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <MessageThread
+                conversation={conversation}
+                data={thread.data}
+                isPending={thread.isPending}
+                isError={thread.isError}
+                isSending={send.isPending}
+                onBack={deselect}
+                onHide={() => {
+                  list.hide(conversation._id);
+                  deselect();
+                }}
+                onRetry={thread.refetch}
+                onSend={(payload) => send.mutate(conversation._id, payload)}
+              />
+            </motion.div>
           ) : (
             <div className={cn(PANE_BODY, "flex items-center justify-center p-4")}>
               <NoConversationState />

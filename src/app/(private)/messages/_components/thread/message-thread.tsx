@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
+import { AnimatePresence } from "framer-motion";
 import { WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -81,20 +82,24 @@ export function MessageThread({
         {!isPending && !isError ? (
           <>
             {messages.length ? (
-              <div className="space-y-2">
-                {days.map((day) => (
-                  <section key={day.date} className="space-y-2">
-                    <DaySeparator date={day.date} />
-                    {day.messages.map((message) => (
-                      <MessageBubble
-                        key={message._id}
-                        message={message}
-                        showAuthor={showAuthor}
-                      />
-                    ))}
-                  </section>
-                ))}
-              </div>
+              /* `initial={false}` so a loaded thread appears at once and only a
+                 message that arrives later plays its entrance. */
+              <AnimatePresence initial={false}>
+                <div className="space-y-2">
+                  {days.map((day) => (
+                    <section key={day.date} className="space-y-2">
+                      <DaySeparator date={day.date} />
+                      {day.messages.map((message) => (
+                        <MessageBubble
+                          key={message._id}
+                          message={message}
+                          showAuthor={showAuthor}
+                        />
+                      ))}
+                    </section>
+                  ))}
+                </div>
+              </AnimatePresence>
             ) : (
               <p className="py-10 text-center text-sm text-muted-foreground">
                 {t("emptyDescription")}
