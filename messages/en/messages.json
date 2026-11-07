@@ -43,6 +43,7 @@
   "reconnecting": "Reconnecting to chat…",
   "hideFailed": "Couldn't hide the chat",
   "hideFailedDescription": "The chat is still in your list. Try again.",
+  "bondRoomFallback": "Bond room",
   "bondLinkStatus": {
     "Ongoing": "Ongoing",
     "Completed": "Completed",

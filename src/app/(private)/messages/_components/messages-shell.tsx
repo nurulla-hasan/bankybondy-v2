@@ -117,7 +117,12 @@ export function MessagesShell() {
         <section
           aria-label={
             conversation
-              ? getConversationTitle(conversation)
+              ? getConversationTitle(
+                  conversation,
+                  conversation.type === "bond-link-group"
+                    ? t("bondRoomFallback")
+                    : undefined,
+                )
               : t("noConversationTitle")
           }
           className={cn(

@@ -67,7 +67,10 @@ export function ConversationRow({
                 unseen ? "font-semibold text-foreground" : "font-medium",
               )}
             >
-              {getConversationTitle(conversation)}
+              {getConversationTitle(
+                conversation,
+                conversation.type === "bond-link-group" ? t("bondRoomFallback") : undefined,
+              )}
             </span>
           </span>
 

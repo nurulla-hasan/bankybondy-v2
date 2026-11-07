@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import { Clock3, FileText } from "lucide-react";
+import { useState } from "react";
 
 import {
   Attachment,
@@ -27,6 +28,7 @@ import { cn, getInitials } from "@/lib/utils";
 import type { RawChatMessage } from "@/types";
 
 import { formatChatClock, useHydrated } from "../shared/chat-timestamp";
+import { ImageLightbox } from "./image-lightbox";
 
 interface MessageBubbleProps {
   message: RawChatMessage;
@@ -46,6 +48,7 @@ export function MessageBubble({
   const t = useTranslations("Messages");
   const locale = useLocale();
   const hydrated = useHydrated();
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const mine = message.isMyMessage;
   const images = message.imageUrl ?? [];
@@ -93,21 +96,36 @@ export function MessageBubble({
             <>
               {/* Media and files are their own surfaces; only text gets a bubble. */}
               {images.length ? (
-                <Bubble variant="ghost" className={images.length > 1 ? "max-w-sm" : "max-w-60"}>
-                  <ul className={images.length > 1 ? "grid grid-cols-2 gap-1" : "grid"}>
+                <Bubble
+                  variant="ghost"
+                  className={images.length > 1 ? "w-64 max-w-sm" : "w-40 max-w-60"}
+                >
+                  <ul className={images.length > 1 ? "grid w-full grid-cols-2 gap-1" : "grid w-full"}>
                     {images.map((src, index) => (
-                      <li key={`${message._id}-image-${index}`}>
-                        <Image
-                          src={src}
-                          alt={t("attachmentImage", { count: images.length })}
-                          width={320}
-                          height={320}
-                          unoptimized
-                          className="aspect-square w-full rounded-lg object-cover"
-                        />
+                      <li key={`${message._id}-image-${index}`} className="min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => setLightboxIndex(index)}
+                          className="block w-full cursor-zoom-in overflow-hidden rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                        >
+                          <Image
+                            src={src}
+                            alt={t("attachmentImage", { count: images.length })}
+                            width={320}
+                            height={320}
+                            unoptimized
+                            className="aspect-square w-full rounded-lg object-cover"
+                          />
+                        </button>
                       </li>
                     ))}
                   </ul>
+                  <ImageLightbox
+                    images={images}
+                    index={lightboxIndex}
+                    onClose={() => setLightboxIndex(null)}
+                    label={t("attachmentImage", { count: images.length })}
+                  />
                 </Bubble>
               ) : null}
 

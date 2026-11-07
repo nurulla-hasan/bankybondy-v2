@@ -63,7 +63,10 @@ export function ThreadHeader({ conversation, onBack, onHide }: ThreadHeaderProps
             <Handshake className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
           ) : null}
           <h3 className="truncate font-heading text-sm font-medium">
-            {getConversationTitle(conversation)}
+            {getConversationTitle(
+              conversation,
+              conversation.type === "bond-link-group" ? t("bondRoomFallback") : undefined,
+            )}
           </h3>
         </div>
 

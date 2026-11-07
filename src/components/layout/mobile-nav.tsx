@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { AuthUser } from "@/types";
+import { ThemeToggle } from "@/components/common/theme-toggle";
+import { NavbarSearch } from "./navbar-search";
 import type { NavLinkItem } from "./nav-items";
 
 interface MobileNavProps {
@@ -48,6 +50,11 @@ export function MobileNav({
   const tMessages = useTranslations("Messages");
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
+
+  // Close the drawer whenever route changes
+  React.useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   const { data: profileData, isLoading: queryLoading } = useGetMyProfile();
   const { mutate: queryLogout } = useLogout();
@@ -82,19 +89,29 @@ export function MobileNav({
         />
         <SheetContent
           side="right"
-          className="w-72 p-6 flex flex-col justify-between"
+          className="w-72 sm:w-80 max-w-[88vw] p-4 flex flex-col overflow-y-auto overscroll-contain gap-4"
         >
-          <div className="space-y-6">
-            <SheetHeader className="text-left pb-4 border-b border-border">
+          <div className="flex flex-col gap-3.5">
+            <SheetHeader className="text-left pb-3 border-b border-border">
               <SheetTitle>
-                <Logo size="sm" />
+                <div onClick={() => setOpen(false)}>
+                  <Logo size="sm" showTextOnMobile />
+                </div>
               </SheetTitle>
             </SheetHeader>
+
+            {/* Mobile Quick Search */}
+            <div>
+              <NavbarSearch
+                className="w-full justify-start h-9 px-3 bg-muted/40"
+                showLabelOnMobile
+              />
+            </div>
 
             {/* Mobile Navigation Links */}
             <nav
               aria-label="Mobile navigation"
-              className="flex flex-col space-y-1"
+              className="flex flex-col space-y-0.5"
             >
               {items.map((link) => {
                 const Icon = link.icon;
@@ -110,7 +127,7 @@ export function MobileNav({
                     aria-current={isActive ? "page" : undefined}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                       isActive
                         ? "bg-primary/10 text-primary font-semibold"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -130,13 +147,13 @@ export function MobileNav({
           </div>
 
           {/* Mobile Bottom User Status or CTA */}
-          <div className="pt-6 border-t border-border flex flex-col gap-3">
+          <div className="mt-auto pt-4 border-t border-border flex flex-col gap-2.5">
             {isLoading ? (
               <div className="h-10 animate-pulse rounded-lg bg-muted" />
             ) : user ? (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5">
                 <div className="flex items-center gap-3 px-1">
-                  <Avatar className="size-9">
+                  <Avatar className="size-8.5">
                     <AvatarImage
                       src={user.profile_image}
                       alt={user.name || "User Avatar"}
@@ -153,11 +170,11 @@ export function MobileNav({
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-0.5">
                   <Link
                     href="/profile"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                   >
                     <UserIcon className="size-4 shrink-0" />
                     <span>{t("profile")}</span>
@@ -165,7 +182,7 @@ export function MobileNav({
                   <Link
                     href="/messages"
                     onClick={() => setOpen(false)}
-                    className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                    className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
                   >
                     <MessageSquare className="size-4 shrink-0" />
                     <span>{t("messages")}</span>
@@ -178,7 +195,7 @@ export function MobileNav({
                   <Link
                     href="/friends"
                     onClick={() => setOpen(false)}
-                    className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                    className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
                   >
                     <Users className="size-4 shrink-0" />
                     <span>{t("friends")}</span>
@@ -186,7 +203,7 @@ export function MobileNav({
                   <Link
                     href="/settings"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                   >
                     <Settings className="size-4 shrink-0" />
                     <span>{t("settings")}</span>
@@ -194,7 +211,7 @@ export function MobileNav({
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
                   >
                     <LogOut className="size-4 shrink-0" />
                     <span>{t("logOut")}</span>
@@ -211,6 +228,14 @@ export function MobileNav({
                 <ArrowRight className="size-4 ml-1.5" />
               </Button>
             )}
+
+            {/* Mobile Theme Switcher */}
+            <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 px-3 py-1.5">
+              <span className="text-xs font-medium text-muted-foreground">
+                Theme
+              </span>
+              <ThemeToggle size="icon" />
+            </div>
           </div>
         </SheetContent>
       </Sheet>

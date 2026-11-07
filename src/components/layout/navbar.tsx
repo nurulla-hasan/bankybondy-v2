@@ -38,7 +38,7 @@ export function Navbar({ className }: NavbarProps) {
       >
         {/* Left: Brand Logo */}
         <div className="flex shrink-0 items-center">
-          <Logo size="md" />
+          <Logo size="md" showTextOnMobile />
         </div>
 
         {/* Center: Desktop Navigation Links */}
@@ -47,11 +47,11 @@ export function Navbar({ className }: NavbarProps) {
         {/* Right: Controls & User Auth Actions */}
         <div className="flex shrink-0 items-center gap-2">
           {/* Quick Search Palette (⌘K) */}
-          <NavbarSearch />
+          <NavbarSearch className="hidden md:inline-flex" />
 
           {/* Controls: Language, Theme & Notifications */}
           <LanguageToggle size="icon" />
-          <ThemeToggle size="icon" />
+          <ThemeToggle size="icon" className="hidden md:inline-flex" />
           <NavbarNotifications />
 
           {/* User Auth Profile / Guest CTA */}

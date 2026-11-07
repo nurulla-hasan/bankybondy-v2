@@ -90,7 +90,7 @@ export function toRowPatch(
   // status has to survive from the row we already have. With no row to take it
   // from, patching would invent a bond link without a status — better to leave
   // the key out and let the list query fill it.
-  if (snapshot.bondLink && existing?.bondLink) {
+  if (snapshot.bondLink?.name?.trim() && existing?.bondLink) {
     patch.bondLink = { ...existing.bondLink, name: snapshot.bondLink.name };
   }
 

@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types";
 
 interface NavbarUserMenuProps {
@@ -45,6 +46,7 @@ export function NavbarUserMenu({
   user: userProp,
   isLoading: isLoadingProp,
   onLogout: onLogoutProp,
+  className,
 }: NavbarUserMenuProps) {
   const t = useTranslations("Navbar");
   const tMessages = useTranslations("Messages");
@@ -64,7 +66,14 @@ export function NavbarUserMenu({
     unreadTotal > 99 ? tMessages("unseenCap") : String(unreadTotal);
 
   if (isLoading) {
-    return <div className="size-9 animate-pulse rounded-full bg-muted" />;
+    return (
+      <div
+        className={cn(
+          "hidden md:block size-9 animate-pulse rounded-full bg-muted",
+          className,
+        )}
+      />
+    );
   }
 
   if (user) {
@@ -75,7 +84,7 @@ export function NavbarUserMenu({
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full"
+              className={cn("hidden md:inline-flex rounded-full", className)}
               aria-label={user.name || "User account menu"}
             >
               <Avatar className="size-8">

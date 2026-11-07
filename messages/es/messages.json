@@ -43,6 +43,7 @@
   "reconnecting": "Reconectando el chat…",
   "hideFailed": "No se pudo ocultar el chat",
   "hideFailedDescription": "El chat sigue en tu lista. Intentalo de nuevo.",
+  "bondRoomFallback": "Sala de trueque",
   "bondLinkStatus": {
     "Ongoing": "En curso",
     "Completed": "Completado",

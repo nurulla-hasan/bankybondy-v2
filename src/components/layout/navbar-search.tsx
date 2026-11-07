@@ -43,11 +43,13 @@ const MIN_SEARCH_LENGTH = 2;
 interface NavbarSearchProps {
   className?: string;
   triggerVariant?: "pill" | "icon";
+  showLabelOnMobile?: boolean;
 }
 
 export function NavbarSearch({
   className,
   triggerVariant = "pill",
+  showLabelOnMobile = false,
 }: NavbarSearchProps) {
   const t = useTranslations("Navbar");
   const router = useRouter();
@@ -138,7 +140,14 @@ export function NavbarSearch({
           aria-label={t("search")}
         >
           <Search className="size-3.5 text-muted-foreground/80 group-hover:text-foreground transition-colors" />
-          <span className="hidden sm:inline font-normal">{t("search")}</span>
+          <span
+            className={cn(
+              showLabelOnMobile ? "inline" : "hidden sm:inline",
+              "font-normal",
+            )}
+          >
+            {t("search")}
+          </span>
           <kbd className="border-border bg-background text-muted-foreground pointer-events-none hidden h-4.5 select-none items-center gap-0.5 rounded border px-1.5 font-mono text-xs font-medium shadow-2xs sm:inline-flex">
             <span>⌘</span>K
           </kbd>
