@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowLeft, Ban, EllipsisVertical, Handshake } from "lucide-react";
+import { ArrowLeft, Ban, EllipsisVertical, Handshake, Info } from "lucide-react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -17,6 +18,7 @@ import type { RawBondLinkStatus, RawConversationListItem } from "@/types";
 
 import { GroupAvatarStack } from "../list/group-avatar-stack";
 import { getConversationTitle } from "../shared/conversation-title";
+import { ChatInfoSheet } from "./chat-info-sheet";
 
 const BOND_STATUS_VARIANT: Record<RawBondLinkStatus, "progress" | "completed" | "rejected"> = {
   Ongoing: "progress",
@@ -32,6 +34,7 @@ interface ThreadHeaderProps {
 
 export function ThreadHeader({ conversation, onBack, onHide }: ThreadHeaderProps) {
   const t = useTranslations("Messages");
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const peer = conversation.userData;
   const bondLink = conversation.bondLink;
@@ -95,12 +98,23 @@ export function ThreadHeader({ conversation, onBack, onHide }: ThreadHeaderProps
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setInfoOpen(true)}>
+            <Info aria-hidden />
+            {t("infoTitle")}
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={onHide}>
             <Ban aria-hidden />
             {t("hide")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ChatInfoSheet
+        conversation={conversation}
+        open={infoOpen}
+        onOpenChange={setInfoOpen}
+        onOpenMedia={() => setInfoOpen(false)}
+      />
     </header>
   );
 }

@@ -11,4 +11,8 @@ export const chatKeys = {
   thread: (conversationId: string | null) =>
     [...chatKeys.messages(), conversationId] as const,
   unread: () => [...chatKeys.all, "unread"] as const,
+  hidden: () => [...chatKeys.all, "hidden"] as const,
+  media: (conversationId: string | null) =>
+    [...chatKeys.all, "media", conversationId] as const,
+  group: (groupId: string | null) => [...chatKeys.all, "group", groupId] as const,
 };

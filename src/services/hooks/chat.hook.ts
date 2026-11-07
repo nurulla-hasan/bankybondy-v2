@@ -14,9 +14,11 @@ import {
   hasOptimisticMessage,
   insertMessageIntoThread,
   insertOptimisticMessage,
+  markMessageDeleted,
   removeConversationRow,
   removeOptimisticMessage,
   toOptimisticMessage,
+  upsertConversationRow,
   type ChatListCache,
   type ThreadPages,
 } from "@/lib/chat/cache";
@@ -29,21 +31,39 @@ import { playSendSound } from "@/lib/sound";
 import { errorToast } from "@/lib/toast";
 import type {
   ApiResponse,
+  ConversationMediaPage,
   NewMessagePayload,
   RawChatMessage,
   RawChatPerson,
+  RawConversationList,
   RawConversationListItem,
   UnreadResult,
 } from "@/types";
 
-import { getChatList, getMessages, getUnreadCount, markSeen, sendMessage } from "../api/chat.api";
-import { hideConversation } from "../api/conversation.api";
+import {
+  deleteMessage,
+  getChatGroup,
+  getChatList,
+  getConversationMedia,
+  getMessages,
+  getUnreadCount,
+  markSeen,
+  sendMessage,
+} from "../api/chat.api";
+import {
+  getHiddenChatList,
+  hideConversation,
+  unhideConversation,
+} from "../api/conversation.api";
 
 /** One page is enough to fill the pane on a large screen without a long wait. */
 const CHAT_PAGE_SIZE = 30;
 
 /** The list is capped at 500 by the backend; one page gets everything visible. */
 const CHAT_LIST_LIMIT = 500;
+
+/** Gallery tile grid: the backend caps `limit` at 100, this keeps each page short. */
+const MEDIA_PAGE_SIZE = 40;
 
 /** How long a socket send may stay "sending" before we assume its echo is lost. */
 const SOCKET_ECHO_TIMEOUT_MS = 15 * 1000;
@@ -387,4 +407,119 @@ export function useChatUnreadCount(enabled = true) {
   });
 }
 
+/** The chats this user hid, newest first — the reverse door to a hidden row. */
+export function useHiddenChats() {
+  return useQuery({
+    queryKey: chatKeys.hidden(),
+    queryFn: () => getHiddenChatList({ limit: CHAT_LIST_LIMIT }),
+    select: (response) => response.data,
+    staleTime: 30 * 1000,
+  });
+}
 
+/**
+ * Restore a hidden chat: drop it from the hidden list and put the row back at
+ * the top of every cached chat list. On failure both caches are refetched, so a
+ * refused unhide cannot leave the row showing in the main list.
+ */
+export function useUnhideConversation() {
+  const queryClient = useQueryClient();
+  const t = useTranslations("Messages");
+
+  return useMutation({
+    mutationFn: (conversationId: string) => unhideConversation(conversationId),
+    onSuccess: (_result, conversationId) => {
+      const hidden = queryClient.getQueryData<ApiResponse<RawConversationList>>(
+        chatKeys.hidden(),
+      );
+      const row = hidden?.data.data.find((entry) => entry._id === conversationId);
+
+      if (row) {
+        queryClient.setQueryData<ApiResponse<RawConversationList>>(
+          chatKeys.hidden(),
+          (previous) => removeConversationRow(previous as ChatListCache, conversationId),
+        );
+      }
+
+      if (row) {
+        queryClient.setQueriesData<ChatListCache>(
+          { queryKey: chatKeys.lists() },
+          (previous) => upsertConversationRow(previous, row),
+        );
+      }
+    },
+    onError: (error) => {
+      errorToast(t("unhideFailed"), getErrorMessage(error, t("unhideFailedDescription")));
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: chatKeys.hidden() });
+      void queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Every image/video/pdf in one thread, paginated newest-last (the pipeline sorts
+ * by message id). The gallery sheet walks pages until `fetchNextPage` ends.
+ */
+export function useConversationMedia(conversationId: string | null, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: chatKeys.media(conversationId),
+    queryFn: ({ pageParam }) =>
+      getConversationMedia(conversationId as string, {
+        page: pageParam,
+        limit: MEDIA_PAGE_SIZE,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data.meta;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled: Boolean(conversationId) && enabled,
+    staleTime: 30 * 1000,
+    select: (data): ConversationMediaPage => {
+      const items = data.pages.flatMap((page) => page.data.items);
+      return {
+        meta: data.pages[0]?.data.meta ?? { page: 1, limit: 0, total: 0, totalPages: 0 },
+        urls: items.map((item) => item.url),
+        items,
+      };
+    },
+  });
+}
+
+/** The group roster behind the chat-info sheet. Non-group chats never call it. */
+export function useChatGroup(groupId: string | null) {
+  return useQuery({
+    queryKey: chatKeys.group(groupId),
+    queryFn: () => getChatGroup(groupId as string),
+    select: (response) => response.data,
+    enabled: Boolean(groupId),
+    staleTime: 60 * 1000,
+  });
+}
+
+/**
+ * Soft-delete one of our own messages. The thread cache is patched in place so
+ * the bubble flips immediately; the server's socket event reaches the other
+ * participants, and a failed call refetches to whatever truth the server holds.
+ */
+export function useDeleteMessage(conversationId: string | null) {
+  const queryClient = useQueryClient();
+  const t = useTranslations("Messages");
+  const key = chatKeys.thread(conversationId);
+
+  return useMutation({
+    mutationFn: (messageId: string) => deleteMessage(messageId),
+    onMutate: async (messageId) => {
+      await queryClient.cancelQueries({ queryKey: key });
+      queryClient.setQueryData<ThreadPages>(key, (data) =>
+        markMessageDeleted(data, messageId),
+      );
+    },
+    onError: (error) => {
+      errorToast(t("deleteFailed"), getErrorMessage(error, t("deleteFailedDescription")));
+      void queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { FileText, Film, Paperclip, Send, Smile, X } from "lucide-react";
@@ -107,6 +107,39 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
   /** Files removed while their upload was still in flight. */
   const removedRef = useRef<Set<string>>(new Set());
 
+  /**
+   * The staged files live on S3 the moment they are picked, so leaving the
+   * thread without sending would orphan them. The cleanup runs once on unmount,
+   * when `pending` is stale — it reads the latest list from `pendingRef`.
+   */
+  const pendingRef = useRef<PendingAttachment[]>([]);
+  const sentRef = useRef<Set<string>>(new Set());
+  const goneRef = useRef(false);
+
+  useEffect(() => {
+    pendingRef.current = pending;
+  }, [pending]);
+
+  // An upload still in flight when the thread closes is caught by `goneRef` in
+  // `startUpload`; a URL a send already claimed is skipped via `sentRef`.
+  useEffect(() => {
+    goneRef.current = false;
+    const sent = sentRef.current;
+
+    return () => {
+      goneRef.current = true;
+
+      const orphans = pendingRef.current
+        .filter((item) => item.state === "done" && item.url !== undefined)
+        .map((item) => item.url as string)
+        .filter((url) => !sent.has(url));
+
+      if (orphans.length) {
+        void deleteConversationFiles(orphans).catch(() => undefined);
+      }
+    };
+  }, []);
+
   const updateAttachment = (
     id: string,
     changes: Partial<PendingAttachment>,
@@ -148,9 +181,9 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
           throw new Error("The upload returned no file URL");
         }
 
-        // Removed while uploading: the file is already on S3, so drop it there
-        // too rather than leaving an orphan nobody will ever send.
-        if (removedRef.current.has(id)) {
+        // Removed while uploading, or the thread closed mid-upload: the file is
+        // already on S3, so drop it there too rather than leaving an orphan.
+        if (removedRef.current.has(id) || goneRef.current) {
           void deleteConversationFiles([url]).catch(() => undefined);
           return;
         }
@@ -203,6 +236,7 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
       // The mutation resolves as soon as a transport accepts the send (both
       // transports reconcile in the background), so a rejection here means it
       // never started — keep the draft and attachments for a retry.
+      ready.forEach((item) => sentRef.current.add(item.url as string));
       setPending([]);
       removedRef.current.clear();
       setText("");

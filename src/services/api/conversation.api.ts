@@ -1,5 +1,23 @@
 import { apiClient } from "@/lib/api-client";
-import type { ApiResponse, ConversationHiddenResult } from "@/types";
+import type {
+  ApiResponse,
+  ConversationHiddenResult,
+  ConversationListQueryParams,
+  RawConversationList,
+} from "@/types";
+
+/**
+ * The chats this user hid — same row shape as the main list, with the `hiddenBy`
+ * filter inverted. The main list omits hidden rows, so this is the only way back
+ * to them.
+ * Endpoint: GET /conversation/get-hidden-chats
+ */
+export function getHiddenChatList(params?: ConversationListQueryParams) {
+  return apiClient<ApiResponse<RawConversationList>>(
+    "/conversation/get-hidden-chats",
+    { method: "GET", query: params },
+  );
+}
 
 /**
  * Hide a conversation for the signed-in user only. The server keeps the data

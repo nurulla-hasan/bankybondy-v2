@@ -323,6 +323,54 @@ export function removeConversationRow(
   };
 }
 
+/**
+ * Put a row back at the top of a list cache — the reverse of
+ * `removeConversationRow`, used when an unhidden chat returns. Rows already
+ * present are left untouched, so a double restore cannot duplicate one.
+ */
+export function upsertConversationRow(
+  cache: ChatListCache | undefined,
+  row: RawConversationListItem,
+): ChatListCache | undefined {
+  if (!cache) return cache;
+
+  const list = cache.data;
+  if (list.data.some((entry) => entry._id === row._id)) return cache;
+
+  return {
+    ...cache,
+    data: {
+      ...list,
+      meta: { ...list.meta, total: list.meta.total + 1 },
+      data: [row, ...list.data],
+    },
+  };
+}
+
+/** Flip one stored message to its deleted state, keeping its position. */
+export function markMessageDeleted(
+  data: ThreadPages | undefined,
+  messageId: string,
+): ThreadPages | undefined {
+  if (!data?.pages.length) return data;
+
+  let changed = false;
+  const pages = data.pages.map((page) => {
+    let pageChanged = false;
+    const result = page.data.result.map((message) => {
+      if (message._id !== messageId || message.isDeleted) return message;
+      pageChanged = true;
+      return { ...message, text: null, isDeleted: true };
+    });
+
+    if (!pageChanged) return page;
+    changed = true;
+    return { ...page, data: { ...page.data, result } };
+  });
+
+  return changed ? { ...data, pages } : data;
+}
+
 /** Zero one row's pill after the thread was opened / marked seen. */
 export function clearConversationUnread(
   cache: ChatListCache | undefined,

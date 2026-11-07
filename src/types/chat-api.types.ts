@@ -145,6 +145,44 @@ export interface MessageListQueryParams {
   limit?: number;
 }
 
+export type MediaKind = "image" | "video" | "pdf";
+
+/**
+ * `GET /conversation/get-media-files/:id` — one attachment, newest-first order is
+ * NOT guaranteed: the pipeline sorts by message `_id` ascending. `urls` is the
+ * flat twin of `items`, derived server-side so the two cannot disagree
+ * (`media.pipeline.ts`).
+ */
+export interface ConversationMediaItem {
+  url: string;
+  kind: MediaKind;
+  messageId: string;
+  createdAt?: string;
+}
+
+export interface ConversationMediaPage {
+  meta: PaginationMeta;
+  urls: string[];
+  items: ConversationMediaItem[];
+}
+
+export interface MediaGalleryQueryParams {
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * `GET /chatGroup/get/:id` (`chatGroup.service.ts:288-322`). Members are the
+ * `name profile_image _id` projection, the creator is listed separately.
+ */
+export interface ChatGroupDetails {
+  _id: string;
+  name: string;
+  image?: string;
+  creator: RawChatPerson | null;
+  participants: RawChatPerson[];
+}
+
 /**
  * What a send carries: `text` is never optional server-side, so an attachment-only
  * message ships it as `""`, and every media kind is an array of uploaded URLs

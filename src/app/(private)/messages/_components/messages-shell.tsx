@@ -1,9 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { EyeOff } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { SearchInput } from "@/components/common/search-input";
+import { Button } from "@/components/ui/button";
 import { useNextFilter } from "@/hooks/useNextFilter";
 import { useAuth } from "@/hooks/useAuth";
 import { CONTAINER_GUTTER, CONTAINER_MAX_WIDTH, STICKY_HEIGHT } from "@/lib/layout";
@@ -14,6 +17,7 @@ import {
   useChatList,
   useChatMessages,
   useConversationChannel,
+  useDeleteMessage,
   useHideConversation,
   useSendMessage,
 } from "@/services";
@@ -25,6 +29,7 @@ import type {
 
 import { ChatSoundToggle } from "./chat-sound-toggle";
 import { ConversationList } from "./list/conversation-list";
+import { HiddenChatsSheet } from "./list/hidden-chats-sheet";
 import { getConversationTitle } from "./shared/conversation-title";
 import { NoConversationState } from "./shared/no-conversation-state";
 import { PANE, PANE_BODY } from "./shared/pane";
@@ -47,6 +52,7 @@ export function MessagesShell() {
     : null;
   const selectedId = getFilter("c") || null;
   const searchTerm = getFilter("searchTerm") ?? "";
+  const [hiddenOpen, setHiddenOpen] = useState(false);
 
   const list = useChatList(searchTerm);
   const hide = useHideConversation();
@@ -87,6 +93,15 @@ export function MessagesShell() {
             <div className="flex flex-1 items-center justify-end gap-2">
               <SearchInput />
               <ChatSoundToggle />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label={t("hiddenTitle")}
+                onClick={() => setHiddenOpen(true)}
+              >
+                <EyeOff />
+              </Button>
             </div>
           </header>
 
@@ -103,6 +118,12 @@ export function MessagesShell() {
               }}
             />
           </div>
+
+          <HiddenChatsSheet
+            open={hiddenOpen}
+            onOpenChange={setHiddenOpen}
+            onRestored={select}
+          />
 
           {showOffline ? (
             <p
@@ -180,6 +201,7 @@ function ConversationThread({
   const meId = me?._id ?? "";
   const thread = useChatMessages(conversation._id, meId);
   const send = useSendMessage();
+  const remove = useDeleteMessage(conversation._id);
   useConversationChannel(conversation, meId);
 
   const handleSend = async (payload: NewMessagePayload) => {
@@ -213,6 +235,7 @@ function ConversationThread({
         void thread.fetchNextPage();
       }}
       onSend={handleSend}
+      onDeleteMessage={(messageId) => remove.mutate(messageId)}
     />
   );
 }

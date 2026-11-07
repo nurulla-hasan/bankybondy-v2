@@ -41,6 +41,7 @@ interface MessageThreadProps {
   onRetry: () => void;
   onLoadOlder: () => void;
   onSend: (payload: NewMessagePayload) => Promise<void>;
+  onDeleteMessage: (messageId: string) => void;
 }
 
 export function MessageThread({
@@ -56,6 +57,7 @@ export function MessageThread({
   onRetry,
   onLoadOlder,
   onSend,
+  onDeleteMessage,
 }: MessageThreadProps) {
   const t = useTranslations("Messages");
   const reduceMotion = useReducedMotion();
@@ -220,6 +222,7 @@ export function MessageThread({
                                 showAuthor={showAuthor}
                                 firstOfRun={index === 0}
                                 lastOfRun={index === run.length - 1}
+                                onDelete={onDeleteMessage}
                               />
                             ))}
                           </MessageGroup>

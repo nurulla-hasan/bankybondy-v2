@@ -1,10 +1,13 @@
 import { apiClient } from "@/lib/api-client";
 import type {
   ApiResponse,
+  ChatGroupDetails,
   ConversationFileKind,
   ConversationListQueryParams,
+  ConversationMediaPage,
   ConversationUploadResult,
   MarkSeenResult,
+  MediaGalleryQueryParams,
   MessageListQueryParams,
   RawConversationList,
   SendMessageInput,
@@ -95,6 +98,44 @@ export function getUnreadCount() {
   return apiClient<ApiResponse<UnreadResult>>("/message/unread-count", {
     method: "GET",
   });
+}
+
+/**
+ * Every image/video/pdf shared in one conversation, paginated. Deleted messages
+ * and blocked senders are already filtered server-side.
+ * Endpoint: GET /conversation/get-media-files/:id
+ */
+export function getConversationMedia(
+  conversationId: string,
+  params?: MediaGalleryQueryParams,
+) {
+  return apiClient<ApiResponse<ConversationMediaPage>>(
+    `/conversation/get-media-files/${encodeURIComponent(conversationId)}`,
+    { method: "GET", query: params },
+  );
+}
+
+/**
+ * Soft-delete one of our own messages. The server flips `isDeleted` and notifies
+ * the other participants over the socket.
+ * Endpoint: DELETE /message/delete-message/:id
+ */
+export function deleteMessage(messageId: string) {
+  return apiClient<ApiResponse<WireChatMessage>>(
+    `/message/delete-message/${encodeURIComponent(messageId)}`,
+    { method: "DELETE" },
+  );
+}
+
+/**
+ * The group roster for the chat-info sheet. A non-member gets a 404, not a 403.
+ * Endpoint: GET /chatGroup/get/:id
+ */
+export function getChatGroup(groupId: string) {
+  return apiClient<ApiResponse<ChatGroupDetails>>(
+    `/chatGroup/get/${encodeURIComponent(groupId)}`,
+    { method: "GET" },
+  );
 }
 
 /**

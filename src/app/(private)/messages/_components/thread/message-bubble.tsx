@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
-import { Clock3, FileText } from "lucide-react";
+import { Clock3, FileText, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/attachment";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { Button } from "@/components/ui/button";
 import {
   Message,
   MessageAvatar,
@@ -37,6 +38,8 @@ interface MessageBubbleProps {
   /** Identity belongs to the top of a run, timestamps to its bottom. */
   firstOfRun: boolean;
   lastOfRun: boolean;
+  /** Soft-deletes our own message; omit for a read-only thread. */
+  onDelete?: (messageId: string) => void;
 }
 
 export function MessageBubble({
@@ -44,6 +47,7 @@ export function MessageBubble({
   showAuthor,
   firstOfRun,
   lastOfRun,
+  onDelete,
 }: MessageBubbleProps) {
   const t = useTranslations("Messages");
   const locale = useLocale();
@@ -55,6 +59,8 @@ export function MessageBubble({
   const videos = message.videoUrl ?? [];
   const pdfs = message.pdfUrl ?? [];
   const author = !mine && showAuthor;
+  const canDelete =
+    Boolean(onDelete) && mine && !message.pending && !message.isDeleted;
 
   return (
     <motion.div
@@ -191,6 +197,18 @@ export function MessageBubble({
               ) : (
                 "\u00A0"
               )}
+
+              {canDelete ? (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t("deleteMessage")}
+                  className="ml-1 opacity-0 transition-opacity group-hover/message:opacity-100 focus-visible:opacity-100"
+                  onClick={() => onDelete?.(message._id)}
+                >
+                  <Trash2 aria-hidden />
+                </Button>
+              ) : null}
             </MessageFooter>
           ) : null}
         </MessageContent>
