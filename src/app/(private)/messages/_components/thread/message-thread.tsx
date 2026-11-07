@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -12,7 +12,6 @@ import type {
   NewMessagePayload,
   RawConversationListItem,
   RawChatMessage,
-  RawMessageList,
 } from "@/types";
 
 import { PANE_BODY } from "../shared/pane";
@@ -30,25 +29,32 @@ const GROUP_GAP_MS = 5 * 60_000;
 
 interface MessageThreadProps {
   conversation: RawConversationListItem;
-  data: RawMessageList | null;
+  /** Oldest first, already normalized by the query's `select`. */
+  messages: RawChatMessage[];
   isPending: boolean;
   isError: boolean;
   isSending: boolean;
+  hasOlder: boolean;
+  isLoadingOlder: boolean;
   onBack: () => void;
   onHide: () => void;
   onRetry: () => void;
-  onSend: (payload: NewMessagePayload) => void;
+  onLoadOlder: () => void;
+  onSend: (payload: NewMessagePayload) => Promise<void>;
 }
 
 export function MessageThread({
   conversation,
-  data,
+  messages,
   isPending,
   isError,
   isSending,
+  hasOlder,
+  isLoadingOlder,
   onBack,
   onHide,
   onRetry,
+  onLoadOlder,
   onSend,
 }: MessageThreadProps) {
   const t = useTranslations("Messages");
@@ -62,8 +68,16 @@ export function MessageThread({
   const atBottomRef = useRef(true);
   const seenRef = useRef({ conversationId: "", newestId: null as string | null });
 
-  // The endpoint sorts newest-first, so the page has to be flipped to be read.
-  const messages = useMemo(() => [...(data?.result ?? [])].reverse(), [data]);
+  /**
+   * Older pages are prepended, which moves everything down. Remembering the
+   * height before the fetch lets us put the reader back exactly where they were.
+   */
+  const anchorRef = useRef<{
+    height: number;
+    top: number;
+    length: number;
+  } | null>(null);
+
   const days = useMemo(() => groupByDay(messages), [messages]);
   const newest = messages.at(-1)?._id ?? null;
 
@@ -84,6 +98,38 @@ export function MessageThread({
     atBottomRef.current = value;
     setAtBottom(value);
   };
+
+  const loadOlder = () => {
+    const viewport = viewportRef.current;
+    if (!viewport || isLoadingOlder) return;
+
+    anchorRef.current = {
+      height: viewport.scrollHeight,
+      top: viewport.scrollTop,
+      length: messages.length,
+    };
+    onLoadOlder();
+  };
+
+  // Restore the anchor only once the older page actually added messages. A
+  // live message arriving first must not consume it.
+  useLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    const viewport = viewportRef.current;
+    if (!anchor || !viewport || messages.length <= anchor.length) return;
+
+    anchorRef.current = null;
+    viewport.scrollTop = viewport.scrollHeight - anchor.height + anchor.top;
+  }, [messages.length]);
+
+  // A page that came back empty (server total changed under us) leaves no anchor
+  // to consume; drop it so the next live message is not mistaken for older data.
+  useEffect(() => {
+    const anchor = anchorRef.current;
+    if (!isLoadingOlder && anchor && messages.length === anchor.length) {
+      anchorRef.current = null;
+    }
+  }, [isLoadingOlder, messages.length]);
 
   // A thread is read from the bottom. The shell keys this component by the
   // conversation, so a switch arrives as a fresh mount: pinned, nothing unseen.
@@ -145,6 +191,18 @@ export function MessageThread({
 
           {!isPending && !isError ? (
             <>
+              {hasOlder || isLoadingOlder ? (
+                <div className="flex justify-center pb-2">
+                  <Button
+                    variant="ghost"
+                    onClick={loadOlder}
+                    disabled={isLoadingOlder}
+                  >
+                    {isLoadingOlder ? t("loadingOlder") : t("loadOlder")}
+                  </Button>
+                </div>
+              ) : null}
+
               {messages.length ? (
                 /* `initial={false}` so a loaded thread appears at once and only a
                    message that arrives later plays its entrance. */
@@ -175,13 +233,6 @@ export function MessageThread({
                   {t("emptyDescription")}
                 </p>
               )}
-
-              {/* Paging is switched off server-side (`message.service.ts:150-158`). */}
-              <div className="flex justify-center py-3">
-                <Button variant="ghost" size="xs" disabled>
-                  {t("loadOlder")}
-                </Button>
-              </div>
             </>
           ) : null}
         </div>
@@ -196,7 +247,6 @@ export function MessageThread({
               className="absolute bottom-3 right-3"
             >
               <Button
-                size="sm"
                 variant="outline"
                 className="rounded-full bg-card/90 shadow-md backdrop-blur"
                 onClick={() => {
@@ -225,8 +275,8 @@ interface DayGroup {
 }
 
 /**
- * Messages arrive oldest-first from the gateway. `createdAt` is an ISO string, so
- * the first ten characters are the UTC day — close enough to split a thread.
+ * Messages arrive oldest-first. `createdAt` is an ISO string, so the first ten
+ * characters are the UTC day — close enough to split a thread.
  */
 function groupByDay(messages: RawChatMessage[]): DayGroup[] {
   const days: DayGroup[] = [];

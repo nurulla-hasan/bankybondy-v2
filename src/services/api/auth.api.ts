@@ -7,9 +7,11 @@ import type {
   LoginPayload,
   LoginResponse,
   OAuthLoginPayload,
+  RefreshSessionResult,
   RegisterPayload,
   ResendVerifyCodePayload,
   ResetPasswordPayload,
+  SocketTokenResult,
   VerifyCodePayload,
   VerifyResetOtpPayload,
 } from "@/types";
@@ -158,5 +160,30 @@ export function deleteAccount(password: string) {
   return apiClient<ApiResponse<null>>("/user/delete-account", {
     method: "DELETE",
     body: { password },
+  });
+}
+
+/**
+ * 14. Mint a 30-minute JWT for the Socket.IO handshake. The access token lives
+ * in an HttpOnly cookie, so the browser cannot read it; this endpoint hands the
+ * socket its own short-lived token and the HTTP middleware refuses it
+ * (`helper/socketToken.ts`).
+ * Endpoint: GET /auth/socket-token
+ */
+export function getSocketToken() {
+  return apiClient<ApiResponse<SocketTokenResult>>("/auth/socket-token", {
+    method: "GET",
+  });
+}
+
+/**
+ * 15. Renew the access cookie. Browsers send the HttpOnly refresh cookie, so no
+ * body is needed. Used when a socket-token mint comes back 401 because the
+ * access cookie expired between page loads.
+ * Endpoint: POST /auth/refresh-token
+ */
+export function refreshSession() {
+  return apiClient<ApiResponse<RefreshSessionResult>>("/auth/refresh-token", {
+    method: "POST",
   });
 }

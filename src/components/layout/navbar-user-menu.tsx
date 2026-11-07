@@ -6,12 +6,14 @@ import { useTranslations } from "next-intl";
 import {
   ArrowRight,
   LogOut,
+  MessageSquare,
   Settings,
   User as UserIcon,
   Users,
 } from "lucide-react";
 
 import {
+  useChatUnreadCount,
   useGetMyProfile,
   useLogout,
   usePendingFriendRequestCount,
@@ -45,6 +47,7 @@ export function NavbarUserMenu({
   onLogout: onLogoutProp,
 }: NavbarUserMenuProps) {
   const t = useTranslations("Navbar");
+  const tMessages = useTranslations("Messages");
 
   const { data: profileData, isLoading: queryLoading } = useGetMyProfile();
   const { mutate: queryLogout } = useLogout();
@@ -53,6 +56,12 @@ export function NavbarUserMenu({
   const user = userProp !== undefined ? userProp : profileData?.data;
   const isLoading = isLoadingProp !== undefined ? isLoadingProp : queryLoading;
   const handleLogout = onLogoutProp ?? (() => queryLogout());
+
+  // Messages is a personal workspace, so it lives here instead of the main nav.
+  const { data: unread } = useChatUnreadCount(Boolean(user));
+  const unreadTotal = unread?.totalUnread ?? 0;
+  const unreadLabel =
+    unreadTotal > 99 ? tMessages("unseenCap") : String(unreadTotal);
 
   if (isLoading) {
     return <div className="size-9 animate-pulse rounded-full bg-muted" />;
@@ -95,6 +104,15 @@ export function NavbarUserMenu({
             <DropdownMenuItem render={<Link href="/profile" />}>
               <UserIcon className="size-4 mr-2" />
               <span>{t("profile")}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/messages" />}>
+              <MessageSquare className="size-4 mr-2" />
+              <span>{t("messages")}</span>
+              {unreadTotal > 0 ? (
+                <span className="ml-auto inline-flex min-w-4.5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-none text-primary-foreground">
+                  {unreadLabel}
+                </span>
+              ) : null}
             </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>

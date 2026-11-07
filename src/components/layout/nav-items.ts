@@ -6,19 +6,12 @@ import {
   Home,
   Handshake,
   Users,
-  MessageSquare,
   Radio,
   HeartHandshake,
   type LucideIcon,
 } from "lucide-react";
 
-export type NavItemKey =
-  | "Home"
-  | "Donate"
-  | "Bonds"
-  | "People"
-  | "Messages"
-  | "Chatting";
+export type NavItemKey = "Home" | "Donate" | "Bonds" | "People" | "Chatting";
 
 export interface NavItemConfig {
   key: NavItemKey;
@@ -35,14 +28,15 @@ export interface NavLinkItem {
 }
 
 /**
- * Ordered exactly as in design: Home, Donate, Bonds, People, Message, We are chatting
+ * Ordered exactly as in design: Home, Donate, Bonds, People, We are chatting.
+ * Messages is a personal workspace and lives in the profile menu instead of the
+ * main nav (see `navbar-user-menu.tsx`), with its unread badge.
  */
 export const NAV_ITEMS: readonly NavItemConfig[] = [
   { key: "Home", href: "/", icon: Home },
   { key: "Donate", href: "/donate", icon: HeartHandshake },
   { key: "Bonds", href: "/bonds", icon: Handshake },
   { key: "People", href: "/people", icon: Users },
-  { key: "Messages", href: "/messages", icon: MessageSquare },
   { key: "Chatting", href: "/chatting", icon: Radio },
 ] as const;
 

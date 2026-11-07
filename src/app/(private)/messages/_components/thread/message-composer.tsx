@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Paperclip, Send, Smile, X } from "lucide-react";
+import { FileText, Film, Paperclip, Send, Smile, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -11,13 +11,21 @@ import {
   AttachmentAction,
   AttachmentActions,
   AttachmentContent,
+  AttachmentDescription,
   AttachmentGroup,
   AttachmentMedia,
   AttachmentTitle,
 } from "@/components/ui/attachment";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import type { NewMessagePayload } from "@/types";
+import { getErrorMessage } from "@/lib/error";
+import { errorToast } from "@/lib/toast";
+import {
+  deleteConversationFiles,
+  uploadConversationFile,
+} from "@/services/api/chat.api";
+import type { ConversationFileKind, NewMessagePayload } from "@/types";
 
 /**
  * Code points instead of literals, and only single-codepoint emoji: every entry
@@ -49,56 +57,158 @@ const EMOJIS = [
   0x2705, 0x274c, 0x2757, 0x1f44b, 0x1f918, 0x1f919, 0x1f4df, 0x1f514,
 ].map((code) => String.fromCodePoint(code));
 
+/** The backend's multer limit (`helper/mutler-s3-uploader.ts`). */
+const MAX_FILE_BYTES = 50 * 1024 * 1024;
+
 interface MessageComposerProps {
   isPending: boolean;
-  onSend: (payload: NewMessagePayload) => void;
+  /** Resolves once the server accepted/echoed it; rejects so the draft survives. */
+  onSend: (payload: NewMessagePayload) => Promise<void>;
 }
 
-/** MOCK-ONLY: a picked file becomes a blob URL in place of an upload response. */
-interface PendingFile {
-  url: string;
+/**
+ * A file is uploaded the moment it is picked. The send then carries CloudFront
+ * URLs only — the API filters out anything that is not on our CDN, and a blob
+ * URL would be dropped silently.
+ */
+interface PendingAttachment {
+  id: string;
   name: string;
-  isPdf: boolean;
+  kind: ConversationFileKind;
+  url?: string;
+  state: "uploading" | "done" | "error";
+}
+
+function kindOf(file: File): ConversationFileKind | null {
+  if (file.type.startsWith("image/")) return "image";
+  if (file.type.startsWith("video/")) return "video";
+  if (file.type === "application/pdf") return "pdf";
+  return null;
+}
+
+function createId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
   const t = useTranslations("Messages");
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const pendingRef = useRef<PendingFile[]>([]);
 
   const [text, setText] = useState("");
-  const [pending, setPending] = useState<PendingFile[]>([]);
+  const [pending, setPending] = useState<PendingAttachment[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const reduceMotion = useReducedMotion();
 
-  // Leaving the thread drops the drafts, so their blobs go with them.
-  useEffect(() => {
-    const tracked = pendingRef;
+  /** Files removed while their upload was still in flight. */
+  const removedRef = useRef<Set<string>>(new Set());
 
-    return () => tracked.current.forEach((file) => URL.revokeObjectURL(file.url));
-  }, []);
-
-  const track = (files: PendingFile[]) => {
-    pendingRef.current = files;
-    setPending(files);
+  const updateAttachment = (
+    id: string,
+    changes: Partial<PendingAttachment>,
+  ) => {
+    setPending((current) =>
+      current.map((item) => (item.id === id ? { ...item, ...changes } : item)),
+    );
   };
 
-  const submit = () => {
+  const startUpload = (file: File) => {
+    const kind = kindOf(file);
+    if (!kind) {
+      errorToast(t("unsupportedFile"), file.name);
+      return;
+    }
+
+    if (file.size > MAX_FILE_BYTES) {
+      errorToast(t("fileTooLarge"), file.name);
+      return;
+    }
+
+    const id = createId();
+    setPending((current) => [
+      ...current,
+      { id, name: file.name, kind, state: "uploading" },
+    ]);
+
+    void (async () => {
+      try {
+        const response = await uploadConversationFile(file, kind);
+        const url =
+          kind === "image"
+            ? response.data.images[0]
+            : kind === "video"
+              ? response.data.videos[0]
+              : response.data.pdfs[0];
+
+        if (!url) {
+          throw new Error("The upload returned no file URL");
+        }
+
+        // Removed while uploading: the file is already on S3, so drop it there
+        // too rather than leaving an orphan nobody will ever send.
+        if (removedRef.current.has(id)) {
+          void deleteConversationFiles([url]).catch(() => undefined);
+          return;
+        }
+
+        updateAttachment(id, { url, state: "done" });
+      } catch (error) {
+        updateAttachment(id, { state: "error" });
+        errorToast(
+          t("uploadFailed"),
+          getErrorMessage(error, t("uploadFailedDescription")),
+        );
+      }
+    })();
+  };
+
+  const removeAttachment = (item: PendingAttachment) => {
+    removedRef.current.add(item.id);
+    setPending((current) => current.filter((entry) => entry.id !== item.id));
+
+    if (item.url) {
+      void deleteConversationFiles([item.url]).catch(() => undefined);
+    }
+  };
+
+  const submit = async () => {
+    if (isPending) return;
+
+    const hasUploading = pending.some((item) => item.state === "uploading");
+    if (hasUploading) return;
+
+    const ready = pending.filter((item) => item.state === "done" && item.url);
     const trimmed = text.trim();
-    if (!trimmed && !pending.length) return;
+    if (!trimmed && !ready.length) return;
 
-    onSend({
+    const urlsOf = (kind: ConversationFileKind) =>
+      ready
+        .filter((item) => item.kind === kind)
+        .map((item) => item.url as string);
+
+    const payload: NewMessagePayload = {
       text: trimmed,
-      imageUrl: pending.filter((file) => !file.isPdf).map((file) => file.url),
-      pdfUrl: pending.filter((file) => file.isPdf).map((file) => file.url),
-    });
+      imageUrl: urlsOf("image"),
+      videoUrl: urlsOf("video"),
+      pdfUrl: urlsOf("pdf"),
+    };
 
-    // The thread now owns these URLs, so they must outlive the composer.
-    pendingRef.current = [];
-    setPending([]);
-    setText("");
-    if (inputRef.current) inputRef.current.value = "";
+    try {
+      await onSend(payload);
+
+      // Only a confirmed send clears the draft. The mutation already toasted a
+      // failure, and a rejection here means the composer must keep everything.
+      setPending([]);
+      removedRef.current.clear();
+      setText("");
+      if (inputRef.current) inputRef.current.value = "";
+    } catch {
+      // Draft and attachments stay as they were.
+    }
   };
 
   const addEmoji = (emoji: string) => {
@@ -106,7 +216,9 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
     textareaRef.current?.focus();
   };
 
-  const canSend = !isPending && Boolean(text.trim() || pending.length);
+  const hasUploading = pending.some((item) => item.state === "uploading");
+  const hasReady = pending.some((item) => item.state === "done");
+  const canSend = !isPending && !hasUploading && Boolean(text.trim() || hasReady);
 
   // `height` is not a transform, so MotionConfig leaves it alone — opt out by hand.
   const panelMotion = reduceMotion
@@ -122,15 +234,15 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
       className="flex shrink-0 flex-col gap-2 border-t border-border px-3 py-3"
       onSubmit={(event) => {
         event.preventDefault();
-        submit();
+        void submit();
       }}
     >
       {pending.length ? (
         <AttachmentGroup aria-label={t("attachmentsPending")}>
           <AnimatePresence>
-            {pending.map((file) => (
+            {pending.map((item) => (
               <motion.div
-                key={file.url}
+                key={item.id}
                 layout
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -138,28 +250,47 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
                 transition={{ duration: 0.15 }}
                 className="flex-none"
               >
-                <Attachment
-                  size="xs"
-                  orientation={file.isPdf ? "horizontal" : "vertical"}
-                >
-                  <AttachmentMedia variant={file.isPdf ? "icon" : "image"}>
-                    {file.isPdf ? null : (
-                      <Image src={file.url} alt="" width={96} height={96} unoptimized />
+                <Attachment size="xs" state={item.state}>
+                  <AttachmentMedia
+                    variant={
+                      item.kind === "image" && item.url ? "image" : "icon"
+                    }
+                  >
+                    {item.state === "uploading" ? (
+                      <Spinner />
+                    ) : item.kind === "image" && item.url ? (
+                      <Image
+                        src={item.url}
+                        alt=""
+                        width={96}
+                        height={96}
+                        unoptimized
+                      />
+                    ) : item.kind === "video" ? (
+                      <Film />
+                    ) : (
+                      <FileText />
                     )}
                   </AttachmentMedia>
 
                   <AttachmentContent>
-                    <AttachmentTitle>{file.name}</AttachmentTitle>
+                    <AttachmentTitle>{item.name}</AttachmentTitle>
+                    {item.state === "uploading" ? (
+                      <AttachmentDescription>
+                        {t("uploading")}
+                      </AttachmentDescription>
+                    ) : item.state === "error" ? (
+                      <AttachmentDescription>
+                        {t("uploadFailed")}
+                      </AttachmentDescription>
+                    ) : null}
                   </AttachmentContent>
 
                   <AttachmentActions>
                     <AttachmentAction
                       variant="secondary"
                       aria-label={t("removeAttachment")}
-                      onClick={() => {
-                        URL.revokeObjectURL(file.url);
-                        track(pending.filter((item) => item.url !== file.url));
-                      }}
+                      onClick={() => removeAttachment(item)}
                     >
                       <X />
                     </AttachmentAction>
@@ -208,16 +339,13 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
           ref={inputRef}
           type="file"
           multiple
-          accept="image/*,application/pdf"
+          accept="image/*,application/pdf,video/*"
           className="sr-only"
           onChange={(event) => {
-            const picked = Array.from(event.target.files ?? [], (file) => ({
-              url: URL.createObjectURL(file),
-              name: file.name,
-              isPdf: file.type === "application/pdf",
-            }));
-
-            track([...pending, ...picked]);
+            const files = Array.from(event.target.files ?? []);
+            // Reset so picking the same file again still fires `change`.
+            event.target.value = "";
+            files.forEach(startUpload);
           }}
         />
 
@@ -243,7 +371,7 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
               event.preventDefault();
-              submit();
+              void submit();
             }
           }}
           placeholder={t("composerPlaceholder")}
@@ -263,7 +391,7 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
         </Button>
 
         <Button type="submit" size="icon-lg" disabled={!canSend} aria-label={t("send")}>
-          <Send />
+          {isPending ? <Spinner /> : <Send />}
         </Button>
       </div>
     </form>

@@ -5,50 +5,67 @@ import { useTranslations } from "next-intl";
 
 import { SearchInput } from "@/components/common/search-input";
 import { useNextFilter } from "@/hooks/useNextFilter";
+import { useAuth } from "@/hooks/useAuth";
 import { CONTAINER_GUTTER, CONTAINER_MAX_WIDTH, STICKY_HEIGHT } from "@/lib/layout";
 import { cn } from "@/lib/utils";
-
+import { useChatSocket } from "@/provider/chat-socket.provider";
 import {
-  MOCK_ME_ID,
-  useMockChatList,
-  useMockMessages,
-  useMockSend,
-  type MockViewState,
-} from "../_mock/mock-chat-gateway";
+  createClientId,
+  useChatList,
+  useChatMessages,
+  useConversationChannel,
+  useHideConversation,
+  useSendMessage,
+} from "@/services";
+import type {
+  NewMessagePayload,
+  RawChatPerson,
+  RawConversationListItem,
+} from "@/types";
+
 import { ConversationList } from "./list/conversation-list";
 import { getConversationTitle } from "./shared/conversation-title";
 import { NoConversationState } from "./shared/no-conversation-state";
 import { PANE, PANE_BODY } from "./shared/pane";
 import { MessageThread } from "./thread/message-thread";
 
-type MessagesFilterKey = "c" | "searchTerm" | "mockState";
+type MessagesFilterKey = "c" | "searchTerm";
 
 export function MessagesShell() {
   const t = useTranslations("Messages");
   const { getFilter, updateFilter } = useNextFilter<MessagesFilterKey>();
+  const { user } = useAuth();
+  const { status } = useChatSocket();
 
-  const rawMockState = getFilter("mockState");
-  const mockState: MockViewState | undefined =
-    rawMockState === "empty" || rawMockState === "error" ? rawMockState : undefined;
-
+  const me = user
+    ? {
+        _id: user._id,
+        name: user.name,
+        profile_image: user.profile_image,
+      }
+    : null;
   const selectedId = getFilter("c") || null;
   const searchTerm = getFilter("searchTerm") ?? "";
 
-  const list = useMockChatList({ searchTerm, mockState });
-  const thread = useMockMessages(selectedId);
-  const send = useMockSend(() => {
-    thread.invalidate();
-    list.invalidate();
-  });
+  const list = useChatList(searchTerm);
+  const hide = useHideConversation();
 
-  const conversation = list.data?.data.find((item) => item._id === selectedId) ?? null;
+  const conversation =
+    list.data?.data.find((item) => item._id === selectedId) ?? null;
+
+  const showOffline = status === "disconnected" || status === "error";
 
   const select = (conversationId: string) => {
-    list.markRead(conversationId);
     updateFilter("c", conversationId, { resetPage: false, method: "push" });
   };
 
-  const deselect = () => updateFilter("c", null, { resetPage: false, method: "push" });
+  const deselect = () =>
+    updateFilter("c", null, { resetPage: false, method: "push" });
+
+  const hideSelected = (conversationId: string) => {
+    hide.mutate(conversationId);
+    deselect();
+  };
 
   return (
     <div
@@ -71,23 +88,34 @@ export function MessagesShell() {
 
           <div className={cn(PANE_BODY, "px-2 py-2")}>
             <ConversationList
-              data={list.data}
+              data={list.data ?? null}
               isPending={list.isPending}
               isError={list.isError}
-              meId={MOCK_ME_ID}
+              meId={me?._id ?? ""}
               selectedId={selectedId}
               onSelect={select}
-              onRetry={list.refetch}
+              onRetry={() => {
+                void list.refetch();
+              }}
             />
           </div>
 
-          <p className="shrink-0 border-t border-border px-4 py-2 text-xs text-muted-foreground">
-            {t("mockNotice")}
-          </p>
+          {showOffline ? (
+            <p
+              role="status"
+              className="shrink-0 border-t border-border px-4 py-2 text-xs text-muted-foreground"
+            >
+              {t("reconnecting")}
+            </p>
+          ) : null}
         </section>
 
         <section
-          aria-label={conversation ? getConversationTitle(conversation) : t("noConversationTitle")}
+          aria-label={
+            conversation
+              ? getConversationTitle(conversation)
+              : t("noConversationTitle")
+          }
           className={cn(
             PANE,
             "lg:col-span-2",
@@ -104,19 +132,11 @@ export function MessagesShell() {
               transition={{ duration: 0.14, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="flex min-h-0 flex-1 flex-col"
             >
-              <MessageThread
+              <ConversationThread
                 conversation={conversation}
-                data={thread.data}
-                isPending={thread.isPending}
-                isError={thread.isError}
-                isSending={send.isPending}
+                me={me}
                 onBack={deselect}
-                onHide={() => {
-                  list.hide(conversation._id);
-                  deselect();
-                }}
-                onRetry={thread.refetch}
-                onSend={(payload) => send.mutate(conversation._id, payload)}
+                onHide={() => hideSelected(conversation._id)}
               />
             </motion.div>
           ) : (
@@ -127,5 +147,63 @@ export function MessagesShell() {
         </section>
       </div>
     </div>
+  );
+}
+
+interface ConversationThreadProps {
+  conversation: RawConversationListItem;
+  me: Pick<RawChatPerson, "_id" | "name" | "profile_image"> | null;
+  onBack: () => void;
+  onHide: () => void;
+}
+
+/**
+ * One thread, one set of hooks. Kept separate so the message query and its
+ * socket channel mount and unmount with the conversation instead of trying to
+ * re-key a listener from the shell.
+ */
+function ConversationThread({
+  conversation,
+  me,
+  onBack,
+  onHide,
+}: ConversationThreadProps) {
+  const meId = me?._id ?? "";
+  const thread = useChatMessages(conversation._id, meId);
+  const send = useSendMessage();
+  useConversationChannel(conversation, meId);
+
+  const handleSend = async (payload: NewMessagePayload) => {
+    if (!me) throw new Error("The signed-in profile is not ready yet");
+
+    // `mutateAsync` rejects on failure, which is what tells the composer to keep
+    // the draft and its already-uploaded attachments.
+    await send.mutateAsync({
+      conversation,
+      payload,
+      me,
+      clientId: createClientId(),
+    });
+  };
+
+  return (
+    <MessageThread
+      conversation={conversation}
+      messages={thread.data?.messages ?? []}
+      isPending={thread.isPending || !meId}
+      isError={thread.isError}
+      isSending={send.isPending}
+      hasOlder={Boolean(thread.hasNextPage)}
+      isLoadingOlder={thread.isFetchingNextPage}
+      onBack={onBack}
+      onHide={onHide}
+      onRetry={() => {
+        void thread.refetch();
+      }}
+      onLoadOlder={() => {
+        void thread.fetchNextPage();
+      }}
+      onSend={handleSend}
+    />
   );
 }

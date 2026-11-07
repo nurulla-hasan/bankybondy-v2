@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { FileText } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { Clock3, FileText } from "lucide-react";
 
 import {
   Attachment,
@@ -23,7 +23,7 @@ import {
   MessageFooter,
   MessageHeader,
 } from "@/components/ui/message";
-import { getInitials } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import type { RawChatMessage } from "@/types";
 
 import { formatChatClock, useHydrated } from "../shared/chat-timestamp";
@@ -49,12 +49,16 @@ export function MessageBubble({
 
   const mine = message.isMyMessage;
   const images = message.imageUrl ?? [];
+  const videos = message.videoUrl ?? [];
   const pdfs = message.pdfUrl ?? [];
   const author = !mine && showAuthor;
 
   return (
     <motion.div
-      className={mine ? "origin-bottom-right" : "origin-bottom-left"}
+      className={cn(
+        mine ? "origin-bottom-right" : "origin-bottom-left",
+        message.pending && "opacity-60",
+      )}
       initial={{ opacity: 0, y: 8, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -98,13 +102,28 @@ export function MessageBubble({
                           alt={t("attachmentImage", { count: images.length })}
                           width={320}
                           height={320}
-                          unoptimized={isMockAttachment(src)}
+                          unoptimized
                           className="aspect-square w-full rounded-lg object-cover"
                         />
                       </li>
                     ))}
                   </ul>
                 </Bubble>
+              ) : null}
+
+              {videos.length ? (
+                <div className="flex flex-col gap-1">
+                  {videos.map((src, index) => (
+                    <video
+                      key={`${message._id}-video-${index}`}
+                      src={src}
+                      controls
+                      preload="metadata"
+                      aria-label={t("attachmentVideo", { count: videos.length })}
+                      className="max-w-60 rounded-lg"
+                    />
+                  ))}
+                </div>
               ) : null}
 
               {pdfs.length ? (
@@ -144,20 +163,22 @@ export function MessageBubble({
 
           {lastOfRun ? (
             <MessageFooter>
-              {hydrated && message.createdAt
-                ? formatChatClock(message.createdAt, locale)
-                : "\u00A0"}
+              {message.pending ? (
+                <span className="inline-flex items-center gap-1">
+                  <Clock3 className="size-3" aria-hidden />
+                  {t("sending")}
+                </span>
+              ) : hydrated && message.createdAt ? (
+                formatChatClock(message.createdAt, locale)
+              ) : (
+                "\u00A0"
+              )}
             </MessageFooter>
           ) : null}
         </MessageContent>
       </Message>
     </motion.div>
   );
-}
-
-/** MOCK-ONLY: seed attachments are `data:`/`mock:` URIs, which next/image cannot resolve. */
-function isMockAttachment(src: string): boolean {
-  return src.startsWith("data:") || src.startsWith("mock:");
 }
 
 /**

@@ -2,15 +2,10 @@ import type { PaginationMeta } from "./api.types";
 import type { RawBondLinkStatus } from "./bond-api.types";
 
 /**
- * `conversation.enum.ts:1-6`. `project-group` is filtered out of every read
- * (`conversation.service.ts:78`) and the socket refuses it with 403, so it can
- * arrive only as a stale value, never as a rendered row.
+ * `conversation.enum.ts` after the project/institution removal: three values.
+ * A stale `project-group` can no longer be produced by any read.
  */
-export type ConversationType =
-  | "chat-group"
-  | "one-two-one"
-  | "project-group"
-  | "bond-link-group";
+export type ConversationType = "chat-group" | "one-two-one" | "bond-link-group";
 
 /**
  * The person shape the chat module ships: `name profile_image` only. Email was
@@ -67,10 +62,9 @@ export interface RawConversationList {
 }
 
 /**
- * One message from `GET /message/get-messages`. There is no message-type enum
- * and no sent/delivered/read status; a message is media-bearing when its URL
- * arrays are non-empty. When `isDeleted`, all four content fields arrive as
- * `null` rather than empty (`message.service.ts:185-199`).
+ * One message as the UI renders it: sender id always a string, sender name
+ * always present, `isMyMessage` always decided. Nothing on the wire is exactly
+ * this, so `lib/chat/normalize.ts` produces it — see `WireChatMessage`.
  */
 export interface RawChatMessage {
   _id: string;
@@ -86,12 +80,57 @@ export interface RawChatMessage {
   /** Projection keeps `name profile_image` only — no id. */
   userDetails: Pick<RawChatPerson, "name" | "profile_image">;
   isMyMessage: boolean;
+  /** Was this message read by me. Only the history page answers it; a message
+   * that just arrived has no idea who is looking, so normalize assumes read. */
+  seen?: boolean;
+  /** Client-side only: the id we generated for an optimistic bubble still
+   * waiting for the server. The backend never echoes `clientId` back on a
+   * stored message — it appears only in a rejection's `details`. */
+  clientId?: string;
+  /** Client-side only: this bubble is optimistic and has no `_id` from the DB
+   * yet. Cleared when the stored message replaces it. */
+  pending?: boolean;
+}
+
+/**
+ * What the network actually sends for a message, on both doors:
+ * - `GET /message/get-messages` (`message.pipeline.ts` `$project`): `msgByUserId`
+ *   is an id string, `userDetails` and `isMyMessage`/`seen` are present.
+ * - a send (`POST /message/send`, socket `message-*`): `msgByUserId` arrives
+ *   POPULATED as an object next to the mirrored `userDetails`
+ *   (`helper/messageEmitShape.ts`), and `isMyMessage`/`seen` are absent because
+ *   one payload goes to both parties and only the reader knows which side it is on.
+ */
+export interface WireChatMessage {
+  _id: string;
+  text: string | null;
+  imageUrl: string[] | null;
+  videoUrl: string[] | null;
+  pdfUrl: string[] | null;
+  msgByUserId: string | RawChatPerson;
+  conversationId: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isDeleted: boolean;
+  userDetails?: Pick<RawChatPerson, "name" | "profile_image">;
+  isMyMessage?: boolean;
+  seen?: boolean;
+  /** Optimistic bubble that is already in the cache but not on the server. */
+  pending?: boolean;
+  /** Echo id we sent; the backend only repeats it in rejection details. */
+  clientId?: string;
 }
 
 /** Messages sort newest-first server-side, so the UI has to reverse the page. */
 export interface RawMessageList {
   meta: PaginationMeta;
   result: RawChatMessage[];
+}
+
+/** The un-normalized twin, which is what the fetchers return. */
+export interface WireMessageList {
+  meta: PaginationMeta;
+  result: WireChatMessage[];
 }
 
 export interface ConversationListQueryParams {
@@ -101,6 +140,7 @@ export interface ConversationListQueryParams {
 }
 
 export interface MessageListQueryParams {
+  conversationId?: string;
   page?: number;
   limit?: number;
 }
@@ -113,5 +153,86 @@ export interface MessageListQueryParams {
 export interface NewMessagePayload {
   text: string;
   imageUrl: string[];
+  videoUrl?: string[];
   pdfUrl: string[];
+}
+
+/** Body of `POST /message/send`: the content, who it goes to, our own echo id. */
+export interface SendMessageInput extends NewMessagePayload {
+  receiver: string;
+  clientId?: string;
+}
+
+/** `GET /message/unread-count` (`message.service.ts:196-228`). */
+export interface UnreadPerConversation {
+  conversationId: string;
+  unreadCount: number;
+}
+
+/**
+ * `totalUnread` counts CONVERSATIONS that have something unread, not messages —
+ * that is what makes the navbar badge agree with the bolded rows.
+ * (`message.service.ts:217-220`)
+ */
+export interface UnreadResult {
+  totalUnread: number;
+  perConversation: UnreadPerConversation[];
+}
+
+/** `POST /message/mark-seen` answers with this and nothing else. */
+export interface MarkSeenResult {
+  marked: true;
+}
+
+/**
+ * `GET /auth/socket-token` (`helper/socketToken.ts`). The token is scoped to the
+ * Socket.IO handshake and is rejected by the HTTP middleware, so it can live in
+ * memory and be re-minted freely.
+ */
+export interface SocketTokenResult {
+  token: string;
+  expiresIn: number;
+}
+
+/** `POST /auth/refresh-token` — the browser sends the HttpOnly refresh cookie. */
+export interface RefreshSessionResult {
+  accessToken: string;
+}
+
+/** Which multer field a picked file goes into. */
+export type ConversationFileKind = "image" | "video" | "pdf";
+
+/**
+ * `POST /file-upload/upload-conversation-files` (`file.controller.ts`). Every
+ * URL is a CloudFront URL — the socket/REST send filters anything else out.
+ */
+export interface ConversationUploadResult {
+  images: string[];
+  videos: string[];
+  pdfs: string[];
+}
+
+/**
+ * `PATCH /conversation/hide/:id` and `PATCH /conversation/unhide/:id`.
+ * `setConversationHidden` selects `_id hiddenBy` only.
+ */
+export interface ConversationHiddenResult {
+  _id: string;
+  hiddenBy: string[];
+}
+
+/**
+ * `socket.emit("send-message", ...)`. Groups and bond links have no REST send
+ * (`handleChat.ts`), so this is their only door. The three target fields are
+ * mutually exclusive on the server.
+ */
+export interface SocketSendMessageInput {
+  text: string;
+  imageUrl?: string[];
+  videoUrl?: string[];
+  pdfUrl?: string[];
+  receiver?: string;
+  groupId?: string;
+  bondLinkId?: string;
+  clientId?: string;
 }

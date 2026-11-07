@@ -8,13 +8,14 @@ import {
   ArrowRight,
   LogOut,
   Menu,
+  MessageSquare,
   Settings,
   User as UserIcon,
   Users,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { useGetMyProfile, useLogout } from "@/services";
+import { useChatUnreadCount, useGetMyProfile, useLogout } from "@/services";
 import { Logo } from "@/components/common/logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +45,7 @@ export function MobileNav({
   className,
 }: MobileNavProps) {
   const t = useTranslations("Navbar");
+  const tMessages = useTranslations("Messages");
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
 
@@ -52,6 +54,9 @@ export function MobileNav({
 
   const user = userProp !== undefined ? userProp : profileData?.data;
   const isLoading = isLoadingProp !== undefined ? isLoadingProp : queryLoading;
+  const { data: unread } = useChatUnreadCount(Boolean(user));
+  const unreadTotal = unread?.totalUnread ?? 0;
+  const unreadLabel = unreadTotal > 99 ? tMessages("unseenCap") : String(unreadTotal);
   const handleLogout = () => {
     if (onLogoutProp) {
       onLogoutProp();
@@ -156,6 +161,19 @@ export function MobileNav({
                   >
                     <UserIcon className="size-4 shrink-0" />
                     <span>{t("profile")}</span>
+                  </Link>
+                  <Link
+                    href="/messages"
+                    onClick={() => setOpen(false)}
+                    className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                  >
+                    <MessageSquare className="size-4 shrink-0" />
+                    <span>{t("messages")}</span>
+                    {unreadTotal > 0 ? (
+                      <span className="ml-auto inline-flex min-w-4.5 items-center justify-center rounded-full bg-primary px-1 text-xs font-semibold leading-none text-primary-foreground">
+                        {unreadLabel}
+                      </span>
+                    ) : null}
                   </Link>
                   <Link
                     href="/friends"

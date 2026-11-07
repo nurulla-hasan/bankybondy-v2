@@ -1,4 +1,6 @@
 export * from "./auth.hook";
+export * from "./chat.hook";
+export * from "./chat-channel.hook";
 export * from "./skill.hook";
 export * from "./donate.hook";
 export * from "./search.hook";
