@@ -23,6 +23,7 @@ import type {
   RawConversationListItem,
 } from "@/types";
 
+import { ChatSoundToggle } from "./chat-sound-toggle";
 import { ConversationList } from "./list/conversation-list";
 import { getConversationTitle } from "./shared/conversation-title";
 import { NoConversationState } from "./shared/no-conversation-state";
@@ -83,7 +84,10 @@ export function MessagesShell() {
         >
           <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
             <h2 className="font-heading text-base font-medium">{t("chats")}</h2>
-            <SearchInput />
+            <div className="flex flex-1 items-center justify-end gap-2">
+              <SearchInput />
+              <ChatSoundToggle />
+            </div>
           </header>
 
           <div className={cn(PANE_BODY, "px-2 py-2")}>

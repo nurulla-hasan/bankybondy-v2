@@ -200,8 +200,9 @@ export function MessageComposer({ isPending, onSend }: MessageComposerProps) {
     try {
       await onSend(payload);
 
-      // Only a confirmed send clears the draft. The mutation already toasted a
-      // failure, and a rejection here means the composer must keep everything.
+      // The mutation resolves as soon as a transport accepts the send (both
+      // transports reconcile in the background), so a rejection here means it
+      // never started — keep the draft and attachments for a retry.
       setPending([]);
       removedRef.current.clear();
       setText("");

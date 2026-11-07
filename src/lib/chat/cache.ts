@@ -143,6 +143,20 @@ export function removeOptimisticMessage(
   };
 }
 
+/** Is this exact optimistic bubble still waiting for its stored twin? */
+export function hasOptimisticMessage(
+  data: ThreadPages | undefined,
+  clientId: string,
+): boolean {
+  return Boolean(
+    data?.pages.some((page) =>
+      page.data.result.some(
+        (message) => message.pending && message.clientId === clientId,
+      ),
+    ),
+  );
+}
+
 /**
  * The server does not echo `clientId` on a stored message (see
  * `WireChatMessage`), so a socket echo is matched against pending bubbles by
@@ -165,6 +179,39 @@ function isSameContent(pending: WireChatMessage, message: WireChatMessage): bool
 }
 
 /**
+ * Which pending bubble does this echo confirm? `clientId` first (future
+ * backends), then sender + content. `null` means the echo is not ours.
+ */
+export function findPendingTwinClientId(
+  data: ThreadPages | undefined,
+  message: WireChatMessage,
+  meId: string,
+): string | null {
+  if (!data?.pages.length) return null;
+  if (senderIdOf(message) !== meId) return null;
+
+  const candidates = data.pages.flatMap((page) => page.data.result);
+
+  const byClientId = message.clientId
+    ? candidates.find(
+        (candidate) =>
+          candidate.pending && candidate.clientId === message.clientId,
+      )
+    : undefined;
+
+  const twin =
+    byClientId ??
+    candidates.find(
+      (candidate) =>
+        candidate.pending &&
+        candidate.clientId &&
+        isSameContent(candidate, message),
+    );
+
+  return twin?.clientId ?? null;
+}
+
+/**
  * Remove the optimistic twin of an incoming message. `meId` is required because
  * only MY pending bubble can be the echo of a message I sent; the receiver has
  * nothing to reconcile.
@@ -174,29 +221,7 @@ function removePendingEcho(
   message: WireChatMessage,
   meId: string,
 ): ThreadPages {
-  if (senderIdOf(message) !== meId) return data;
-
-  const matching = data.pages
-    .flatMap((page) => page.data.result)
-    .find(
-      (candidate) =>
-        candidate.pending &&
-        candidate.clientId &&
-        candidate.clientId === message.clientId,
-    );
-
-  const byContent = matching
-    ? null
-    : data.pages
-        .flatMap((page) => page.data.result)
-        .find(
-          (candidate) =>
-            candidate.pending &&
-            candidate.clientId &&
-            isSameContent(candidate, message),
-        );
-
-  const clientId = matching?.clientId ?? byContent?.clientId;
+  const clientId = findPendingTwinClientId(data, message, meId);
   return clientId ? (removeOptimisticMessage(data, clientId) ?? data) : data;
 }
 

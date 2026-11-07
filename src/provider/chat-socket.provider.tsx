@@ -23,6 +23,7 @@ import {
 } from "@/lib/chat/cache";
 import { chatKeys } from "@/lib/chat/keys";
 import { createChatSocket, setChatSocket } from "@/lib/socket";
+import { playReceiveSound } from "@/lib/sound";
 import { errorToast } from "@/lib/toast";
 import { getSocketToken, refreshSession } from "@/services/api/auth.api";
 import type {
@@ -183,6 +184,8 @@ export function ChatSocketProvider({ children }: { children: ReactNode }) {
         chatKeys.unread(),
       );
 
+      if (shouldPlayIncoming(notification, previous)) playReceiveSound();
+
       if (previous) {
         queryClient.setQueryData<ApiResponse<UnreadResult>>(chatKeys.unread(), {
           ...previous,
@@ -264,5 +267,44 @@ function detailsClientId(details: unknown): unknown {
   return "clientId" in details
     ? (details as { clientId?: unknown }).clientId
     : null;
+}
+
+/**
+ * Play only when a conversation's unread count actually GREW. `mark-seen` and
+ * our own sends also emit `message-notification` with lower/equal counts, and a
+ * second message in an already-unread chat keeps `totalUnread` flat — so the
+ * comparison has to be per conversation, not on the total.
+ *
+ * A message that lands in the thread the user is already looking at (visible
+ * tab, `/messages?c=<id>`) stays silent: they can see it arrive.
+ */
+function shouldPlayIncoming(
+  notification: MessageNotification,
+  previous: ApiResponse<UnreadResult> | undefined,
+): boolean {
+  const previousCounts = new Map(
+    (previous?.data.perConversation ?? []).map((entry) => [
+      entry.conversationId,
+      entry.unreadCount,
+    ]),
+  );
+
+  const grown = notification.perConversation.filter(
+    (entry) => entry.unreadCount > (previousCounts.get(entry.conversationId) ?? 0),
+  );
+  if (!grown.length) return false;
+
+  if (typeof document === "undefined" || document.visibilityState !== "visible") {
+    return true;
+  }
+
+  if (window.location.pathname !== "/messages") return true;
+
+  const openConversationId = new URLSearchParams(window.location.search).get("c");
+  if (!openConversationId) return true;
+
+  return !grown.every(
+    (entry) => entry.conversationId === openConversationId,
+  );
 }
 

@@ -11,6 +11,7 @@ import { useTranslations } from "next-intl";
 
 import {
   clearConversationUnread,
+  hasOptimisticMessage,
   insertMessageIntoThread,
   insertOptimisticMessage,
   removeConversationRow,
@@ -24,6 +25,7 @@ import { toChatMessage } from "@/lib/chat/normalize";
 import { conversationTarget } from "@/lib/chat/target";
 import { getErrorMessage } from "@/lib/error";
 import { emitSocketSeen, sendSocketMessage } from "@/lib/socket";
+import { playSendSound } from "@/lib/sound";
 import { errorToast } from "@/lib/toast";
 import type {
   ApiResponse,
@@ -139,17 +141,19 @@ export function createClientId(): string {
  * - `chat-group` and `bond-link-group` only exist on the socket; there is no
  *   REST twin, so an offline send fails loudly instead of vanishing.
  *
- * The bubble appears immediately (`onMutate`) and is replaced by the stored
- * message: the REST reply, or the socket echo matched by content because the
- * backend does not return `clientId` on a stored message. A failed send removes
- * the bubble and leaves the composer draft untouched.
+ * Both transports resolve the mutation as soon as the send is accepted, so the
+ * composer stays optimistic. The bubble appears immediately (`onMutate`) and is
+ * replaced by the stored message in the background: the REST reply, or the
+ * socket echo matched by content because the backend does not return `clientId`
+ * on a stored message. A failed send removes the bubble; only a send that could
+ * not start at all (no receiver, socket down) rejects and keeps the draft.
  */
 export function useSendMessage() {
   const queryClient = useQueryClient();
   const t = useTranslations("Messages");
 
   return useMutation({
-    mutationFn: async ({ conversation, payload, clientId }: SendMessageVariables) => {
+    mutationFn: async ({ conversation, payload, me, clientId }: SendMessageVariables) => {
       const content = {
         text: payload.text,
         imageUrl: payload.imageUrl,
@@ -164,7 +168,50 @@ export function useSendMessage() {
           throw new Error("This conversation has no other participant");
         }
 
-        return sendMessage({ ...content, receiver });
+        const key = chatKeys.thread(conversation._id);
+
+        // Do not make the composer wait for this reply: the server moderates
+        // before it stores the message, so the round-trip can take seconds.
+        // Resolve now and reconcile in the background — the socket echo of the
+        // stored message usually lands even before the HTTP reply.
+        void sendMessage({ ...content, receiver })
+          .then((response) => {
+            const confirmsPending = hasOptimisticMessage(
+              queryClient.getQueryData<ThreadPages>(key),
+              clientId,
+            );
+
+            queryClient.setQueryData<ThreadPages>(key, (data) =>
+              insertMessageIntoThread(
+                removeOptimisticMessage(data, clientId),
+                response.data,
+                me._id,
+              ),
+            );
+
+            // Last-message preview and ordering come from the server list; this
+            // covers the REST-send-with-socket-down path.
+            void queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
+
+            // Off the promise chain so a sound failure can never be mistaken
+            // for a failed send.
+            if (confirmsPending) window.setTimeout(playSendSound, 0);
+          })
+          .catch((error: unknown) => {
+            queryClient.setQueryData<ThreadPages>(key, (data) =>
+              removeOptimisticMessage(data, clientId),
+            );
+            // A lost reply may still mean the message was stored; the refetch
+            // reconciles the thread with whichever truth the server has.
+            void queryClient.invalidateQueries({ queryKey: key });
+
+            errorToast(
+              t("sendFailed"),
+              getErrorMessage(error, t("sendFailedDescription")),
+            );
+          });
+
+        return null;
       }
 
       const target = conversationTarget(conversation);
@@ -202,46 +249,25 @@ export function useSendMessage() {
         ),
       );
     },
-    onSuccess: (response, { conversation, me, clientId }) => {
-      const key = chatKeys.thread(conversation._id);
+    onSuccess: (_response, { conversation, clientId }) => {
+      // 1-a-1 reconciles in the background (see mutationFn above).
+      if (conversation.type === "one-two-one") return;
 
       // A socket send has no ack: the stored message arrives on
-      // `message-<target>` and replaces the pending bubble by content. If that
-      // echo never comes (or the thread is closed, so nobody is subscribed),
-      // drop the bubble and refetch once instead of leaving it pending forever.
-      if (!response?.data) {
-        window.setTimeout(() => {
-          const data = queryClient.getQueryData<ThreadPages>(key);
-          const stillPending = data?.pages.some((page) =>
-            page.data.result.some(
-              (message) => message.pending && message.clientId === clientId,
-            ),
-          );
+      // `message-<target>` and replaces the pending bubble by content. That echo
+      // is the confirmation; if it never comes, drop the bubble and refetch once
+      // instead of leaving it pending forever.
+      const key = chatKeys.thread(conversation._id);
 
-          if (!stillPending) return;
+      window.setTimeout(() => {
+        const data = queryClient.getQueryData<ThreadPages>(key);
+        if (!hasOptimisticMessage(data, clientId)) return;
 
-          queryClient.setQueryData<ThreadPages>(key, (current) =>
-            removeOptimisticMessage(current, clientId),
-          );
-          void queryClient.invalidateQueries({ queryKey: key });
-        }, SOCKET_ECHO_TIMEOUT_MS);
-
-        return;
-      }
-
-      // REST returns the stored message; swap the optimistic bubble for it now
-      // so the sender sees the real row even if the socket event is slow.
-      queryClient.setQueryData<ThreadPages>(key, (data) =>
-        insertMessageIntoThread(
-          removeOptimisticMessage(data, clientId),
-          response.data,
-          me._id,
-        ),
-      );
-
-      // Last-message preview and ordering come from the server list. The socket
-      // patches it live; this covers the REST-send-with-socket-down path.
-      queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
+        queryClient.setQueryData<ThreadPages>(key, (current) =>
+          removeOptimisticMessage(current, clientId),
+        );
+        void queryClient.invalidateQueries({ queryKey: key });
+      }, SOCKET_ECHO_TIMEOUT_MS);
     },
     onError: (error, { conversation, clientId }) => {
       // The send never reached the server: drop the bubble so the thread does

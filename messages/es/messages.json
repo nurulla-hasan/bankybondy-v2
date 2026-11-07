@@ -30,6 +30,8 @@
   "removeAttachment": "Quitar",
   "send": "Enviar",
   "sending": "Enviando…",
+  "muteSounds": "Silenciar sonidos del chat",
+  "unmuteSounds": "Activar sonidos del chat",
   "uploading": "Subiendo…",
   "unsupportedFile": "Tipo de archivo no compatible",
   "fileTooLarge": "El archivo supera los 50 MB",

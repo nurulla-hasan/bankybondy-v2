@@ -3,10 +3,15 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { insertMessageIntoThread, type ThreadPages } from "@/lib/chat/cache";
+import {
+  findPendingTwinClientId,
+  insertMessageIntoThread,
+  type ThreadPages,
+} from "@/lib/chat/cache";
 import { chatKeys } from "@/lib/chat/keys";
 import { senderIdOf } from "@/lib/chat/normalize";
 import { conversationTarget } from "@/lib/chat/target";
+import { playSendSound } from "@/lib/sound";
 import { useChatSocket } from "@/provider/chat-socket.provider";
 import type { RawConversationListItem, WireChatMessage } from "@/types";
 
@@ -34,11 +39,18 @@ export function useConversationChannel(
     const event = `message-${target}`;
     const onMessage = (message: WireChatMessage) => {
       const key = chatKeys.thread(conversationId);
+      const data = queryClient.getQueryData<ThreadPages>(key);
 
-      if (queryClient.getQueryData<ThreadPages>(key)) {
-        queryClient.setQueryData<ThreadPages>(key, (data) =>
-          insertMessageIntoThread(data, message, meId),
+      if (data) {
+        // A socket send has no ack; the echo that replaces MY pending bubble is
+        // the confirmation, so the outgoing tick plays here, exactly once.
+        const confirmsPending = findPendingTwinClientId(data, message, meId);
+
+        queryClient.setQueryData<ThreadPages>(key, (current) =>
+          insertMessageIntoThread(current, message, meId),
         );
+
+        if (confirmsPending) playSendSound();
       } else {
         // The first page is still in flight. It may have been requested before
         // this message was stored, so refetching is the only way not to lose it.
