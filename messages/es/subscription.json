@@ -1,0 +1,42 @@
+{
+  "title": "Elegí tu plan",
+  "description": "Elegí el límite de vínculos que se adapte a tu comunidad. Los planes pagos se abonan una sola vez, sin pagos recurrentes.",
+  "currentPlan": "Tu plan actual",
+  "availablePlans": "Planes disponibles",
+  "free": "Gratis",
+  "oneTime": "Pago único",
+  "priceNotice": "Los precios pueden cambiar. Confirmá el importe final con el proveedor antes de pagar.",
+  "bondLimit": "Hasta {count} vínculos",
+  "current": "Plan actual",
+  "included": "Incluido en tu plan",
+  "unavailable": "Precio no disponible",
+  "loadErrorTitle": "No pudimos cargar los planes",
+  "loadErrorDescription": "Revisá tu conexión y volvé a intentarlo.",
+  "retry": "Reintentar",
+  "statusChecking": "Consultando el estado del pago…",
+  "statusUnavailable": "El pago no está disponible temporalmente. Intentá de nuevo más tarde.",
+  "statusPending": "Tu pago está pendiente de confirmación. No podrás iniciar otro hasta verificar su estado.",
+  "statusConfirmed": "Tu pago y tu plan están confirmados.",
+  "statusFailed": "El proveedor confirmó que el pago falló. Podés intentarlo de nuevo.",
+  "statusReview": "Tu pago necesita revisión. Contactá a soporte antes de iniciar otro pago.",
+  "statusUnknown": "No pudimos confirmar el estado del pago. Contactá a soporte antes de intentarlo de nuevo.",
+  "statusError": "No pudimos consultar el estado del pago. Intentá de nuevo.",
+  "refreshStatus": "Actualizar estado",
+  "providerUnavailable": {
+    "paypal": "PayPal no disponible",
+    "mercadopago": "Mercado Pago no disponible"
+  },
+  "providerDisabled": {
+    "paypal": "PayPal · {price} (no disponible)",
+    "mercadopago": "Mercado Pago · {price} (no disponible)"
+  },
+  "pay": {
+    "paypal": "PayPal · {price}",
+    "mercadopago": "Mercado Pago · {price}"
+  },
+  "plan": {
+    "Free": "Gratis",
+    "Standard": "Estándar",
+    "Premium": "Premium"
+  }
+}

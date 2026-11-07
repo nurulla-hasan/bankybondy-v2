@@ -194,8 +194,7 @@ function routeFor(item: NotificationItem): string | null {
       // Chat isn't built yet; the links tab is where these trades live.
       return "/bonds?tab=links";
     case "SUBSCRIPTION":
-      // No subscriptions page in v2 yet.
-      return null;
+      return "/subscriptions";
     case "REVIEW":
       // redirectId is the reviewer's profile id (bondRating.service.ts:127).
       return item.redirectId ? `/people/${item.redirectId}` : "/profile";

@@ -15,9 +15,11 @@ import { PlanCard } from "./plan-card";
 
 export function SubscriptionPlans({
   checkoutDisabled,
+  providers,
   onCheckout,
 }: {
   checkoutDisabled: boolean;
+  providers: Record<SubscriptionProvider, boolean>;
   onCheckout: (plan: PaidSubscriptionPlan, provider: SubscriptionProvider) => void;
 }) {
   const t = useTranslations("Subscription");
@@ -61,6 +63,7 @@ export function SubscriptionPlans({
             plan={plan}
             currentPlan={planType as SubscriptionPlanType}
             checkoutDisabled={checkoutDisabled}
+            providers={providers}
             onCheckout={onCheckout}
           />
         ))}

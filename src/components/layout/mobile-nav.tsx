@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   ArrowRight,
+  CreditCard,
   LogOut,
   Menu,
   MessageSquare,
@@ -199,6 +200,14 @@ export function MobileNav({
                   >
                     <Users className="size-4 shrink-0" />
                     <span>{t("friends")}</span>
+                  </Link>
+                  <Link
+                    href="/subscriptions"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  >
+                    <CreditCard className="size-4 shrink-0" />
+                    <span>{t("categorySubscription")}</span>
                   </Link>
                   <Link
                     href="/settings"

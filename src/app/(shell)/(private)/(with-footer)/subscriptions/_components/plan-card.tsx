@@ -14,11 +14,13 @@ export function PlanCard({
   plan,
   currentPlan,
   checkoutDisabled,
+  providers,
   onCheckout,
 }: {
   plan: SubscriptionPlan;
   currentPlan: SubscriptionPlan["type"];
   checkoutDisabled: boolean;
+  providers: Record<SubscriptionProvider, boolean>;
   onCheckout: (plan: PaidSubscriptionPlan, provider: SubscriptionProvider) => void;
 }) {
   const t = useTranslations("Subscription");
@@ -62,11 +64,13 @@ export function PlanCard({
                 <Button
                   key={provider}
                   variant={provider === "paypal" ? "default" : "outline"}
-                  disabled={checkoutDisabled || current || included || !amount}
+                  disabled={checkoutDisabled || current || included || !amount || !providers[provider]}
                   onClick={() => onCheckout(paidPlan, provider)}
                 >
                   <CreditCard aria-hidden />
-                  {amount ? t(`pay.${provider}`, { price: price(amount) }) : t("unavailable")}
+                  {amount
+                    ? t(`${providers[provider] ? "pay" : "providerDisabled"}.${provider}`, { price: price(amount) })
+                    : t(`providerUnavailable.${provider}`)}
                 </Button>
               );
             })}

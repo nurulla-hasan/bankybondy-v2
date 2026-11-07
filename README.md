@@ -82,6 +82,16 @@ pnpm lint
 
 ---
 
+## Subscription checkout
+
+The private `/subscriptions` page uses the backend's `/normal-user/subscription-prices`, `/normal-user/subscription-checkout`, and `/normal-user/subscribe` endpoints. Paid plans are one-time purchases.
+
+PayPal checkout is disabled by default. On the backend, configure `SUBSCRIPTION_RETURN_URL` to the V2 subscriptions page (HTTPS in production), and set `SUBSCRIPTION_LEGACY_CHECKOUTS_RECONCILED=true` **only after** reconciling and invalidating previously issued checkout links. Verify the PayPal webhook configuration and test the complete flow in a sandbox before enabling it. The server retains uncertain attempts and blocks another checkout until a verified outcome; unresolved attempts require operator investigation.
+
+Mercado Pago is currently unavailable in V2: its Checkout Pro preference reuse and reconciliation must be resolved and sandbox-tested before enabling it. Browser redirects are never treated as proof of payment.
+
+---
+
 ## 📄 License
 
 MIT

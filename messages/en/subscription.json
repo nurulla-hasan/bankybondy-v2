@@ -1,0 +1,42 @@
+{
+  "title": "Choose your plan",
+  "description": "Choose the bond limit that fits your community. Paid plans are a one-time purchase, with no recurring payments.",
+  "currentPlan": "Your current plan",
+  "availablePlans": "Available plans",
+  "free": "Free",
+  "oneTime": "One-time payment",
+  "priceNotice": "Prices may change. Confirm the final amount with the payment provider before paying.",
+  "bondLimit": "Up to {count} bonds",
+  "current": "Current plan",
+  "included": "Included in your plan",
+  "unavailable": "Price unavailable",
+  "loadErrorTitle": "Plans could not be loaded",
+  "loadErrorDescription": "Check your connection and try again.",
+  "retry": "Try again",
+  "statusChecking": "Checking payment status…",
+  "statusUnavailable": "Checkout is temporarily unavailable. Please try again later.",
+  "statusPending": "Your checkout is awaiting confirmation. A new checkout is unavailable until its status is verified.",
+  "statusConfirmed": "Your payment and plan have been confirmed.",
+  "statusFailed": "The payment provider confirmed this checkout failed. You can try again.",
+  "statusReview": "Your payment needs review. Please contact support before starting another checkout.",
+  "statusUnknown": "We couldn't confirm the checkout status. Please contact support before trying again.",
+  "statusError": "Unable to check payment status. Please try again.",
+  "refreshStatus": "Refresh status",
+  "providerUnavailable": {
+    "paypal": "PayPal unavailable",
+    "mercadopago": "Mercado Pago unavailable"
+  },
+  "providerDisabled": {
+    "paypal": "PayPal · {price} (unavailable)",
+    "mercadopago": "Mercado Pago · {price} (unavailable)"
+  },
+  "pay": {
+    "paypal": "PayPal · {price}",
+    "mercadopago": "Mercado Pago · {price}"
+  },
+  "plan": {
+    "Free": "Free",
+    "Standard": "Standard",
+    "Premium": "Premium"
+  }
+}
