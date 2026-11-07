@@ -26,9 +26,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -123,29 +120,14 @@ export function NavbarUserMenu({
                 </span>
               ) : null}
             </DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Users className="size-4 mr-2" />
-                <span>
-                  {pendingRequests > 0
-                    ? t("friendsCount", { count: pendingRequests })
-                    : t("friends")}
-                </span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-44">
-                <DropdownMenuItem
-                  render={<Link href="/friends?tab=requests" />}
-                >
-                  <span>{t("friendRequests")}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem render={<Link href="/friends?tab=sent" />}>
-                  <span>{t("friendSent")}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem render={<Link href="/friends?tab=friends" />}>
-                  <span>{t("friends")}</span>
-                </DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
+            <DropdownMenuItem render={<Link href="/friends" />}>
+              <Users className="size-4 mr-2" />
+              <span>
+                {pendingRequests > 0
+                  ? t("friendsCount", { count: pendingRequests })
+                  : t("friends")}
+              </span>
+            </DropdownMenuItem>
             <DropdownMenuItem render={<Link href="/settings" />}>
               <Settings className="size-4 mr-2" />
               <span>{t("settings")}</span>

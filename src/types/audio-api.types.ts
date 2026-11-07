@@ -87,14 +87,96 @@ export interface RawAudioTopicList {
   result: RawAudioTopicWithCount[];
 }
 
+/** The viewer's own rating + comment, added by `getAudioById` when signed in. */
+export interface RawAudioMyFeeling {
+  text: string;
+  feelingTags: string[];
+}
+
+/**
+ * `GET /audio/single-audio/:audioId`. Same enrichment as the feed, plus the
+ * viewer's own rating/comment. The owner also sees the moderation reason and
+ * non-`ready` rows; everyone else only ever gets `ready` audios.
+ */
+export interface RawAudioDetail extends RawAudio {
+  moderationReason?: string;
+  myRating: number | null;
+  myFeeling: RawAudioMyFeeling | null;
+}
+
+/** One row of `GET /audio/:audioId/feedback` (comment upserted per listener). */
+export interface RawAudioComment {
+  _id: string;
+  text: string;
+  feelingTags: string[];
+  commentor: RawAudioAuthor | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AudioFeedbackList {
+  meta: PaginationMeta;
+  totalComments: number;
+  /** Totals over the whole audio, not just the current page. */
+  feelingCounts: RawAudioFeeling[];
+  result: RawAudioComment[];
+}
+
+export interface AudioFeedbackInput {
+  text?: string;
+  feelingTags?: string[];
+}
+
+/** One row of `GET /audio/my-audios` — every moderation status, no author. */
+export interface RawMyAudio {
+  _id: string;
+  audioTopic: RawAudioTopic | null;
+  title: string;
+  description?: string;
+  audio_url: string;
+  cover_image: string;
+  tags: string[];
+  totalPlay: number;
+  totalRating: number;
+  ratingCount: number;
+  duration: number;
+  isBlocked: boolean;
+  moderationStatus: AudioModerationStatus;
+  moderationReason?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface RawMyAudioList {
+  meta: PaginationMeta;
+  result: RawMyAudio[];
+}
+
+/** The audio as populated inside a bookmark (no author, no enrichment). */
+export interface RawBookmarkedAudio {
+  _id: string;
+  title: string;
+  description?: string;
+  audio_url: string;
+  cover_image: string;
+  tags?: string[];
+  duration: number;
+  totalPlay: number;
+  totalRating: number;
+  ratingCount: number;
+  moderationStatus?: AudioModerationStatus;
+  createdAt?: string;
+  updatedAt?: string;
+  audioTopic: RawAudioTopic | null;
+}
+
 /**
  * `GET /audio-bookmark/my-bookmark-audios`. The bookmark populates `audio`
- * (with its `audioTopic`) but not the audio's author, so only `_id` is
- * guaranteed here — the feed carries the full row.
+ * (with its `audioTopic`) but not the audio's author.
  */
 export interface RawAudioBookmark {
   _id: string;
-  audio: Pick<RawAudio, "_id">;
+  audio: RawBookmarkedAudio;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -121,6 +203,21 @@ export interface CreateAudioInput {
   duration: number;
   audio_url: string;
   cover_image: string;
+}
+
+/** Editable fields of `PATCH /audio/update-audio/:audioId` (all optional). */
+export interface UpdateAudioInput {
+  title?: string;
+  description?: string;
+  audioTopic?: string;
+  tags?: string[];
+  duration?: number;
+}
+
+/** Replacement files for the update; both are optional. */
+export interface UpdateAudioFiles {
+  audio?: File;
+  cover?: File;
 }
 
 /** `POST /audio/:audioId/listen` — the server decides if the listen qualifies. */

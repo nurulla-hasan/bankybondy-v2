@@ -1,13 +1,21 @@
 import { apiClient } from "@/lib/api-client";
 import type {
   ApiResponse,
+  AudioFeedbackInput,
+  AudioFeedbackList,
   AudioListQueryParams,
   AudioModerationResult,
   CreateAudioInput,
   RawAudio,
   RawAudioBookmark,
+  RawAudioComment,
+  RawAudioDetail,
   RawAudioList,
+  RawMyAudio,
+  RawMyAudioList,
   RecordAudioListenInput,
+  UpdateAudioFiles,
+  UpdateAudioInput,
   UploadedAudioFiles,
 } from "@/types";
 
@@ -122,5 +130,105 @@ export function getMyAudioBookmarks() {
   return apiClient<ApiResponse<RawAudioBookmark[]>>(
     "/audio-bookmark/my-bookmark-audios",
     { method: "GET" },
+  );
+}
+
+/**
+ * One conversation with its aggregates and, when signed in, the viewer's own
+ * rating/comment. Non-`ready` audios are only visible to their owner.
+ * Endpoint: GET /audio/single-audio/:audioId
+ */
+export function getAudioDetail(audioId: string) {
+  return apiClient<ApiResponse<RawAudioDetail>>(
+    `/audio/single-audio/${encodeURIComponent(audioId)}`,
+    { method: "GET" },
+  );
+}
+
+/**
+ * Paginated comments of one conversation plus feeling totals. "Load more"
+ * raises `limit` instead of paginating by page.
+ * Endpoint: GET /audio/:audioId/feedback
+ */
+export function getAudioFeedback(
+  audioId: string,
+  params?: { page?: number; limit?: number },
+) {
+  return apiClient<ApiResponse<AudioFeedbackList>>(
+    `/audio/${encodeURIComponent(audioId)}/feedback`,
+    { method: "GET", query: params },
+  );
+}
+
+/** Controlled feeling vocabulary (accented display labels). */
+export function getFeelingTags() {
+  return apiClient<ApiResponse<string[]>>("/audio/feeling-tags", {
+    method: "GET",
+  });
+}
+
+/**
+ * One rating per listener; the server refuses a second one and self-ratings.
+ * Endpoint: POST /audio/give-rating/:audioId
+ */
+export function giveAudioRating(audioId: string, rating: number) {
+  return apiClient<ApiResponse<RawAudio>>(
+    `/audio/give-rating/${encodeURIComponent(audioId)}`,
+    { method: "POST", body: { rating } },
+  );
+}
+
+/**
+ * Upserts the caller's comment + feeling tags on a conversation.
+ * Endpoint: POST /audio/:audioId/feedback
+ */
+export function saveAudioFeedback(
+  audioId: string,
+  input: AudioFeedbackInput,
+) {
+  return apiClient<ApiResponse<RawAudioComment>>(
+    `/audio/${encodeURIComponent(audioId)}/feedback`,
+    { method: "POST", body: input },
+  );
+}
+
+/**
+ * The caller's own conversations, every moderation status included.
+ * Endpoint: GET /audio/my-audios
+ */
+export function getMyAudios(params?: AudioListQueryParams) {
+  return apiClient<ApiResponse<RawMyAudioList>>("/audio/my-audios", {
+    method: "GET",
+    query: params,
+  });
+}
+
+/**
+ * Updates text fields and/or replaces the media. Multipart on purpose: the
+ * uploader middleware expects `data` (JSON) plus optional `audio`/`audio_cover`
+ * files. Replacing the audio re-runs moderation on the server.
+ * Endpoint: PATCH /audio/update-audio/:audioId
+ */
+export function updateAudio(
+  audioId: string,
+  input: UpdateAudioInput,
+  files: UpdateAudioFiles = {},
+) {
+  const body = new FormData();
+  body.append("data", JSON.stringify(input));
+  if (files.audio) body.append("audio", files.audio);
+  if (files.cover) body.append("audio_cover", files.cover);
+
+  return apiClient<ApiResponse<RawMyAudio>>(
+    `/audio/update-audio/${encodeURIComponent(audioId)}`,
+    { method: "PATCH", body },
+  );
+}
+
+/** Endpoint: DELETE /audio/delete-audio/:audioId */
+export function deleteAudio(audioId: string) {
+  return apiClient<ApiResponse<RawMyAudio>>(
+    `/audio/delete-audio/${encodeURIComponent(audioId)}`,
+    { method: "DELETE" },
   );
 }

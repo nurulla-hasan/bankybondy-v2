@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, Flame, Headphones } from "lucide-react";
+import { Bookmark, Compass, Flame, Headphones, LayoutList } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,32 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export type FeedSection = "recent" | "trending" | "mostPlayed";
+export type FeedSection =
+  | "recent"
+  | "trending"
+  | "mostPlayed"
+  | "favorites"
+  | "myContent";
 
 const SECTIONS = [
   { key: "recent", icon: Compass },
   { key: "trending", icon: Flame },
   { key: "mostPlayed", icon: Headphones },
+  { key: "favorites", icon: Bookmark },
+  { key: "myContent", icon: LayoutList },
 ] as const;
+
+export const FEED_SECTIONS = [
+  "recent",
+  "trending",
+  "mostPlayed",
+] as const satisfies readonly FeedSection[];
+
+export function isFeedSection(
+  section: FeedSection,
+): section is (typeof FEED_SECTIONS)[number] {
+  return (FEED_SECTIONS as readonly FeedSection[]).includes(section);
+}
 
 export function sectionLabelKey(section: FeedSection) {
   return `section${section.charAt(0).toUpperCase()}${section.slice(1)}`;

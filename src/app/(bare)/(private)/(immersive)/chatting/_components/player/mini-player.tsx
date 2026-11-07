@@ -16,8 +16,8 @@ import { Button } from "@/components/ui/button";
 import { CONTAINER_GUTTER } from "@/lib/layout";
 import { cn } from "@/lib/utils";
 
-import type { FeedAudio } from "./shared/audio-model";
-import { formatClock } from "./shared/format";
+import type { FeedAudio } from "../shared/audio-model";
+import { formatClock } from "../shared/format";
 
 interface MiniPlayerProps {
   conversation: FeedAudio;

@@ -12,8 +12,6 @@ const STORAGE_KEY = "bankybondy:chatting:pending-audio";
 /** The worker stops retrying after ~2.5h; anything older is dead weight. */
 const MAX_AGE_MS = 6 * 60 * 60 * 1000;
 
-export const SHARE_DIALOG_EVENT = "chatting:share-dialog";
-
 const EMPTY: PendingAudio[] = [];
 const listeners = new Set<() => void>();
 
@@ -119,11 +117,4 @@ export function untrackPendingAudio(id: string) {
   const current = load();
   if (!current.some((entry) => entry.id === id)) return;
   write(current.filter((entry) => entry.id !== id));
-}
-
-/** Asks the mounted share dialog to open (used by the rejection toast). */
-export function requestShareDialog() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(SHARE_DIALOG_EVENT));
-  }
 }

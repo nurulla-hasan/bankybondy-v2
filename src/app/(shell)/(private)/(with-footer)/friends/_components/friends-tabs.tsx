@@ -1,17 +1,20 @@
 "use client";
 
-import { Inbox, Send, Users } from "lucide-react";
+import { Ban, Inbox, Send, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNextFilter } from "@/hooks/useNextFilter";
-import { useFriendList } from "@/services";
+import { useBlockedUsers, useFriendList } from "@/services";
 import type { FriendListKind } from "@/types";
 
+import { BlockedList } from "./blocked-list";
 import { FriendList } from "./friend-list";
 
-const FRIEND_TABS: readonly FriendListKind[] = ["requests", "sent", "friends"];
-const DEFAULT_TAB: FriendListKind = "requests";
+type FriendsTab = FriendListKind | "blocked";
+
+const FRIEND_TABS: readonly FriendsTab[] = ["requests", "sent", "friends", "blocked"];
+const DEFAULT_TAB: FriendsTab = "requests";
 
 type FriendsFilterKey = "tab" | "page";
 
@@ -19,7 +22,7 @@ export function FriendsTabs() {
   const t = useTranslations("Friends");
   const { getFilter, updateFilter } = useNextFilter<FriendsFilterKey>();
 
-  const tabParam = getFilter("tab", DEFAULT_TAB) as FriendListKind;
+  const tabParam = getFilter("tab", DEFAULT_TAB) as FriendsTab;
   const activeTab = FRIEND_TABS.includes(tabParam) ? tabParam : DEFAULT_TAB;
   const pageParam = Number(getFilter("page", "1"));
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
@@ -27,8 +30,9 @@ export function FriendsTabs() {
   const { data: requests } = useFriendList("requests");
   const { data: sent } = useFriendList("sent");
   const { data: friends } = useFriendList("friends");
+  const { data: blocked } = useBlockedUsers({ limit: 1 });
 
-  const handleTabChange = (tab: FriendListKind) => {
+  const handleTabChange = (tab: FriendsTab) => {
     updateFilter("tab", tab === DEFAULT_TAB ? null : tab);
   };
 
@@ -57,31 +61,43 @@ export function FriendsTabs() {
       label: t("tabs.friends"),
       count: friends?.meta.total ?? 0,
     },
+    {
+      id: "blocked" as const,
+      icon: <Ban className="size-4" aria-hidden />,
+      label: t("tabs.blocked"),
+      count: blocked?.meta.total ?? 0,
+    },
   ];
 
   return (
     <Tabs
       value={activeTab}
-      onValueChange={(value) => handleTabChange(value as FriendListKind)}
+      onValueChange={(value) => handleTabChange(value as FriendsTab)}
       className="space-y-4"
     >
-      <TabsList
-        variant="line"
-        aria-label={t("tabsLabel")}
-        className="w-full border-b sm:w-fit"
-      >
-        {tabs.map((tab) => (
-          <TabsTrigger key={tab.id} value={tab.id} className="flex-1 sm:flex-none">
-            {tab.icon}
-            {tab.label}
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs tabular-nums group-data-active/tab-trigger:bg-primary/10 group-data-active/tab-trigger:text-primary">
-              {tab.count}
-            </span>
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      <div className="w-full overflow-x-auto pb-1">
+        <TabsList
+          variant="line"
+          aria-label={t("tabsLabel")}
+          className="w-max min-w-full border-b sm:min-w-0"
+        >
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.id} value={tab.id} className="flex-1 sm:flex-none">
+              {tab.icon}
+              {tab.label}
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs tabular-nums group-data-active/tab-trigger:bg-primary/10 group-data-active/tab-trigger:text-primary">
+                {tab.count}
+              </span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
 
-      <FriendList kind={activeTab} page={page} onPageChange={handlePageChange} />
+      {activeTab === "blocked" ? (
+        <BlockedList page={page} onPageChange={handlePageChange} />
+      ) : (
+        <FriendList kind={activeTab} page={page} onPageChange={handlePageChange} />
+      )}
     </Tabs>
   );
 }

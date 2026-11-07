@@ -5,7 +5,8 @@
   "tabs": {
     "requests": "Solicitudes",
     "sent": "Enviadas",
-    "friends": "Amigos"
+    "friends": "Amigos",
+    "blocked": "Bloqueados"
   },
   "loadErrorTitle": "No pudimos cargar esta lista",
   "loadErrorDescription": "Revisá tu conexión y volvé a intentarlo.",

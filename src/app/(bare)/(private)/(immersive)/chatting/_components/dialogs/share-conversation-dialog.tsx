@@ -8,7 +8,7 @@ import {
   type ChangeEvent,
 } from "react";
 import { useForm } from "@tanstack/react-form";
-import { ImageIcon, Loader2, Mic, Upload, X } from "lucide-react";
+import { ImageIcon, Loader2, Mic, Square, Upload, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
 
@@ -33,10 +33,8 @@ import {
   isAcceptedImageFile,
   readAudioDuration,
 } from "../shared/audio-file";
-import {
-  SHARE_DIALOG_EVENT,
-  trackPendingAudio,
-} from "../shared/moderation-tracker";
+import { formatClock } from "../shared/format";
+import { trackPendingAudio } from "../shared/moderation-tracker";
 
 interface ShareConversationValues {
   title: string;
@@ -76,6 +74,17 @@ export function ShareConversationDialog({
   const progressTimers = useRef<Record<"audio" | "cover", ReturnType<
     typeof setInterval
   > | null>>({ audio: null, cover: null });
+  const [recording, setRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [recordedDuration, setRecordedDuration] = useState<number | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+  const recordingSecondsRef = useRef(0);
+  const micRequestRef = useRef(false);
 
   const createAudio = useCreateAudio();
   const uploadAudioFiles = useUploadAudioFiles();
@@ -84,9 +93,10 @@ export function ShareConversationDialog({
   const isUploading = uploading.audio !== null || uploading.cover !== null;
 
   useEffect(() => {
-    const openDialog = () => setOpen(true);
-    window.addEventListener(SHARE_DIALOG_EVENT, openDialog);
-    return () => window.removeEventListener(SHARE_DIALOG_EVENT, openDialog);
+    return () => {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
   }, []);
 
   const topicOptions = useMemo(
@@ -129,17 +139,116 @@ export function ShareConversationDialog({
     if (files.length) deleteUploads.mutate(files);
   };
 
+  const stopRecordingTimer = () => {
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    recordingTimerRef.current = null;
+  };
+
+  const releaseMicrophone = () => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    recorderRef.current = null;
+  };
+
+  const startRecording = async () => {
+    if (
+      !navigator.mediaDevices?.getUserMedia ||
+      typeof MediaRecorder === "undefined"
+    ) {
+      errorToast(t("shareMicUnsupported"));
+      return;
+    }
+
+    micRequestRef.current = true;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micRequestRef.current = false;
+      streamRef.current = stream;
+      chunksRef.current = [];
+
+      const recorder = new MediaRecorder(stream);
+      recorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) chunksRef.current.push(event.data);
+      };
+
+      recorder.onstop = () => {
+        const seconds = recordingSecondsRef.current;
+        const type = recorder.mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type });
+        chunksRef.current = [];
+        releaseMicrophone();
+
+        if (!blob.size) {
+          errorToast(t("shareMicEmpty"));
+          return;
+        }
+
+        const extension = type.includes("ogg")
+          ? "ogg"
+          : type.includes("mp4")
+            ? "m4a"
+            : "webm";
+        const file = new File([blob], `recording-${Date.now()}.${extension}`, {
+          type,
+        });
+
+        if (!isAcceptedAudioFile(file)) {
+          errorToast(t("shareInvalidAudio"));
+          return;
+        }
+
+        // MediaRecorder output often reports `Infinity` duration until it is
+        // remuxed, so the wall-clock count is the reliable source here.
+        setRecordedDuration(Math.max(1, seconds));
+        void stageFile("audio", file);
+      };
+
+      recorder.start();
+      recordingSecondsRef.current = 0;
+      setRecordingSeconds(0);
+      setRecording(true);
+      recordingTimerRef.current = setInterval(() => {
+        recordingSecondsRef.current += 1;
+        setRecordingSeconds(recordingSecondsRef.current);
+      }, 1000);
+    } catch (error) {
+      micRequestRef.current = false;
+      releaseMicrophone();
+      errorToast(
+        t("shareMicError"),
+        getErrorMessage(error, t("shareMicErrorDescription")),
+      );
+    }
+  };
+
+  const stopRecording = () => {
+    const recorder = recorderRef.current;
+    setRecording(false);
+    stopRecordingTimer();
+
+    if (recorder && recorder.state !== "inactive") recorder.stop();
+    else releaseMicrophone();
+  };
+
   const reset = ({ keepStaged = false }: { keepStaged?: boolean } = {}) => {
     if (!keepStaged) discardStaged([staged.audio_url, staged.cover_image]);
     form.reset();
     setAudioFile(null);
     setCoverFile(null);
     setStaged({ audio_url: null, cover_image: null });
+    setRecordedDuration(null);
+    setRecordingSeconds(0);
+    recordingSecondsRef.current = 0;
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
-    // Closing mid-upload would orphan the file that is still landing in S3.
-    if (!nextOpen && isUploading) return;
+    // Closing mid-upload would orphan the file still landing in S3; closing
+    // mid-recording would leave the microphone open.
+    if (!nextOpen && (isUploading || recording || micRequestRef.current)) {
+      return;
+    }
     setOpen(nextOpen);
     if (!nextOpen) reset();
   };
@@ -211,6 +320,7 @@ export function ShareConversationDialog({
       return;
     }
 
+    setRecordedDuration(null);
     void stageFile("audio", file);
   };
 
@@ -231,8 +341,12 @@ export function ShareConversationDialog({
     const field = kind === "audio" ? "audio_url" : "cover_image";
     discardStaged([staged[field]]);
 
-    if (kind === "audio") setAudioFile(null);
-    else setCoverFile(null);
+    if (kind === "audio") {
+      setAudioFile(null);
+      setRecordedDuration(null);
+    } else {
+      setCoverFile(null);
+    }
     setStaged((current) => ({ ...current, [field]: null }));
   };
 
@@ -253,11 +367,15 @@ export function ShareConversationDialog({
     }
 
     let duration: number;
-    try {
-      duration = await readAudioDuration(audioFile);
-    } catch {
-      errorToast(t("shareDurationError"));
-      return;
+    if (recordedDuration) {
+      duration = recordedDuration;
+    } else {
+      try {
+        duration = await readAudioDuration(audioFile);
+      } catch {
+        errorToast(t("shareDurationError"));
+        return;
+      }
     }
 
     const tags = value.tags
@@ -299,7 +417,7 @@ export function ShareConversationDialog({
   };
 
   const isPublishing = createAudio.isPending;
-  const isBusy = isPublishing || isUploading;
+  const isBusy = isPublishing || isUploading || recording;
 
   return (
     <Modal
@@ -407,6 +525,46 @@ export function ShareConversationDialog({
                 </Button>
               ) : null}
             </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <span
+                className={cn(
+                  "text-xs",
+                  recording
+                    ? "font-medium text-destructive"
+                    : "text-muted-foreground",
+                )}
+              >
+                {recording
+                  ? t("shareMicRecording", {
+                      time: formatClock(recordingSeconds),
+                    })
+                  : t("shareMicHint")}
+              </span>
+              <Button
+                type="button"
+                variant={recording ? "destructive" : "outline"}
+                disabled={isBusy && !recording}
+                onClick={
+                  recording
+                    ? stopRecording
+                    : () => void startRecording()
+                }
+              >
+                {recording ? (
+                  <>
+                    <Square aria-hidden className="fill-current" />
+                    {t("shareMicStop")}
+                  </>
+                ) : (
+                  <>
+                    <Mic aria-hidden />
+                    {t("shareMicStart")}
+                  </>
+                )}
+              </Button>
+            </div>
+
             <Input
               ref={audioInputRef}
               id="chatting-audio"

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import {
   keepPreviousData,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -12,24 +13,35 @@ import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/error";
 import { errorToast } from "@/lib/toast";
 import type {
+  AudioFeedbackInput,
   AudioListQueryParams,
   CreateAudioInput,
+  UpdateAudioFiles,
+  UpdateAudioInput,
 } from "@/types";
 
 import {
   createAudio,
+  deleteAudio,
   deleteAudioUploads,
   getAllAudios,
+  getAudioDetail,
+  getAudioFeedback,
   getAudioModerationStatus,
+  getFeelingTags,
   getMyAudioBookmarks,
+  getMyAudios,
+  giveAudioRating,
   recordAudioListen,
+  saveAudioFeedback,
   toggleAudioBookmark,
+  updateAudio,
   uploadAudioFiles,
 } from "../api/audio.api";
 import { getAudioTopics } from "../api/topic.api";
 
-/** One feed page is enough to fill the grid without a second request. */
-export const FEED_PAGE_SIZE = 60;
+/** One feed page fills the grid (plus the featured slot on page one). */
+export const FEED_PAGE_SIZE = 12;
 
 /** The topic catalog is read whole so the filter chips need no pagination. */
 const TOPIC_LIST_LIMIT = 500;
@@ -49,8 +61,17 @@ export const audioKeys = {
   lists: () => [...audioKeys.all, "list"] as const,
   list: (params: AudioListQueryParams) =>
     [...audioKeys.lists(), params] as const,
+  detail: (audioId: string) => [...audioKeys.all, "detail", audioId] as const,
+  feedbackBase: (audioId: string) =>
+    [...audioKeys.all, "feedback", audioId] as const,
+  feedback: (audioId: string, limit: number) =>
+    [...audioKeys.feedbackBase(audioId), limit] as const,
+  feelingTags: () => [...audioKeys.all, "feeling-tags"] as const,
+  myAudios: (params: AudioListQueryParams) =>
+    [...audioKeys.all, "my-audios", params] as const,
   topics: () => [...audioKeys.all, "topics"] as const,
   bookmarks: () => [...audioKeys.all, "bookmarks"] as const,
+  saved: () => [...audioKeys.all, "saved"] as const,
   moderation: (audioId: string | null) =>
     [...audioKeys.all, "moderation", audioId] as const,
 };
@@ -65,6 +86,21 @@ export function useAudioFeed(params: AudioListQueryParams) {
     queryFn: () => getAllAudios(params),
     select: (response) => response.data,
     placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useInfiniteAudioFeed(
+  params: Omit<AudioListQueryParams, "page">,
+) {
+  return useInfiniteQuery({
+    queryKey: [...audioKeys.lists(), "infinite", params],
+    queryFn: ({ pageParam }) => getAllAudios({ ...params, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { meta } = lastPage.data;
+      return meta.page < meta.totalPages ? meta.page + 1 : undefined;
+    },
     staleTime: 30 * 1000,
   });
 }
@@ -132,6 +168,7 @@ export function useToggleAudioBookmark() {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: audioKeys.bookmarks() });
+      void queryClient.invalidateQueries({ queryKey: audioKeys.saved() });
     },
   });
 }
@@ -212,6 +249,161 @@ export function useCreateAudio() {
 }
 
 /**
+ * One conversation with aggregates. The owner sees the moderation reason and
+ * a non-`ready` row, so this also polls while the server re-moderates an edit
+ * (same cadence as the upload watcher).
+ */
+export function useAudioDetail(audioId: string) {
+  return useQuery({
+    queryKey: audioKeys.detail(audioId),
+    queryFn: () => getAudioDetail(audioId),
+    select: (response) => response.data,
+    staleTime: 30 * 1000,
+    retry: false,
+    refetchInterval: (query) => {
+      const status = query.state.data?.data.moderationStatus;
+      if (status === "processing") return MODERATION_POLL_MS;
+      if (status === "failed") return MODERATION_RETRY_POLL_MS;
+      return false;
+    },
+  });
+}
+
+/**
+ * Comments of one conversation. "Load more" raises `limit` with `page` fixed
+ * at 1, which is the pattern the server caps at 500 rows.
+ */
+export function useAudioFeedback(
+  audioId: string,
+  limit: number,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: audioKeys.feedback(audioId, limit),
+    queryFn: () => getAudioFeedback(audioId, { page: 1, limit }),
+    select: (response) => response.data,
+    enabled,
+    placeholderData: keepPreviousData,
+    staleTime: 15 * 1000,
+  });
+}
+
+/** The controlled feeling vocabulary; it does not change per session. */
+export function useFeelingTags() {
+  return useQuery({
+    queryKey: audioKeys.feelingTags(),
+    queryFn: () => getFeelingTags(),
+    select: (response) => response.data,
+    staleTime: Infinity,
+  });
+}
+
+/** The caller's own conversations, any moderation status. */
+export function useMyAudios(params: AudioListQueryParams) {
+  return useQuery({
+    queryKey: audioKeys.myAudios(params),
+    queryFn: () => getMyAudios(params),
+    select: (response) => response.data,
+    placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
+  });
+}
+
+/** Full bookmark rows (the ids cache above only stores ids). */
+export function useBookmarkedAudios(enabled = true) {
+  return useQuery({
+    queryKey: audioKeys.saved(),
+    queryFn: () => getMyAudioBookmarks(),
+    select: (response) => response.data,
+    enabled,
+    staleTime: 60 * 1000,
+  });
+}
+
+/** One rating per listener; the reply carries the updated counters. */
+export function useGiveAudioRating(audioId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (rating: number) => giveAudioRating(audioId, rating),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: audioKeys.detail(audioId),
+      });
+      void queryClient.invalidateQueries({ queryKey: audioKeys.lists() });
+    },
+  });
+}
+
+export interface SaveAudioFeedbackVariables {
+  input: AudioFeedbackInput;
+}
+
+/** Upserts the caller's comment/feelings and refreshes the aggregate view. */
+export function useSaveAudioFeedback(audioId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ input }: SaveAudioFeedbackVariables) =>
+      saveAudioFeedback(audioId, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: audioKeys.detail(audioId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: audioKeys.feedbackBase(audioId),
+      });
+    },
+  });
+}
+
+export interface UpdateAudioVariables {
+  input: UpdateAudioInput;
+  files?: UpdateAudioFiles;
+}
+
+/**
+ * Text edits are visible immediately; replacing the audio puts the row back
+ * into `processing` server-side, so the detail hook keeps polling.
+ */
+export function useUpdateAudio(audioId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ input, files }: UpdateAudioVariables) =>
+      updateAudio(audioId, input, files),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: audioKeys.detail(audioId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [...audioKeys.all, "my-audios"],
+      });
+      void queryClient.invalidateQueries({ queryKey: audioKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: audioKeys.saved() });
+    },
+  });
+}
+
+/** Removes the conversation everywhere it can be cached. */
+export function useDeleteAudio() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (audioId: string) => deleteAudio(audioId),
+    onSuccess: (_response, audioId) => {
+      queryClient.removeQueries({ queryKey: audioKeys.detail(audioId) });
+      void queryClient.invalidateQueries({ queryKey: audioKeys.lists() });
+      void queryClient.invalidateQueries({
+        queryKey: [...audioKeys.all, "my-audios"],
+      });
+      void queryClient.invalidateQueries({ queryKey: audioKeys.saved() });
+      void queryClient.invalidateQueries({ queryKey: audioKeys.bookmarks() });
+    },
+  });
+}
+
+/**
  * Polls one upload until `ready` / `rejected`. `failed` is a technical state
  * the sweep retries, so it only slows the loop down instead of stopping it.
  */
@@ -235,10 +427,17 @@ export function useAudioModerationStatus(audioId: string | null) {
   const status = query.data?.moderationStatus;
 
   useEffect(() => {
-    if (status === "ready") {
-      void queryClient.invalidateQueries({ queryKey: audioKeys.lists() });
+    if (status !== "ready" && status !== "rejected") return;
+    void queryClient.invalidateQueries({ queryKey: audioKeys.lists() });
+    void queryClient.invalidateQueries({
+      queryKey: [...audioKeys.all, "my-audios"],
+    });
+    if (audioId) {
+      void queryClient.invalidateQueries({
+        queryKey: audioKeys.detail(audioId),
+      });
     }
-  }, [status, queryClient]);
+  }, [status, audioId, queryClient]);
 
   return query;
 }

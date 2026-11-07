@@ -44,7 +44,6 @@ export function ChattingHeader() {
           <MessageCircle aria-hidden />
           {t("headerMessages")}
         </Button>
-
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <LanguageToggle size="icon" />
           <ThemeToggle size="icon" className="hidden md:inline-flex" />

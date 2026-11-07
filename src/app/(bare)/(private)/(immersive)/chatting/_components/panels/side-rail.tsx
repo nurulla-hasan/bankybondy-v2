@@ -19,7 +19,7 @@ import {
 import type { RawAudioTopicWithCount } from "@/types";
 import { cn, getInitials } from "@/lib/utils";
 
-import type { FeedVoice } from "./shared/audio-model";
+import type { FeedVoice } from "../shared/audio-model";
 
 interface SideRailProps {
   topics: readonly RawAudioTopicWithCount[];

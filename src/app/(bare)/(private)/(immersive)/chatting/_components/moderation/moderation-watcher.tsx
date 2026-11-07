@@ -8,10 +8,9 @@ import { errorToast, infoToast, successToast } from "@/lib/toast";
 import { useAudioModerationStatus } from "@/services/hooks/audio.hook";
 
 import {
-  requestShareDialog,
   untrackPendingAudio,
   usePendingAudio,
-} from "./shared/moderation-tracker";
+} from "../shared/moderation-tracker";
 
 /**
  * Renders nothing; polls every upload whose moderation outlived the dialog.
@@ -49,16 +48,7 @@ function AudioModerationWatch({ audioId }: { audioId: string }) {
 
     if (status === "rejected") {
       notifiedRef.current = status;
-      errorToast(
-        t("shareRejected"),
-        reason || t("shareRejectedGeneric"),
-        {
-          action: {
-            label: t("shareRejectedAction"),
-            onClick: requestShareDialog,
-          },
-        },
-      );
+      errorToast(t("shareRejected"), reason || t("shareRejectedGeneric"));
       untrackPendingAudio(audioId);
       return;
     }

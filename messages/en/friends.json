@@ -5,7 +5,8 @@
   "tabs": {
     "requests": "Requests",
     "sent": "Sent",
-    "friends": "Friends"
+    "friends": "Friends",
+    "blocked": "Blocked"
   },
   "loadErrorTitle": "Couldn't load this list",
   "loadErrorDescription": "Check your connection and try again.",

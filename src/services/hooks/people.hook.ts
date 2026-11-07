@@ -168,6 +168,7 @@ export function useBlockUser() {
     onSuccess: (_response, id) => {
       queryClient.removeQueries({ queryKey: peopleKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: peopleKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: [...peopleKeys.all, "blocked"] });
     },
   });
 }

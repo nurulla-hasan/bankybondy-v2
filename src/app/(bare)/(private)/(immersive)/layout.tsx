@@ -1,4 +1,4 @@
-import { ChattingHeader } from "./chatting/_components/chatting-header";
+import { ChattingHeader } from "./chatting/_components/layout/chatting-header";
 
 export default function ImmersiveLayout({
   children,

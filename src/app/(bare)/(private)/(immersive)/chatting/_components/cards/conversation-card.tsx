@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   AudioLines,
   Bookmark,
@@ -105,7 +106,12 @@ export function ConversationCard({
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
           <h3 className="line-clamp-2 font-heading text-sm font-medium sm:text-base">
-            {conversation.title}
+            <Link
+              href={`/chatting/conversations/${conversation.id}`}
+              className="transition-colors hover:text-primary"
+            >
+              {conversation.title}
+            </Link>
           </h3>
 
           <div className="mt-2 flex items-center gap-2">
