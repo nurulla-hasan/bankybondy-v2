@@ -18,11 +18,13 @@ import type {
 
 import {
   createAudio,
+  deleteAudioUploads,
   getAllAudios,
   getAudioModerationStatus,
   getMyAudioBookmarks,
   recordAudioListen,
   toggleAudioBookmark,
+  uploadAudioFiles,
 } from "../api/audio.api";
 import { getAudioTopics } from "../api/topic.api";
 
@@ -34,6 +36,13 @@ const TOPIC_LIST_LIMIT = 500;
 
 /** Moderation is background work (ffmpeg + AI); poll slowly until terminal. */
 const MODERATION_POLL_MS = 4 * 1000;
+
+/**
+ * A technical `failed` is not final: the worker sweep re-runs it (up to
+ * `AUDIO_FAILED_MAX_RETRIES`, 30 min backoff). Keep a slow poll so a later
+ * `ready`/`rejected` still reaches the dialog instead of dying as a hard error.
+ */
+const MODERATION_RETRY_POLL_MS = 60 * 1000;
 
 export const audioKeys = {
   all: ["audio"] as const,
@@ -150,23 +159,52 @@ export function useRecordAudioListen() {
   });
 }
 
-export interface CreateAudioVariables {
-  input: CreateAudioInput;
-  audio: File;
-  cover: File;
+export interface UploadAudioFilesVariables {
+  audio?: File;
+  cover?: File;
 }
 
 /**
- * Upload one conversation. The reply is 202 + `processing`, so invalidation
- * here is just a courtesy; the moderation polling hook invalidates again once
- * the background worker approves the audio.
+ * Stages a file as soon as it is picked. The returned URLs are what the create
+ * call publishes, so the dialog can retry without uploading again.
+ */
+export function useUploadAudioFiles() {
+  return useMutation({
+    mutationFn: ({ audio, cover }: UploadAudioFilesVariables) =>
+      uploadAudioFiles({ audio, cover }),
+  });
+}
+
+/**
+ * Removes staged files the dialog never published. Best effort: a failure is
+ * logged rather than shown, and the server refuses anything not owned.
+ */
+export function useDeleteAudioUploads() {
+  return useMutation({
+    mutationFn: (files: string[]) => deleteAudioUploads(files),
+    onError: (error) => {
+      console.error(
+        "Failed to delete staged audio uploads",
+        getErrorMessage(error, "Unknown error"),
+      );
+    },
+  });
+}
+
+export interface CreateAudioVariables {
+  input: CreateAudioInput;
+}
+
+/**
+ * Publishes a conversation from already-uploaded files. The reply is
+ * 202 + `processing`, so invalidation here is just a courtesy; the moderation
+ * polling hook invalidates again once the background worker approves it.
  */
 export function useCreateAudio() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ input, audio, cover }: CreateAudioVariables) =>
-      createAudio(input, audio, cover),
+    mutationFn: ({ input }: CreateAudioVariables) => createAudio(input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: audioKeys.lists() });
     },
@@ -174,9 +212,8 @@ export function useCreateAudio() {
 }
 
 /**
- * Polls one upload until `ready` / `rejected` / `failed`. The interval is
- * disabled for terminal statuses, so a finished conversation stops the loop
- * without extra state.
+ * Polls one upload until `ready` / `rejected`. `failed` is a technical state
+ * the sweep retries, so it only slows the loop down instead of stopping it.
  */
 export function useAudioModerationStatus(audioId: string | null) {
   const queryClient = useQueryClient();
@@ -188,9 +225,10 @@ export function useAudioModerationStatus(audioId: string | null) {
     enabled: Boolean(audioId),
     refetchInterval: (query) => {
       const status = query.state.data?.data.moderationStatus;
-      const isTerminal =
-        status === "ready" || status === "rejected" || status === "failed";
-      return isTerminal ? false : MODERATION_POLL_MS;
+      if (status === "ready" || status === "rejected") return false;
+      return status === "failed"
+        ? MODERATION_RETRY_POLL_MS
+        : MODERATION_POLL_MS;
     },
   });
 

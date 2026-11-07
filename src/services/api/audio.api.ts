@@ -8,6 +8,7 @@ import type {
   RawAudioBookmark,
   RawAudioList,
   RecordAudioListenInput,
+  UploadedAudioFiles,
 } from "@/types";
 
 /**
@@ -25,26 +26,52 @@ export function getAllAudios(params?: AudioListQueryParams) {
 }
 
 /**
- * Upload a conversation. Multer reads the two files by field name and
- * `parseMultipartData` turns the `data` part into the request body, so the
- * contract is exactly: `audio`, `audio_cover`, `data` (JSON string).
- * The server answers 202 with `moderationStatus: "processing"`; content
+ * Stage one or both files before publishing. The server stores them under the
+ * caller's own prefix and returns CloudFront URLs; the create call then sends
+ * only JSON, so a cancelled dialog can delete what it never used.
+ * Endpoint: POST /audio/upload-audio
+ */
+export function uploadAudioFiles({
+  audio,
+  cover,
+}: {
+  audio?: File;
+  cover?: File;
+}) {
+  const body = new FormData();
+  if (audio) body.append("audio", audio);
+  if (cover) body.append("audio_cover", cover);
+
+  return apiClient<ApiResponse<UploadedAudioFiles>>("/audio/upload-audio", {
+    method: "POST",
+    body,
+  });
+}
+
+/**
+ * Remove staged files that will never be published (dialog closed, file
+ * replaced). The server only deletes URLs under the caller's own audio
+ * prefixes and refuses files already tied to an audio.
+ * Endpoint: POST /audio/delete-upload
+ */
+export function deleteAudioUploads(files: string[]) {
+  return apiClient<ApiResponse<{ deleted: number }>>("/audio/delete-upload", {
+    method: "POST",
+    body: { files },
+  });
+}
+
+/**
+ * Publish a conversation from already-uploaded files. The server validates
+ * that both URLs are on the CDN, under the caller's prefix and not used by
+ * another audio. Answers 202 with `moderationStatus: "processing"`; content
  * moderation + ffmpeg run in the background.
  * Endpoint: POST /audio/create-audio
  */
-export function createAudio(
-  input: CreateAudioInput,
-  audio: File,
-  cover: File,
-) {
-  const body = new FormData();
-  body.append("audio", audio);
-  body.append("audio_cover", cover);
-  body.append("data", JSON.stringify(input));
-
+export function createAudio(input: CreateAudioInput) {
   return apiClient<ApiResponse<RawAudio>>("/audio/create-audio", {
     method: "POST",
-    body,
+    body: input,
   });
 }
 

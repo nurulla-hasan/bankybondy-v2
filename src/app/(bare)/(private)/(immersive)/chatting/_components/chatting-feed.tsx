@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ChevronDown, ChevronUp, Headphones } from "lucide-react";
+import {
+  ArrowDown,
+  ChevronDown,
+  ChevronUp,
+  Headphones,
+  Loader2,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { EmptyState } from "@/components/common/empty-state";
@@ -26,6 +32,7 @@ import { FeaturedConversation } from "./cards/featured-conversation";
 import { HowItWorksCard } from "./cards/how-it-works-card";
 import { ShareConversationDialog } from "./dialogs/share-conversation-dialog";
 import { MiniPlayer } from "./mini-player";
+import { AudioModerationWatcher } from "./moderation-watcher";
 import { SectionNav, sectionLabelKey, type FeedSection } from "./section-nav";
 import {
   toFeedAudio,
@@ -33,6 +40,7 @@ import {
   type FeedAudio,
 } from "./shared/audio-model";
 import { compactNumber } from "./shared/format";
+import { usePendingAudio } from "./shared/moderation-tracker";
 import { SideRail } from "./side-rail";
 import { Waveform } from "./shared/waveform";
 
@@ -52,6 +60,7 @@ export function ChattingFeed() {
 
   const [section, setSection] = useState<FeedSection>("recent");
   const [topicId, setTopicId] = useState<string | null>(null);
+  const pendingAudio = usePendingAudio();
 
   const params = useMemo<AudioListQueryParams>(
     () => ({
@@ -283,6 +292,8 @@ export function ChattingFeed() {
         playing && "pb-24",
       )}
     >
+      <AudioModerationWatcher />
+
       <section className="relative overflow-hidden rounded-3xl border border-border bg-card">
         <div
           aria-hidden
@@ -429,6 +440,23 @@ export function ChattingFeed() {
               {t("conversationsCount", { count: totalCount })}
             </p>
           </div>
+
+          {pendingAudio.length ? (
+            <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
+              <Loader2
+                className="mt-0.5 size-4 shrink-0 animate-spin text-muted-foreground"
+                aria-hidden
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-medium">
+                  {t("pendingReview", { count: pendingAudio.length })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t("pendingReviewDescription")}
+                </p>
+              </div>
+            </div>
+          ) : null}
 
           {feedQuery.isPending ? (
             <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">

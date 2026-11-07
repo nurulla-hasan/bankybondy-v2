@@ -106,13 +106,21 @@ export interface AudioModerationResult {
   moderationReason: string;
 }
 
-/** Fields the uploader posts inside the multipart `data` JSON part. */
+/** Files staged by `POST /audio/upload-audio`; either side may be null. */
+export interface UploadedAudioFiles {
+  audio_url: string | null;
+  cover_image: string | null;
+}
+
+/** Fields the uploader posts to `POST /audio/create-audio` as JSON. */
 export interface CreateAudioInput {
   title: string;
   description: string;
   audioTopic: string;
   tags: string[];
   duration: number;
+  audio_url: string;
+  cover_image: string;
 }
 
 /** `POST /audio/:audioId/listen` — the server decides if the listen qualifies. */
