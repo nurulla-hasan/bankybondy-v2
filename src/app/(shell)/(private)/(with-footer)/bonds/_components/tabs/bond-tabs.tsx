@@ -33,7 +33,10 @@ export function BondTabs() {
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
 
   const { data: requests } = useBondRequests({ searchTerm, page });
-  const { data: matches } = useBondMatches(requestFilterId, page);
+  // Solo pedir matches cuando la pestaña está visible. Antes se traía el set
+  // completo de coincidencias en cada carga para pintar un contador.
+  const matchesQueryId = activeTab === "matches" ? requestFilterId : null;
+  const { data: matches } = useBondMatches(matchesQueryId);
   const { data: links } = useBondLinks({ searchTerm, page });
 
   const handleTabChange = (tab: BondTab) => {
@@ -61,7 +64,10 @@ export function BondTabs() {
       id: "matches" as const,
       icon: <Sparkles className="size-4" aria-hidden />,
       label: t("tabs.matches"),
-      count: requestFilterId ? (matches?.total ?? 0) : undefined,
+      count:
+        activeTab === "matches" && requestFilterId
+          ? (matches?.pages[0]?.data.total ?? 0)
+          : undefined,
     },
     {
       id: "links" as const,
@@ -114,8 +120,6 @@ export function BondTabs() {
         onClearFilter={() => updateFilter("request", null)}
         onBrowseRequests={() => updateFilter("tab", null)}
         searchTerm={searchTerm}
-        page={page}
-        onPageChange={handlePageChange}
       />
       <LinksTab
         searchTerm={searchTerm}

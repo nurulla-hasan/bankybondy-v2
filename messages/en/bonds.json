@@ -49,6 +49,8 @@
   "matchesComputingTitle": "Finding matches",
   "matchesComputingDescription": "We are scanning offers and wants. This page refreshes automatically when the results are ready.",
   "clearFilter": "Clear filter",
+  "loadMore": "Load more",
+  "loadingMore": "Loading...",
   "searchEmptyTitle": "No results for “{term}”",
   "searchEmptyDescription": "Try a different word, or clear the search.",
   "matchScore": "{score}% match",

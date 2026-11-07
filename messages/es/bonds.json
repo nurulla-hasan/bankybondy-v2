@@ -49,6 +49,8 @@
   "matchesComputingTitle": "Buscando coincidencias",
   "matchesComputingDescription": "Estamos revisando ofertas y búsquedas. La página se actualiza sola cuando los resultados estén listos.",
   "clearFilter": "Quitar filtro",
+  "loadMore": "Cargar más",
+  "loadingMore": "Cargando...",
   "searchEmptyTitle": "Sin resultados para “{term}”",
   "searchEmptyDescription": "Prueba con otra palabra o quita la búsqueda.",
   "matchScore": "{score}% de afinidad",

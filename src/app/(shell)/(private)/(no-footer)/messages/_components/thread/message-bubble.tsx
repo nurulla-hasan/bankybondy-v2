@@ -92,6 +92,14 @@ export function MessageBubble({
             <MessageHeader>{message.userDetails.name}</MessageHeader>
           ) : null}
 
+          {/* One shrink-to-fit stack per message so the hover action can sit
+              beside the bubble instead of inside a run's last footer. */}
+          <div
+            className={cn(
+              "relative flex w-fit max-w-[80%] flex-col gap-2.5",
+              mine ? "items-end self-end" : "items-start self-start",
+            )}
+          >
           {message.isDeleted ? (
             <Bubble variant="muted">
               <BubbleContent>
@@ -176,7 +184,10 @@ export function MessageBubble({
               ) : null}
 
               {message.text ? (
-                <Bubble variant={mine ? "default" : "secondary"}>
+                <Bubble
+                  variant={mine ? "default" : "secondary"}
+                  className="max-w-full"
+                >
                   <BubbleContent>
                     <p className="leading-relaxed">{message.text}</p>
                   </BubbleContent>
@@ -184,6 +195,19 @@ export function MessageBubble({
               ) : null}
             </>
           )}
+
+          {canDelete ? (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("deleteMessage")}
+              className="absolute end-full top-1/2 me-1 -translate-y-1/2 opacity-0 transition-opacity group-hover/message:opacity-100 focus-visible:opacity-100"
+              onClick={() => onDelete?.(message._id)}
+            >
+              <Trash2 aria-hidden />
+            </Button>
+          ) : null}
+          </div>
 
           {lastOfRun ? (
             <MessageFooter>
@@ -197,18 +221,6 @@ export function MessageBubble({
               ) : (
                 "\u00A0"
               )}
-
-              {canDelete ? (
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={t("deleteMessage")}
-                  className="ml-1 opacity-0 transition-opacity group-hover/message:opacity-100 focus-visible:opacity-100"
-                  onClick={() => onDelete?.(message._id)}
-                >
-                  <Trash2 aria-hidden />
-                </Button>
-              ) : null}
             </MessageFooter>
           ) : null}
         </MessageContent>

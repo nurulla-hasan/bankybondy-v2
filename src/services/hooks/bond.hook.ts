@@ -1,5 +1,6 @@
 import {
   keepPreviousData,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -43,8 +44,6 @@ export const bondKeys = {
   requestDetail: (id: string | null) =>
     [...bondKeys.requests(), "detail", id] as const,
   matches: () => [...bondKeys.all, "matches"] as const,
-  matchList: (params: { bondRequest: string | null; page: number; limit: number }) =>
-    [...bondKeys.matches(), params] as const,
   links: () => [...bondKeys.all, "links"] as const,
   linkList: (params: BondLinkQueryParams) =>
     [...bondKeys.links(), params] as const,
@@ -120,27 +119,32 @@ export function useBondLinks(params: BondLinkQueryParams = {}) {
   });
 }
 
-export function useBondMatches(requestId: string | null, page = 1) {
-  const normalizedPage = page > 0 ? page : 1;
-
-  return useQuery({
-    queryKey: bondKeys.matchList({
-      bondRequest: requestId,
-      page: normalizedPage,
-      limit: BOND_MATCHES_PAGE_SIZE,
-    }),
-    queryFn: () =>
+export function useBondMatches(requestId: string | null) {
+  return useInfiniteQuery({
+    queryKey: [...bondKeys.matches(), "infinite", requestId] as const,
+    queryFn: ({ pageParam }) =>
       getBondMatches({
         bondRequest: requestId as string,
-        page: normalizedPage,
+        page: pageParam,
         limit: BOND_MATCHES_PAGE_SIZE,
       }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, limit, total, status } = lastPage.data;
+
+      if (status === "computing") return undefined;
+
+      return page * limit < total ? page + 1 : undefined;
+    },
     enabled: !!requestId,
-    select: (response) => response.data,
-    placeholderData: keepPreviousData,
     staleTime: 10 * 1000,
+    // El robot mantiene la cache fresca; el poll de abajo cubre "computing".
+    // Un refetch por foco de ventana solo repetía una lectura ya resuelta.
+    refetchOnWindowFocus: false,
     refetchInterval: (query) =>
-      query.state.data?.data.status === "computing" ? MATCHES_POLL_MS : false,
+      query.state.data?.pages[0]?.data.status === "computing"
+        ? MATCHES_POLL_MS
+        : false,
   });
 }
 

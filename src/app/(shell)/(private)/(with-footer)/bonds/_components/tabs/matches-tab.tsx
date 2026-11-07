@@ -1,9 +1,9 @@
 "use client";
 
-import { SearchX, Sparkles, WifiOff, X } from "lucide-react";
+import { ChevronDown, SearchX, Sparkles, WifiOff, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 
-import CustomPagination from "@/components/common/custom-pagination";
 import { EmptyState } from "@/components/common/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,13 +24,18 @@ function matchesSearchTerm(match: RawBondMatch, term: string) {
   });
 }
 
+function matchSignature(match: RawBondMatch) {
+  return match.matchRequest
+    .map((entry) => entry._id)
+    .sort()
+    .join("|");
+}
+
 interface MatchesTabProps {
   requestFilterId: string | null;
   onClearFilter: () => void;
   onBrowseRequests: () => void;
   searchTerm: string;
-  page: number;
-  onPageChange: (page: number) => void;
 }
 
 export function MatchesTab({
@@ -38,18 +43,41 @@ export function MatchesTab({
   onClearFilter,
   onBrowseRequests,
   searchTerm,
-  page,
-  onPageChange,
 }: MatchesTabProps) {
   const t = useTranslations("Bonds");
   const { data: request } = useBondRequest(requestFilterId);
-  const { data, isPending, isError, isFetching } = useBondMatches(
-    requestFilterId,
-    page,
-  );
+  const {
+    data,
+    isPending,
+    isError,
+    isFetching,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useBondMatches(requestFilterId);
 
-  const matches = data?.data ?? [];
-  const isComputing = data?.status === "computing";
+  // El mismo match puede repetirse entre páginas si el set se recomputó
+  // mientras se iba paginando; la firma lo deduplica sin reordenar.
+  const matches = useMemo(() => {
+    const seen = new Set<string>();
+    const result: RawBondMatch[] = [];
+
+    for (const page of data?.pages ?? []) {
+      for (const match of page.data.data) {
+        const signature = matchSignature(match);
+
+        if (seen.has(signature)) continue;
+        seen.add(signature);
+        result.push(match);
+      }
+    }
+
+    return result;
+  }, [data]);
+
+  const status = data?.pages[0]?.data.status;
+  const isComputing = status === "computing";
+  const reactivated = data?.pages.some((page) => page.data.reactivated);
   const term = searchTerm.trim();
   const normalizedTerm = term.toLowerCase();
 
@@ -86,7 +114,7 @@ export function MatchesTab({
             </Button>
           </div>
 
-          {data?.reactivated ? (
+          {reactivated ? (
             <p className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-muted-foreground">
               {t("matchesReactivated")}
             </p>
@@ -114,18 +142,14 @@ export function MatchesTab({
             <div
               className={cn(
                 "space-y-4",
-                isFetching && "opacity-60 transition-opacity",
+                isFetching &&
+                  !isFetchingNextPage &&
+                  "opacity-60 transition-opacity",
               )}
               aria-busy={isFetching}
             >
               {searchedMatches.map((match) => (
-                <MatchCard
-                  key={match.matchRequest
-                    .map((entry) => entry._id)
-                    .sort()
-                    .join("|")}
-                  match={match}
-                />
+                <MatchCard key={matchSignature(match)} match={match} />
               ))}
             </div>
           ) : term ? (
@@ -142,15 +166,21 @@ export function MatchesTab({
             />
           )}
 
-          {data && !isError && !isComputing ? (
-            <CustomPagination
-              currentPage={data.page}
-              totalPages={Math.max(
-                1,
-                Math.ceil(data.total / Math.max(data.limit, 1)),
-              )}
-              updatePage={onPageChange}
-            />
+          {data && !isError && !isComputing && hasNextPage ? (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? (
+                  <Spinner className="size-4" />
+                ) : (
+                  <ChevronDown className="size-4" aria-hidden />
+                )}
+                {isFetchingNextPage ? t("loadingMore") : t("loadMore")}
+              </Button>
+            </div>
           ) : null}
         </>
       )}
