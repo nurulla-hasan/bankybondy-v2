@@ -1,102 +1,251 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, Headphones, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowDown, ChevronDown, ChevronUp, Headphones } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { StatStrip } from "@/components/common/stat-strip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { successToast } from "@/lib/toast";
+import { Skeleton } from "@/components/ui/skeleton";
+import { errorToast, successToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import {
+  FEED_PAGE_SIZE,
+  useAudioFeed,
+  useAudioTopics,
+  useBookmarkedAudioIds,
+  useRecordAudioListen,
+  useToggleAudioBookmark,
+} from "@/services/hooks/audio.hook";
+import type { AudioFeedSort, AudioListQueryParams } from "@/types";
 
 import { ConversationCard } from "./cards/conversation-card";
 import { FeaturedConversation } from "./cards/featured-conversation";
-import { compactNumber } from "./shared/format";
 import { HowItWorksCard } from "./cards/how-it-works-card";
-import { MiniPlayer } from "./mini-player";
-import {
-  MOCK_CONVERSATIONS,
-  MOCK_FEATURED,
-  MOCK_TOPIC_ENTRIES,
-  MOCK_TOPIC_LIST,
-  MOCK_TOPICS,
-  MOCK_TOTAL_AUDIOS,
-  type MockConversation,
-  type MockTopicId,
-} from "./shared/mock-data";
-import { SectionNav, sectionLabelKey, type FeedSection } from "./section-nav";
 import { ShareConversationDialog } from "./dialogs/share-conversation-dialog";
+import { MiniPlayer } from "./mini-player";
+import { SectionNav, sectionLabelKey, type FeedSection } from "./section-nav";
+import {
+  toFeedAudio,
+  toFeedVoices,
+  type FeedAudio,
+} from "./shared/audio-model";
+import { compactNumber } from "./shared/format";
 import { SideRail } from "./side-rail";
 import { Waveform } from "./shared/waveform";
 
-const SECTION_SORTERS: Record<
-  FeedSection,
-  (a: MockConversation, b: MockConversation) => number
-> = {
-  recent: (a, b) => b.createdAt.localeCompare(a.createdAt),
-  trending: (a, b) => b.trendingScore - a.trendingScore,
-  mostPlayed: (a, b) => b.totalPlay - a.totalPlay,
+const SECTION_SORT: Record<FeedSection, AudioFeedSort> = {
+  recent: "-createdAt",
+  trending: "-trendingScore",
+  mostPlayed: "-totalPlay",
 };
 
 export function ChattingFeed() {
   const t = useTranslations("Chatting");
-
-  const [section, setSection] = useState<FeedSection>("recent");
-  const [topic, setTopic] = useState<MockTopicId | null>(null);
-  const [saved, setSaved] = useState<Set<string>>(new Set());
-
-  // Design-preview player: a countdown for the mock waveform, nothing else.
-  const [playing, setPlaying] = useState<MockConversation | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
+  const tRef = useRef(t);
 
   useEffect(() => {
-    if (!isPlaying || !playing) return;
+    tRef.current = t;
+  }, [t]);
 
-    const timer = window.setInterval(() => {
-      setElapsed((value) => Math.min(value + 1, playing.durationSec));
-    }, 1000);
+  const [section, setSection] = useState<FeedSection>("recent");
+  const [topicId, setTopicId] = useState<string | null>(null);
 
-    return () => window.clearInterval(timer);
-  }, [isPlaying, playing]);
+  const params = useMemo<AudioListQueryParams>(
+    () => ({
+      page: 1,
+      limit: FEED_PAGE_SIZE,
+      sort: SECTION_SORT[section],
+      audioTopic: topicId ?? undefined,
+    }),
+    [section, topicId],
+  );
 
-  const visible = useMemo(() => {
-    const base = MOCK_CONVERSATIONS.slice(1);
-    const filtered = topic
-      ? base.filter((item) => item.topic.id === MOCK_TOPICS[topic].id)
-      : base;
+  const feedQuery = useAudioFeed(params);
+  const statsQuery = useAudioFeed({ page: 1, limit: 1 });
+  const topicsQuery = useAudioTopics();
+  const savedQuery = useBookmarkedAudioIds();
+  const toggleSave = useToggleAudioBookmark();
+  const recordListen = useRecordAudioListen();
 
-    return [...filtered].sort(SECTION_SORTERS[section]);
-  }, [section, topic]);
+  const items = useMemo(
+    () =>
+      (feedQuery.data?.result ?? [])
+        .map((audio, index) => toFeedAudio(audio, index))
+        .filter((audio): audio is FeedAudio => audio !== null),
+    [feedQuery.data],
+  );
 
-  const handlePlay = (conversation: MockConversation) => {
-    if (playing?.id === conversation.id) {
-      if (elapsed >= conversation.durationSec) {
-        setElapsed(0);
-        setIsPlaying(true);
-        return;
+  const topics = useMemo(
+    () => topicsQuery.data ?? [],
+    [topicsQuery.data],
+  );
+  const savedIds = savedQuery.data ?? new Set<string>();
+  const voices = useMemo(() => toFeedVoices(items), [items]);
+
+  const INITIAL_VISIBLE_TOPICS = 6;
+  const [showAllTopics, setShowAllTopics] = useState(false);
+
+  const visibleTopics = useMemo(() => {
+    if (showAllTopics) return topics;
+    const slice = topics.slice(0, INITIAL_VISIBLE_TOPICS);
+    if (topicId && !slice.some((t) => t._id === topicId)) {
+      const selected = topics.find((t) => t._id === topicId);
+      if (selected) {
+        return [...slice.slice(0, INITIAL_VISIBLE_TOPICS - 1), selected];
       }
-      setIsPlaying((value) => !value);
+    }
+    return slice;
+  }, [showAllTopics, topics, topicId]);
+
+  const hiddenCount = topics.length - visibleTopics.length;
+
+  const featured =
+    section === "recent" && topicId === null ? items[0] : undefined;
+  const visible = featured ? items.slice(1) : items;
+  const totalCount = feedQuery.data?.meta.total ?? items.length;
+
+  const [playing, setPlaying] = useState<FeedAudio | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [muted, setMuted] = useState(false);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const mutedRef = useRef(false);
+  const recordedRef = useRef<Set<string>>(new Set());
+  const recordListenRef = useRef(recordListen);
+
+  useEffect(() => {
+    mutedRef.current = muted;
+    if (audioRef.current) audioRef.current.muted = muted;
+  }, [muted]);
+
+  useEffect(() => {
+    recordListenRef.current = recordListen;
+  }, [recordListen]);
+
+  useEffect(() => {
+    if (!playing) {
+      audioRef.current?.pause();
+      audioRef.current = null;
       return;
     }
 
-    setPlaying(conversation);
+    const audio = new Audio(playing.audioUrl);
+    audio.muted = mutedRef.current;
+    audioRef.current = audio;
+
+    const handleTimeUpdate = () => {
+      setElapsed(audio.currentTime);
+
+      // A qualified listen is ≥30s or ≥40% (`audio.listen.ts`); send it once
+      // per playback session and let the server dedupe per day.
+      const threshold = Math.min(30, playing.durationSec * 0.4);
+      if (
+        audio.currentTime < threshold ||
+        recordedRef.current.has(playing.id)
+      ) {
+        return;
+      }
+
+      recordedRef.current.add(playing.id);
+      recordListenRef.current.mutate({
+        audioId: playing.id,
+        secondsListened: Math.round(audio.currentTime),
+        completion: playing.durationSec
+          ? Math.min(1, audio.currentTime / playing.durationSec)
+          : 0,
+      });
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setElapsed(audio.duration || playing.durationSec);
+    };
+
+    const handleError = () => {
+      setIsPlaying(false);
+      errorToast(
+        tRef.current("playFailed"),
+        tRef.current("playFailedDescription"),
+      );
+    };
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", handleError);
+
+    void audio.play().then(
+      () => setIsPlaying(true),
+      () => {
+        setIsPlaying(false);
+        errorToast(
+          tRef.current("playFailed"),
+          tRef.current("playFailedDescription"),
+        );
+      },
+    );
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleError);
+      audio.src = "";
+      if (audioRef.current === audio) audioRef.current = null;
+    };
+  }, [playing]);
+
+  const handlePlay = (conversation: FeedAudio) => {
+    if (playing?.id === conversation.id && audioRef.current) {
+      const audio = audioRef.current;
+
+      if (audio.ended) {
+        audio.currentTime = 0;
+        setElapsed(0);
+      }
+
+      if (audio.paused) {
+        setIsPlaying(true);
+        void audio.play().catch(() => setIsPlaying(false));
+        return;
+      }
+
+      audio.pause();
+      setIsPlaying(false);
+      return;
+    }
+
     setElapsed(0);
+    setPlaying(conversation);
     setIsPlaying(true);
   };
 
-  const handleToggleSave = (conversationId: string) => {
-    setSaved((current) => {
-      const next = new Set(current);
-      if (next.has(conversationId)) next.delete(conversationId);
-      else next.add(conversationId);
-      return next;
-    });
+  const seekBy = (delta: number) => {
+    const audio = audioRef.current;
+    if (!audio || !playing) return;
+
+    const duration = Number.isFinite(audio.duration)
+      ? audio.duration
+      : playing.durationSec;
+    const next = Math.min(Math.max(0, audio.currentTime + delta), duration);
+    audio.currentTime = next;
+    setElapsed(next);
   };
 
-  const handleShare = async (conversation: MockConversation) => {
+  const closePlayer = () => {
+    setPlaying(null);
+    setIsPlaying(false);
+    setElapsed(0);
+  };
+
+  const handleSelectTopic = (nextTopicId: string) => {
+    setTopicId((current) => (current === nextTopicId ? null : nextTopicId));
+  };
+
+  const handleShare = async (conversation: FeedAudio) => {
     try {
       const url = `${window.location.origin}/chatting?c=${conversation.id}`;
 
@@ -118,24 +267,14 @@ export function ChattingFeed() {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const handleSelectTopic = (nextTopic: MockTopicId) => {
-    setTopic((current) => (current === nextTopic ? null : nextTopic));
-  };
-
   const featuredIsPlaying =
-    playing?.id === MOCK_FEATURED.id &&
+    playing?.id === featured?.id &&
     isPlaying &&
-    elapsed < MOCK_FEATURED.durationSec;
+    elapsed < (featured?.durationSec ?? 0);
   const featuredProgress =
-    playing?.id === MOCK_FEATURED.id
-      ? (elapsed / MOCK_FEATURED.durationSec) * 100
+    playing?.id === featured?.id && featured?.durationSec
+      ? (elapsed / featured.durationSec) * 100
       : 0;
-
-  const closePlayer = () => {
-    setPlaying(null);
-    setIsPlaying(false);
-    setElapsed(0);
-  };
 
   return (
     <div
@@ -169,10 +308,6 @@ export function ChattingFeed() {
                 </span>
                 {t("eyebrow")}
               </Badge>
-              <Badge variant="outline">
-                <Sparkles aria-hidden />
-                {t("previewBadge")}
-              </Badge>
             </div>
 
             <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
@@ -184,7 +319,7 @@ export function ChattingFeed() {
             </p>
 
             <div className="flex flex-wrap items-center gap-2">
-              <ShareConversationDialog />
+              <ShareConversationDialog topics={topics} />
               <Button variant="outline" size="xl" onClick={handleExplore}>
                 <ArrowDown aria-hidden />
                 {t("exploreCta")}
@@ -197,11 +332,11 @@ export function ChattingFeed() {
               className="grid-cols-2"
               items={[
                 {
-                  value: compactNumber(MOCK_TOTAL_AUDIOS),
+                  value: compactNumber(statsQuery.data?.meta.total ?? 0),
                   label: t("statConversations"),
                 },
                 {
-                  value: String(MOCK_TOPIC_LIST.length),
+                  value: String(topics.length),
                   label: t("statTopics"),
                 },
               ]}
@@ -213,22 +348,20 @@ export function ChattingFeed() {
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="space-y-4 lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
           <SectionNav value={section} onChange={setSection} />
-          <HowItWorksCard className="hidden lg:block" />
+          <HowItWorksCard />
         </div>
 
         <div className="space-y-6 lg:col-span-6">
-          {section === "recent" && topic === null ? (
+          {featured ? (
             <FeaturedConversation
-              conversation={MOCK_FEATURED}
+              conversation={featured}
               isPlaying={featuredIsPlaying}
-              isSaved={saved.has(MOCK_FEATURED.id)}
+              isSaved={savedIds.has(featured.id)}
               progress={featuredProgress}
-              elapsedSec={
-                playing?.id === MOCK_FEATURED.id ? elapsed : 0
-              }
-              onPlay={() => handlePlay(MOCK_FEATURED)}
-              onToggleSave={() => handleToggleSave(MOCK_FEATURED.id)}
-              onShare={() => void handleShare(MOCK_FEATURED)}
+              elapsedSec={playing?.id === featured.id ? elapsed : 0}
+              onPlay={() => handlePlay(featured)}
+              onToggleSave={() => toggleSave.mutate(featured.id)}
+              onShare={() => void handleShare(featured)}
             />
           ) : null}
 
@@ -244,23 +377,47 @@ export function ChattingFeed() {
 
             <div className="flex flex-wrap gap-2">
               <Button
-                variant={topic === null ? "default" : "outline"}
-                aria-pressed={topic === null}
-                onClick={() => setTopic(null)}
+                variant={topicId === null ? "default" : "outline"}
+                aria-pressed={topicId === null}
+                onClick={() => setTopicId(null)}
               >
                 {t("allTopics")}
               </Button>
 
-              {MOCK_TOPIC_ENTRIES.map((entry) => (
+              {topicsQuery.isPending
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <Skeleton key={index} className="h-9 w-24 rounded-xl" />
+                  ))
+                : visibleTopics.map((topic) => (
+                    <Button
+                      key={topic._id}
+                      variant={topicId === topic._id ? "default" : "outline"}
+                      aria-pressed={topicId === topic._id}
+                      onClick={() => handleSelectTopic(topic._id)}
+                    >
+                      {topic.name}
+                    </Button>
+                  ))}
+
+              {!topicsQuery.isPending && (topics.length > INITIAL_VISIBLE_TOPICS || showAllTopics) && (
                 <Button
-                  key={entry.key}
-                  variant={topic === entry.key ? "default" : "outline"}
-                  aria-pressed={topic === entry.key}
-                  onClick={() => handleSelectTopic(entry.key)}
+                  variant="outline"
+                  onClick={() => setShowAllTopics((prev) => !prev)}
+                  className="gap-1 border-dashed"
                 >
-                  {entry.topic.name}
+                  {showAllTopics ? (
+                    <>
+                      <span>{t("topicsLess")}</span>
+                      <ChevronUp className="size-3.5" aria-hidden />
+                    </>
+                  ) : (
+                    <>
+                      <span>{t("topicsMore", { count: hiddenCount })}</span>
+                      <ChevronDown className="size-3.5" aria-hidden />
+                    </>
+                  )}
                 </Button>
-              ))}
+              )}
             </div>
           </section>
 
@@ -269,11 +426,42 @@ export function ChattingFeed() {
               {t(sectionLabelKey(section))}
             </h2>
             <p className="text-xs text-muted-foreground">
-              {t("conversationsCount", { count: visible.length })}
+              {t("conversationsCount", { count: totalCount })}
             </p>
           </div>
 
-          {visible.length ? (
+          {feedQuery.isPending ? (
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Skeleton key={index} className="h-80 rounded-2xl" />
+              ))}
+            </section>
+          ) : feedQuery.isError ? (
+            <EmptyState
+              icon={<Headphones className="size-5" aria-hidden />}
+              title={t("loadErrorTitle")}
+              description={t("loadErrorDescription")}
+              action={
+                <Button
+                  variant="outline"
+                  onClick={() => void feedQuery.refetch()}
+                >
+                  {t("loadErrorAction")}
+                </Button>
+              }
+            />
+          ) : items.length === 0 ? (
+            <EmptyState
+              icon={<Headphones className="size-5" aria-hidden />}
+              title={t("emptyFilterTitle")}
+              description={t("emptyFilterDescription")}
+              action={
+                <Button variant="outline" onClick={() => setTopicId(null)}>
+                  {t("emptyFilterAction")}
+                </Button>
+              }
+            />
+          ) : (
             <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
               {visible.map((conversation) => (
                 <ConversationCard
@@ -284,29 +472,23 @@ export function ChattingFeed() {
                     isPlaying &&
                     elapsed < conversation.durationSec
                   }
-                  isSaved={saved.has(conversation.id)}
+                  isSaved={savedIds.has(conversation.id)}
                   onPlay={() => handlePlay(conversation)}
-                  onToggleSave={() => handleToggleSave(conversation.id)}
+                  onToggleSave={() => toggleSave.mutate(conversation.id)}
                   onShare={() => void handleShare(conversation)}
                 />
               ))}
             </section>
-          ) : (
-            <EmptyState
-              icon={<Headphones className="size-5" aria-hidden />}
-              title={t("emptyFilterTitle")}
-              description={t("emptyFilterDescription")}
-              action={
-                <Button variant="outline" onClick={() => setTopic(null)}>
-                  {t("emptyFilterAction")}
-                </Button>
-              }
-            />
           )}
         </div>
 
         <div className="lg:col-span-3">
-          <SideRail onSelectTopic={handleSelectTopic} />
+          <SideRail
+            topics={topics}
+            voices={voices}
+            activeTopicId={topicId}
+            onSelectTopic={handleSelectTopic}
+          />
         </div>
       </div>
 
@@ -315,13 +497,11 @@ export function ChattingFeed() {
           conversation={playing}
           isPlaying={isPlaying}
           elapsedSec={elapsed}
+          muted={muted}
           onToggle={() => handlePlay(playing)}
-          onBack={() => setElapsed((value) => Math.max(0, value - 15))}
-          onForward={() =>
-            setElapsed((value) =>
-              Math.min(playing.durationSec, value + 15),
-            )
-          }
+          onBack={() => seekBy(-15)}
+          onForward={() => seekBy(15)}
+          onToggleMute={() => setMuted((value) => !value)}
           onClose={closePlayer}
         />
       ) : null}

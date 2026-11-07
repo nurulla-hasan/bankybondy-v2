@@ -17,15 +17,12 @@ const STEPS = [
   { key: "howStep3", icon: Mic },
 ] as const;
 
-interface HowItWorksCardProps {
-  className?: string;
-}
 
-export function HowItWorksCard({ className }: HowItWorksCardProps) {
+export function HowItWorksCard() {
   const t = useTranslations("Chatting");
 
   return (
-    <Card className={className}>
+    <Card className="hidden lg:flex">
       <CardHeader>
         <CardTitle>{t("howTitle")}</CardTitle>
         <CardDescription>{t("howDescription")}</CardDescription>
@@ -38,9 +35,7 @@ export function HowItWorksCard({ className }: HowItWorksCardProps) {
                 <step.icon className="size-4" aria-hidden />
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-medium">
-                  {t(`${step.key}Title`)}
-                </p>
+                <p className="text-sm font-medium">{t(`${step.key}Title`)}</p>
                 <p className="text-xs text-muted-foreground">
                   {t(`${step.key}Description`)}
                 </p>

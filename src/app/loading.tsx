@@ -9,9 +9,6 @@ export default function RootLoading() {
           <Spinner className="size-6 text-primary" />
         </div>
       </div>
-      <p className="mt-4 font-mono text-xs uppercase tracking-wider text-muted-foreground animate-pulse">
-        Loading...
-      </p>
     </div>
   );
 }

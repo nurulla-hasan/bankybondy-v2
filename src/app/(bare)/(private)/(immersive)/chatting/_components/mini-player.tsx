@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 import {
   Pause,
   Play,
@@ -17,16 +16,18 @@ import { Button } from "@/components/ui/button";
 import { CONTAINER_GUTTER } from "@/lib/layout";
 import { cn } from "@/lib/utils";
 
+import type { FeedAudio } from "./shared/audio-model";
 import { formatClock } from "./shared/format";
-import type { MockConversation } from "./shared/mock-data";
 
 interface MiniPlayerProps {
-  conversation: MockConversation;
+  conversation: FeedAudio;
   isPlaying: boolean;
   elapsedSec: number;
+  muted: boolean;
   onToggle: () => void;
   onBack: () => void;
   onForward: () => void;
+  onToggleMute: () => void;
   onClose: () => void;
 }
 
@@ -34,17 +35,17 @@ export function MiniPlayer({
   conversation,
   isPlaying,
   elapsedSec,
+  muted,
   onToggle,
   onBack,
   onForward,
+  onToggleMute,
   onClose,
 }: MiniPlayerProps) {
   const t = useTranslations("Chatting");
-  const [muted, setMuted] = useState(false);
-  const progress = Math.min(
-    100,
-    (elapsedSec / conversation.durationSec) * 100,
-  );
+  const progress = conversation.durationSec
+    ? Math.min(100, (elapsedSec / conversation.durationSec) * 100)
+    : 0;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur">
@@ -144,7 +145,7 @@ export function MiniPlayer({
             className="hidden sm:inline-flex"
             aria-pressed={muted}
             aria-label={t("playerMute")}
-            onClick={() => setMuted((value) => !value)}
+            onClick={onToggleMute}
           >
             {muted ? <VolumeX aria-hidden /> : <Volume2 aria-hidden />}
           </Button>

@@ -21,13 +21,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn, getInitials } from "@/lib/utils";
+import type { FeedAudio } from "../shared/audio-model";
 import { compactNumber, formatClock } from "../shared/format";
 import { Waveform } from "../shared/waveform";
-import { MockConversation } from "../shared/mock-data";
-
 
 interface FeaturedConversationProps {
-  conversation: MockConversation;
+  conversation: FeedAudio;
   isPlaying: boolean;
   isSaved: boolean;
   /** 0-100, shared with the mini player. */

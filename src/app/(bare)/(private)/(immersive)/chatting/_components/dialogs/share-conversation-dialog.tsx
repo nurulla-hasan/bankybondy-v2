@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { ImageIcon, Mic, Upload } from "lucide-react";
+import { ImageIcon, Loader2, Mic, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
 
@@ -12,14 +12,19 @@ import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { successToast } from "@/lib/toast";
-import { MOCK_TOPIC_ENTRIES } from "../shared/mock-data";
+import { getErrorMessage } from "@/lib/error";
+import { errorToast, successToast } from "@/lib/toast";
+import {
+  useAudioModerationStatus,
+  useCreateAudio,
+} from "@/services/hooks/audio.hook";
+import type { AudioModerationStatus, RawAudioTopicWithCount } from "@/types";
 
-
-const TOPIC_OPTIONS = MOCK_TOPIC_ENTRIES.map((entry) => ({
-  value: entry.key,
-  label: entry.topic.name,
-}));
+import {
+  isAcceptedAudioFile,
+  isAcceptedImageFile,
+  readAudioDuration,
+} from "../shared/audio-file";
 
 interface ShareConversationValues {
   title: string;
@@ -35,13 +40,31 @@ const DEFAULT_VALUES: ShareConversationValues = {
   tags: "",
 };
 
-export function ShareConversationDialog() {
+interface ShareConversationDialogProps {
+  topics: readonly RawAudioTopicWithCount[];
+}
+
+export function ShareConversationDialog({
+  topics,
+}: ShareConversationDialogProps) {
   const t = useTranslations("Chatting");
   const [open, setOpen] = useState(false);
-  const [audioFileName, setAudioFileName] = useState<string | null>(null);
-  const [coverFileName, setCoverFileName] = useState<string | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [moderationAudioId, setModerationAudioId] = useState<string | null>(
+    null,
+  );
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const handledStatusRef = useRef<AudioModerationStatus | null>(null);
+
+  const createAudio = useCreateAudio();
+  const moderation = useAudioModerationStatus(moderationAudioId);
+
+  const topicOptions = useMemo(
+    () => topics.map((topic) => ({ value: topic._id, label: topic.name })),
+    [topics],
+  );
 
   const schema = useMemo(
     () =>
@@ -65,15 +88,15 @@ export function ShareConversationDialog() {
     validators: {
       onChange: schema,
     },
-    onSubmit: () => {
-      publish();
+    onSubmit: async ({ value }) => {
+      await publish(value);
     },
   });
 
   const reset = () => {
     form.reset();
-    setAudioFileName(null);
-    setCoverFileName(null);
+    setAudioFile(null);
+    setCoverFile(null);
   };
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -81,10 +104,100 @@ export function ShareConversationDialog() {
     if (!nextOpen) reset();
   };
 
-  const publish = () => {
-    handleOpenChange(false);
-    successToast(t("shareMockTitle"), t("shareMockDescription"));
+  const publish = async (value: ShareConversationValues) => {
+    if (!audioFile) {
+      errorToast(t("shareAudioRequired"));
+      return;
+    }
+
+    if (!coverFile) {
+      errorToast(t("shareCoverRequired"));
+      return;
+    }
+
+    if (!isAcceptedAudioFile(audioFile)) {
+      errorToast(t("shareInvalidAudio"));
+      return;
+    }
+
+    if (!isAcceptedImageFile(coverFile)) {
+      errorToast(t("shareInvalidCover"));
+      return;
+    }
+
+    let duration: number;
+    try {
+      duration = await readAudioDuration(audioFile);
+    } catch {
+      errorToast(t("shareDurationError"));
+      return;
+    }
+
+    const tags = value.tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    createAudio.mutate(
+      {
+        input: {
+          title: value.title.trim(),
+          description: value.description.trim(),
+          audioTopic: value.topic,
+          tags,
+          duration: Math.round(duration),
+        },
+        audio: audioFile,
+        cover: coverFile,
+      },
+      {
+        onSuccess: (response) => {
+          handleOpenChange(false);
+          successToast(t("shareProcessing"));
+
+          if (response.data?._id) {
+            handledStatusRef.current = null;
+            setModerationAudioId(response.data._id);
+          }
+        },
+        onError: (error) => {
+          errorToast(
+            t("shareFailed"),
+            getErrorMessage(error, t("shareFailedDescription")),
+          );
+        },
+      },
+    );
   };
+
+  const moderationStatus = moderation.data?.moderationStatus;
+
+  useEffect(() => {
+    if (!moderationStatus || handledStatusRef.current === moderationStatus) {
+      return;
+    }
+
+    handledStatusRef.current = moderationStatus;
+
+    if (moderationStatus === "ready") {
+      successToast(t("shareReady"));
+      return;
+    }
+
+    if (moderationStatus === "rejected") {
+      errorToast(
+        t("shareRejected"),
+        moderation.data?.moderationReason || t("shareRejectedGeneric"),
+      );
+      return;
+    }
+
+    if (moderationStatus === "failed") {
+      errorToast(t("shareFailed"), t("shareFailedDescription"));
+    }
+  }, [moderationStatus, moderation.data?.moderationReason, t]);
+
+  const isPublishing = createAudio.isPending;
 
   return (
     <Modal
@@ -121,7 +234,7 @@ export function ShareConversationDialog() {
           name="topic"
           label={t("shareFormTopic")}
           type="select"
-          options={TOPIC_OPTIONS}
+          options={topicOptions}
           placeholder={t("shareFormTopicPlaceholder")}
         />
 
@@ -151,7 +264,7 @@ export function ShareConversationDialog() {
             >
               <Upload className="size-5 text-muted-foreground" aria-hidden />
               <span className="max-w-full truncate text-sm font-medium">
-                {audioFileName ?? t("shareFormUploadHint")}
+                {audioFile?.name ?? t("shareFormUploadHint")}
               </span>
             </button>
             <Input
@@ -161,7 +274,7 @@ export function ShareConversationDialog() {
               accept="audio/*"
               className="sr-only"
               onChange={(event) =>
-                setAudioFileName(event.target.files?.[0]?.name ?? null)
+                setAudioFile(event.target.files?.[0] ?? null)
               }
             />
           </div>
@@ -175,7 +288,7 @@ export function ShareConversationDialog() {
             >
               <ImageIcon className="size-5 text-muted-foreground" aria-hidden />
               <span className="max-w-full truncate text-sm font-medium">
-                {coverFileName ?? t("shareFormCoverHint")}
+                {coverFile?.name ?? t("shareFormCoverHint")}
               </span>
             </button>
             <Input
@@ -185,7 +298,7 @@ export function ShareConversationDialog() {
               accept="image/*"
               className="sr-only"
               onChange={(event) =>
-                setCoverFileName(event.target.files?.[0]?.name ?? null)
+                setCoverFile(event.target.files?.[0] ?? null)
               }
             />
           </div>
@@ -200,10 +313,20 @@ export function ShareConversationDialog() {
             type="button"
             variant="outline"
             onClick={() => handleOpenChange(false)}
+            disabled={isPublishing}
           >
             {t("shareFormCancel")}
           </Button>
-          <Button type="submit">{t("shareFormPublish")}</Button>
+          <Button type="submit" disabled={isPublishing}>
+            {isPublishing ? (
+              <>
+                <Loader2 className="animate-spin" aria-hidden />
+                {t("shareUploading")}
+              </>
+            ) : (
+              t("shareFormPublish")
+            )}
+          </Button>
         </DialogFooter>
       </form>
     </Modal>

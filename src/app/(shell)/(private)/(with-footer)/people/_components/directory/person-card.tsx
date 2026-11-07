@@ -1,13 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, Star } from "lucide-react";
+import { MapPin, Star, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { getErrorMessage } from "@/lib/error";
+import { errorToast, successToast } from "@/lib/toast";
 import { getInitials } from "@/lib/utils";
+import { useSendFriendRequest } from "@/services";
 import type { RawPerson } from "@/types";
 
 import { FriendStatusBadge } from "../shared/friend-status-badge";
@@ -34,6 +44,23 @@ function pickVisibleSkills(skills: string[]) {
 
 export function PersonCard({ person }: { person: RawPerson }) {
   const t = useTranslations("People");
+  const sendRequest = useSendFriendRequest();
+
+  const handleConnect = () => {
+    sendRequest.mutate(
+      { receiver: person._id },
+      {
+        onSuccess: () =>
+          successToast(
+            t("actions.connectSuccessTitle"),
+            t("actions.connectSuccess", { name: person.name }),
+          ),
+        onError: (error) =>
+          errorToast(t("actions.connectErrorTitle"), getErrorMessage(error)),
+      },
+    );
+  };
+
   const skills = (person.skills ?? [])
     .map((skill) => skill.name)
     .filter(Boolean);
@@ -41,10 +68,7 @@ export function PersonCard({ person }: { person: RawPerson }) {
   const hiddenSkills = skills.length - visibleSkills.length;
 
   return (
-    <Link
-      href={`/people/${person._id}`}
-    >
-
+    <Link href={`/people/${person._id}`}>
       <Card className="relative h-full gap-0 py-0">
         <span
           aria-hidden
@@ -88,7 +112,35 @@ export function PersonCard({ person }: { person: RawPerson }) {
               </span>
             </span>
 
-            <FriendStatusBadge status={person.friendRequestStatus} />
+            <div className="flex items-center gap-2">
+              <FriendStatusBadge status={person.friendRequestStatus} />
+              {person.friendRequestStatus === "none" && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="secondary"
+                          size="icon-sm"
+                          className="bg-card/85 shadow-xs ring-1 ring-border backdrop-blur-sm hover:bg-card"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleConnect();
+                          }}
+                          loading={
+                            sendRequest.isPending &&
+                            sendRequest.variables?.receiver === person._id
+                          }
+                        >
+                          <UserPlus className="size-3.5" aria-hidden />
+                        </Button>
+                      }
+                    />
+                    <TooltipContent>{t("actions.connect")}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
           </div>
         </div>
 
@@ -145,7 +197,6 @@ export function PersonCard({ person }: { person: RawPerson }) {
           <div className="pb-4" aria-hidden />
         )}
       </Card>
-      
     </Link>
   );
 }

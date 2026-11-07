@@ -1,3 +1,4 @@
+export * from "./audio.hook";
 export * from "./auth.hook";
 export * from "./chat.hook";
 export * from "./chat-channel.hook";

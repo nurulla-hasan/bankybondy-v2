@@ -60,6 +60,7 @@ function Button({
   ...props
 }: ButtonProps) {
   const isNative = nativeButton ?? (props.render ? false : undefined);
+  const isIcon = size?.toString().startsWith("icon");
 
   return (
     <ButtonPrimitive
@@ -74,8 +75,8 @@ function Button({
     >
       {loading ? (
         <>
-          <Spinner className="size-4" aria-hidden="true" />
-          {loadingText ?? children}
+          <Spinner className={isIcon ? "size-3.5" : "size-4"} aria-hidden="true" />
+          {!isIcon && (loadingText ?? children)}
         </>
       ) : (
         children

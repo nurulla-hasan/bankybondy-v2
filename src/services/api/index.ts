@@ -1,3 +1,5 @@
+export * from "./audio.api";
+export * from "./topic.api";
 export * from "./auth.api";
 export * from "./bond.api";
 export * from "./bond-link.api";
