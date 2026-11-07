@@ -17,8 +17,8 @@ import { Button } from "@/components/ui/button";
 import { CONTAINER_GUTTER } from "@/lib/layout";
 import { cn } from "@/lib/utils";
 
-import { formatClock } from "./format";
-import type { MockConversation } from "./mock-data";
+import { formatClock } from "./shared/format";
+import type { MockConversation } from "./shared/mock-data";
 
 interface MiniPlayerProps {
   conversation: MockConversation;
@@ -67,7 +67,7 @@ export function MiniPlayer({
           <div
             aria-hidden
             className={cn(
-              "size-10 shrink-0 rounded-lg bg-gradient-to-br",
+              "size-10 shrink-0 rounded-lg bg-linear-to-br",
               conversation.gradient,
             )}
           />

@@ -11,10 +11,10 @@ import { Button } from "@/components/ui/button";
 import { successToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
-import { ConversationCard } from "./conversation-card";
-import { FeaturedConversation } from "./featured-conversation";
-import { compactNumber } from "./format";
-import { HowItWorksCard } from "./how-it-works-card";
+import { ConversationCard } from "./cards/conversation-card";
+import { FeaturedConversation } from "./cards/featured-conversation";
+import { compactNumber } from "./shared/format";
+import { HowItWorksCard } from "./cards/how-it-works-card";
 import { MiniPlayer } from "./mini-player";
 import {
   MOCK_CONVERSATIONS,
@@ -25,11 +25,11 @@ import {
   MOCK_TOTAL_AUDIOS,
   type MockConversation,
   type MockTopicId,
-} from "./mock-data";
+} from "./shared/mock-data";
 import { SectionNav, sectionLabelKey, type FeedSection } from "./section-nav";
-import { ShareConversationDialog } from "./share-conversation-dialog";
+import { ShareConversationDialog } from "./dialogs/share-conversation-dialog";
 import { SideRail } from "./side-rail";
-import { Waveform } from "./waveform";
+import { Waveform } from "./shared/waveform";
 
 const SECTION_SORTERS: Record<
   FeedSection,

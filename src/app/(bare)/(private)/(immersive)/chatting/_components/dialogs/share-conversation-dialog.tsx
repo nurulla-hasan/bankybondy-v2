@@ -13,8 +13,8 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { successToast } from "@/lib/toast";
+import { MOCK_TOPIC_ENTRIES } from "../shared/mock-data";
 
-import { MOCK_TOPIC_ENTRIES } from "./mock-data";
 
 const TOPIC_OPTIONS = MOCK_TOPIC_ENTRIES.map((entry) => ({
   value: entry.key,

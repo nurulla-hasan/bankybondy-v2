@@ -22,7 +22,7 @@ import {
   MOCK_TOPICS,
   MOCK_VOICES,
   type MockTopicId,
-} from "./mock-data";
+} from "./shared/mock-data";
 
 const TOP_TOPICS = [...MOCK_TOPIC_ENTRIES]
   .sort((a, b) => b.topic.totalAudios - a.topic.totalAudios)

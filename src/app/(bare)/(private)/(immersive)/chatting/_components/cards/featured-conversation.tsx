@@ -21,10 +21,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn, getInitials } from "@/lib/utils";
+import { compactNumber, formatClock } from "../shared/format";
+import { Waveform } from "../shared/waveform";
+import { MockConversation } from "../shared/mock-data";
 
-import { compactNumber, formatClock } from "./format";
-import type { MockConversation } from "./mock-data";
-import { Waveform } from "./waveform";
 
 interface FeaturedConversationProps {
   conversation: MockConversation;
@@ -56,7 +56,7 @@ export function FeaturedConversation({
       <div
         aria-hidden
         className={cn(
-          "absolute inset-0 bg-gradient-to-br",
+          "absolute inset-0 bg-linear-to-br",
           conversation.gradient,
         )}
       />

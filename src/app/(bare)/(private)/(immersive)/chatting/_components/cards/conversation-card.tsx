@@ -21,9 +21,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn, getInitials } from "@/lib/utils";
+import { compactNumber, formatClock } from "../shared/format";
+import { MockConversation } from "../shared/mock-data";
 
-import { compactNumber, formatClock } from "./format";
-import type { MockConversation } from "./mock-data";
+
 
 interface ConversationCardProps {
   conversation: MockConversation;
@@ -49,7 +50,7 @@ export function ConversationCard({
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30">
       <div
         className={cn(
-          "relative aspect-video overflow-hidden bg-gradient-to-br",
+          "relative aspect-video overflow-hidden bg-linear-to-br",
           conversation.gradient,
         )}
       >
@@ -65,7 +66,7 @@ export function ConversationCard({
             />
             <div
               aria-hidden
-              className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent"
+              className="absolute inset-0 bg-linear-to-t from-foreground/50 via-transparent to-transparent"
             />
           </>
         ) : (
