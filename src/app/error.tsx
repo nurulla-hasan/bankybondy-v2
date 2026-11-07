@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { AlertTriangle, RotateCcw, Home } from "lucide-react";
+import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 
 interface ErrorProps {
@@ -16,7 +17,9 @@ export default function GlobalError({ error, reset }: ErrorProps) {
   }, [error]);
 
   return (
-    <div className="flex min-h-[80vh] flex-col items-center justify-center p-4 text-center">
+    <>
+      <Navbar />
+      <div className="flex min-h-[80vh] flex-col items-center justify-center p-4 text-center">
       <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
         <AlertTriangle className="size-8" />
       </div>
@@ -47,6 +50,7 @@ export default function GlobalError({ error, reset }: ErrorProps) {
           Back to Home
         </Button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

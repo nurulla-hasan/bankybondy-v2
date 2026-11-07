@@ -26,6 +26,7 @@ export default getRequestConfig(async () => {
       Messages: (await import(`../../messages/${locale}/messages.json`)).default,
       People: (await import(`../../messages/${locale}/people.json`)).default,
       Profile: (await import(`../../messages/${locale}/profile.json`)).default,
+      Chatting: (await import(`../../messages/${locale}/chatting.json`)).default,
     },
   };
 

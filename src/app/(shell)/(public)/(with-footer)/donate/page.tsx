@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { DonationAmbience } from "@/app/(public)/(with-footer)/donate/_components/donation-ambience";
+import { DonationAmbience } from "@/app/(shell)/(public)/(with-footer)/donate/_components/donation-ambience";
 import { CardAura, HeroVisuals } from "@/components/home/hero-visuals";
 import {
   MercadoPagoIcon,

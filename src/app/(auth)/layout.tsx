@@ -13,7 +13,8 @@ export default async function AuthLayout({
   const t = await getTranslations("Auth");
 
   return (
-    <div className="min-h-screen w-full grid lg:grid-cols-2 bg-background">
+    <>
+      <div className="min-h-screen w-full grid lg:grid-cols-2 bg-background">
       {/* Left Column: Visual & Bankybondy Branding */}
       <div className="relative hidden lg:flex flex-col justify-between p-12 bg-muted/20 border-r border-border overflow-hidden">
         {/* Subtle Decorative Background Glow using theme tokens */}
@@ -92,7 +93,8 @@ export default async function AuthLayout({
         </div>
 
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

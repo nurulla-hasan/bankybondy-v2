@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { PageWrapper } from "@/components/common/page-wrapper";
 import { Button } from "@/components/ui/button";
-import { MySettings } from "@/app/(private)/(bare)/settings/_components/my-settings";
+import { MySettings } from "@/app/(shell)/(private)/(with-footer)/settings/_components/my-settings";
 
 export default function SettingsPage() {
   return (

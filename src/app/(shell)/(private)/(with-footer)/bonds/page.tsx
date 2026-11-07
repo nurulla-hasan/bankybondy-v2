@@ -3,8 +3,8 @@ import { useTranslations } from "next-intl";
 
 import { PageWrapper } from "@/components/common/page-wrapper";
 import { SectionHeading } from "@/components/common/section-heading";
-import { BondTabs } from "@/app/(private)/(bare)/bonds/_components/tabs/bond-tabs";
-import { CreateBondDialog } from "@/app/(private)/(bare)/bonds/_components/dialogs/create-bond-dialog";
+import { BondTabs } from "@/app/(shell)/(private)/(with-footer)/bonds/_components/tabs/bond-tabs";
+import { CreateBondDialog } from "@/app/(shell)/(private)/(with-footer)/bonds/_components/dialogs/create-bond-dialog";
 
 export default function BondsPage() {
   const t = useTranslations("Bonds");

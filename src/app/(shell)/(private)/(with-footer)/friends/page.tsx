@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 
 import { PageWrapper } from "@/components/common/page-wrapper";
 import { SectionHeading } from "@/components/common/section-heading";
-import { FriendsTabs } from "@/app/(private)/(bare)/friends/_components/friends-tabs";
+import { FriendsTabs } from "@/app/(shell)/(private)/(with-footer)/friends/_components/friends-tabs";
 
 export default function FriendsPage() {
   const t = useTranslations("Friends");
