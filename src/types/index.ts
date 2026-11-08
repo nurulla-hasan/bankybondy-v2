@@ -6,6 +6,7 @@ export * from "./chat-api.types";
 export * from "./chat-socket.types";
 export * from "./donate.types";
 export * from "./friend-api.types";
+export * from "./legal.types";
 export * from "./search.types";
 export * from "./notification.types";
 export * from "./people-api.types";

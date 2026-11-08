@@ -1,0 +1,74 @@
+{
+  "pages": {
+    "about": {
+      "title": "About us",
+      "metaTitle": "About BankyBondy",
+      "metaDescription": "Who we are and why we built BankyBondy.",
+      "emptyTitle": "Content not available",
+      "emptyDescription": "This page isn't available right now. Please try again later or write to bankybondyar@gmail.com."
+    },
+    "terms": {
+      "title": "Terms & Conditions",
+      "metaTitle": "Terms & Conditions",
+      "metaDescription": "The terms of use for BankyBondy.",
+      "emptyTitle": "Terms not available",
+      "emptyDescription": "We couldn't load the terms and conditions. Please try again later or write to bankybondyar@gmail.com."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "metaTitle": "Privacy Policy",
+      "metaDescription": "How BankyBondy collects, uses and protects your data.",
+      "emptyTitle": "Privacy policy not available",
+      "emptyDescription": "We couldn't load the privacy policy. Please try again later or write to bankybondyar@gmail.com."
+    }
+  },
+  "contact": {
+    "title": "Contact us",
+    "description": "We're always here to listen. Share your thoughts, ask a question, or simply say hello.",
+    "emailTitle": "Email us",
+    "phoneTitle": "Call us",
+    "hours": "Support: Monday to Friday, 9 a.m. to 5 p.m. (Argentina time).",
+    "formTitle": "Send us a message",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "phone": "Phone",
+    "phonePlaceholder": "Your phone",
+    "message": "Message",
+    "messagePlaceholder": "Your message here...",
+    "send": "Send message",
+    "sending": "Sending...",
+    "successTitle": "Message sent",
+    "success": "Thanks for writing. We'll reply to the email you gave us.",
+    "error": "We couldn't send your message. Please try again in a moment."
+  },
+  "consumidor": {
+    "navLabel": "Consumer rights",
+    "linkArrepentimiento": "Botón de arrepentimiento (right of withdrawal)",
+    "linkBaja": "Botón de baja de servicio (cancel service)",
+    "tituloArrepentimiento": "Botón de arrepentimiento — right of withdrawal",
+    "introArrepentimiento": "Did you pay for a plan or make a donation in the last 10 calendar days and change your mind? Request a refund here. No login and no reason needed: we refund 100% through the same payment method and your account goes back to the free plan, without deleting what you posted.",
+    "tituloBaja": "Botón de baja de servicio — cancel service",
+    "introBaja": "Request the cancellation of your account here. No login and no reason needed.",
+    "nombre": "Full name",
+    "emailArrepentimiento": "Email you paid with",
+    "emailBaja": "Your account email",
+    "medioPago": "Payment method (optional)",
+    "otro": "Other",
+    "operacion": "Transaction ID (optional)",
+    "comentario": "Comment (optional)",
+    "enviar": "Send request",
+    "enviando": "Sending…",
+    "error": "We couldn't register your request. Try again or write to bankybondyar@gmail.com.",
+    "listoTitulo": "We received your request",
+    "listoCodigo": "Your identification code is:",
+    "listoFecha": "Received on {fecha} (Argentina time).",
+    "listoMail": "Keep this code: it is your proof of the request. We will also send a copy to {email} (check spam if you don't see it).",
+    "listoDespuesArrepentimiento": "We will refund 100% of what you paid, through the same payment method, within 10 business days.",
+    "listoDespuesBaja": "To confirm it was you, reply to that email: only then will we cancel the account and send you the confirmation. If it doesn't arrive, write to bankybondyar@gmail.com from that same address and include your code.",
+    "avisoCheckout": "You have 10 calendar days from payment to withdraw, with no reason and at no cost: we refund 100%.",
+    "atencion": "User support: Monday to Friday, 9 a.m. to 5 p.m. (Argentina time), by email at bankybondyar@gmail.com."
+  },
+  "backHome": "Back to home"
+}

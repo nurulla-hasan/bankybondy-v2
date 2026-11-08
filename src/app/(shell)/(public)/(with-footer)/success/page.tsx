@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { PageWrapper } from "@/components/common/page-wrapper";
 import { SectionHeading } from "@/components/common/section-heading";
+import { ConsumerLinks } from "@/components/legal/consumer-links";
 import { Button } from "@/components/ui/button";
 
 export default function PaymentSuccessPage() {
@@ -32,6 +33,8 @@ export default function PaymentSuccessPage() {
           {t("success.ctaHome")}
         </Button>
       </div>
+
+      <ConsumerLinks className="mt-6" />
     </PageWrapper>
   );
 }

@@ -26,6 +26,7 @@ import { SectionHeading } from "@/components/common/section-heading";
 import { ProgressGrid } from "@/components/common/progress-grid";
 import { FaqList } from "@/components/common/faq-list";
 import AnimationWrapper from "@/components/common/animation-wrapper";
+import { WithdrawalNotice } from "@/components/legal/withdrawal-notice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCreateDonation } from "@/services";
@@ -361,6 +362,8 @@ export default function DonatePage() {
                       </p>
                     </div>
                   )}
+
+                  <WithdrawalNotice className="mt-4" />
 
                   {/* Trust line */}
                   <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">

@@ -10,6 +10,7 @@ export * from "./conversation.api";
 export * from "./friend.api";
 export * from "./skill.api";
 export * from "./donate.api";
+export * from "./legal.api";
 export * from "./search.api";
 export * from "./notification.api";
 export * from "./people.api";

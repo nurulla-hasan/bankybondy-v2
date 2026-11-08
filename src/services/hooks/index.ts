@@ -4,6 +4,7 @@ export * from "./chat.hook";
 export * from "./chat-channel.hook";
 export * from "./skill.hook";
 export * from "./donate.hook";
+export * from "./legal.hook";
 export * from "./search.hook";
 export * from "./notification.hook";
 export * from "./bond.hook";

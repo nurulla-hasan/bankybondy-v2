@@ -230,3 +230,90 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Sanitized HTML from the admin legal document editor (no typography plugin). */
+@layer components {
+  .legal-content {
+    @apply text-sm leading-7 text-foreground sm:text-base;
+  }
+
+  .legal-content > * + * {
+    @apply mt-4;
+  }
+
+  .legal-content :where(h1) {
+    @apply mt-8 font-heading text-2xl font-bold tracking-tight sm:text-3xl;
+  }
+
+  .legal-content :where(h2) {
+    @apply mt-8 font-heading text-xl font-semibold tracking-tight sm:text-2xl;
+  }
+
+  .legal-content :where(h3) {
+    @apply mt-6 font-heading text-lg font-semibold tracking-tight;
+  }
+
+  .legal-content :where(h4) {
+    @apply mt-5 font-heading text-base font-semibold;
+  }
+
+  .legal-content :where(h1, h2, h3, h4) {
+    @apply scroll-mt-24;
+  }
+
+  .legal-content :where(h1, h2, h3, h4):first-child {
+    @apply mt-0;
+  }
+
+  .legal-content :where(a) {
+    @apply font-medium text-primary underline underline-offset-4 hover:text-primary/80;
+  }
+
+  .legal-content :where(strong, b) {
+    @apply font-semibold text-foreground;
+  }
+
+  .legal-content :where(ul) {
+    @apply list-disc space-y-1.5 pl-6;
+  }
+
+  .legal-content :where(ol) {
+    @apply list-decimal space-y-1.5 pl-6;
+  }
+
+  .legal-content :where(li) {
+    @apply pl-1;
+  }
+
+  .legal-content :where(li)::marker {
+    @apply text-muted-foreground;
+  }
+
+  .legal-content :where(blockquote) {
+    @apply border-l-2 border-primary/40 pl-4 text-muted-foreground italic;
+  }
+
+  .legal-content :where(hr) {
+    @apply my-8 border-border;
+  }
+
+  .legal-content :where(table) {
+    @apply w-full border-collapse text-left text-sm;
+  }
+
+  .legal-content :where(th) {
+    @apply border-b border-border px-3 py-2 font-semibold;
+  }
+
+  .legal-content :where(td) {
+    @apply border-b border-border px-3 py-2 align-top text-muted-foreground;
+  }
+
+  .legal-content :where(code) {
+    @apply rounded bg-muted px-1.5 py-0.5 text-[0.9em];
+  }
+
+  .legal-content :where(img) {
+    @apply h-auto max-w-full rounded-lg;
+  }
+}

@@ -52,8 +52,8 @@ export function SectionNav({ value, onChange }: SectionNavProps) {
 
   return (
     <>
-      <nav aria-label={t("sectionsLabel")} className="lg:hidden">
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+      <nav aria-label={t("sectionsLabel")} className="min-w-0 lg:hidden">
+        <div className="-mx-1 flex gap-2 overflow-x-auto overscroll-x-contain px-1 pb-1">
           {SECTIONS.map((section) => (
             <Button
               key={section.key}

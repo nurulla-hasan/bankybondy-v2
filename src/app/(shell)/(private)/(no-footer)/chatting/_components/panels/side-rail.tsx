@@ -43,7 +43,7 @@ export function SideRail({
   );
 
   return (
-    <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+    <aside className="space-y-4">
       {voices.length ? (
         <Card>
           <CardHeader>

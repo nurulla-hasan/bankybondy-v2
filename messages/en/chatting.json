@@ -28,6 +28,7 @@
   "topicsDescription": "Pick a topic to filter the list.",
   "allTopics": "All",
   "topicsMore": "+{count} more",
+  "topicsShowMore": "Show more",
   "topicsLess": "Show less",
   "emptyFilterTitle": "No conversations in this topic",
   "emptyFilterDescription": "Try another topic or go back to all conversations.",

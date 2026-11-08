@@ -1,0 +1,74 @@
+{
+  "pages": {
+    "about": {
+      "title": "Sobre nosotros",
+      "metaTitle": "Sobre BankyBondy",
+      "metaDescription": "Quiénes somos y por qué creamos BankyBondy.",
+      "emptyTitle": "Contenido no disponible",
+      "emptyDescription": "Esta página no está disponible ahora. Probá de nuevo más tarde o escribinos a bankybondyar@gmail.com."
+    },
+    "terms": {
+      "title": "Términos y condiciones",
+      "metaTitle": "Términos y condiciones",
+      "metaDescription": "Las condiciones de uso de BankyBondy.",
+      "emptyTitle": "Términos no disponibles",
+      "emptyDescription": "No pudimos cargar los términos y condiciones. Probá de nuevo más tarde o escribinos a bankybondyar@gmail.com."
+    },
+    "privacy": {
+      "title": "Política de privacidad",
+      "metaTitle": "Política de privacidad",
+      "metaDescription": "Cómo BankyBondy recolecta, usa y protege tus datos.",
+      "emptyTitle": "Privacidad no disponible",
+      "emptyDescription": "No pudimos cargar la política de privacidad. Probá de nuevo más tarde o escribinos a bankybondyar@gmail.com."
+    }
+  },
+  "contact": {
+    "title": "Contactanos",
+    "description": "Siempre estamos para escucharte. Contanos qué pensás, hacé una pregunta o simplemente saludá.",
+    "emailTitle": "Escribinos",
+    "phoneTitle": "Llamanos",
+    "hours": "Atención: lunes a viernes de 9 a 17 h (hora de Argentina).",
+    "formTitle": "Mandanos un mensaje",
+    "name": "Nombre",
+    "namePlaceholder": "Tu nombre",
+    "email": "Correo",
+    "emailPlaceholder": "vos@ejemplo.com",
+    "phone": "Teléfono",
+    "phonePlaceholder": "Tu teléfono",
+    "message": "Mensaje",
+    "messagePlaceholder": "Tu mensaje acá...",
+    "send": "Enviar mensaje",
+    "sending": "Enviando…",
+    "successTitle": "Mensaje enviado",
+    "success": "Gracias por escribir. Te respondemos al correo que nos dejaste.",
+    "error": "No pudimos enviar tu mensaje. Probá de nuevo en un momento."
+  },
+  "consumidor": {
+    "navLabel": "Derechos del consumidor",
+    "linkArrepentimiento": "Botón de arrepentimiento",
+    "linkBaja": "Botón de baja de servicio",
+    "tituloArrepentimiento": "Botón de arrepentimiento",
+    "introArrepentimiento": "¿Pagaste un plan o hiciste una donación en los últimos 10 días corridos y te arrepentiste? Pedí la devolución acá. No hace falta iniciar sesión ni explicar el motivo: te devolvemos el 100% por el mismo medio de pago y tu cuenta vuelve al plan gratuito, sin borrar lo que publicaste.",
+    "tituloBaja": "Botón de baja de servicio",
+    "introBaja": "Pedí la baja de tu cuenta acá. No hace falta iniciar sesión ni explicar el motivo.",
+    "nombre": "Nombre y apellido",
+    "emailArrepentimiento": "Email con el que pagaste",
+    "emailBaja": "Email de tu cuenta",
+    "medioPago": "Medio de pago (opcional)",
+    "otro": "Otro",
+    "operacion": "N.º de operación (opcional)",
+    "comentario": "Comentario (opcional)",
+    "enviar": "Enviar pedido",
+    "enviando": "Enviando…",
+    "error": "No pudimos registrar tu pedido. Probá de nuevo o escribinos a bankybondyar@gmail.com.",
+    "listoTitulo": "Recibimos tu pedido",
+    "listoCodigo": "Tu código de identificación es:",
+    "listoFecha": "Lo recibimos el {fecha} (hora de Argentina).",
+    "listoMail": "Guardá este código: es tu constancia del pedido. Además te vamos a mandar una copia a {email} (si no la ves, revisá spam).",
+    "listoDespuesArrepentimiento": "Te devolvemos el 100% de lo que pagaste, por el mismo medio de pago, dentro de los 10 días hábiles.",
+    "listoDespuesBaja": "Para confirmar que la pediste vos, respondé ese correo: recién entonces damos de baja la cuenta y te mandamos la constancia. Si no te llega, escribinos desde esa misma dirección a bankybondyar@gmail.com con tu código.",
+    "avisoCheckout": "Tenés 10 días corridos desde el pago para arrepentirte, sin motivo y sin costo: te devolvemos el 100%.",
+    "atencion": "Atención al usuario: lunes a viernes de 9 a 17 h (hora de Argentina), por email a bankybondyar@gmail.com."
+  },
+  "backHome": "Volver al inicio"
+}

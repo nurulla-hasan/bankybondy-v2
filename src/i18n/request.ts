@@ -28,6 +28,7 @@ export default getRequestConfig(async () => {
       Profile: (await import(`../../messages/${locale}/profile.json`)).default,
       Subscription: (await import(`../../messages/${locale}/subscription.json`)).default,
       PaymentResult: (await import(`../../messages/${locale}/payment-result.json`)).default,
+      Legal: (await import(`../../messages/${locale}/legal.json`)).default,
       Chatting: (await import(`../../messages/${locale}/chatting.json`)).default,
     },
   };

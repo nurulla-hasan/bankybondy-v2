@@ -192,12 +192,7 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
       : 0;
 
   return (
-    <div
-      className={cn(
-        "flex w-full flex-col gap-6 px-4 pt-5 pb-8 md:px-6 lg:pb-12",
-        playing && "pb-24",
-      )}
-    >
+    <div className={cn("flex w-full flex-col gap-6", playing && "pb-24")}>
       <AudioModerationWatcher />
 
       <ChattingHero
@@ -207,12 +202,20 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
       />
 
       <div className="grid gap-6 lg:grid-cols-12">
-        <div className="space-y-4 lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
+        <div className="min-w-0 space-y-4 lg:col-span-3">
           <SectionNav value={section} onChange={handleSectionChange} />
           <HowItWorksCard />
+          <div className="hidden lg:block">
+            <SideRail
+              topics={topics}
+              voices={voices}
+              activeTopicId={topicId}
+              onSelectTopic={handleSelectTopic}
+            />
+          </div>
         </div>
 
-        <div className="space-y-6 lg:col-span-6">
+        <div className="min-w-0 space-y-6 lg:col-span-9">
           {conversationId ? (
             <ConversationDetail audioId={conversationId} />
           ) : isFeedSection(section) ? (
@@ -341,7 +344,7 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
           )}
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="min-w-0 lg:hidden">
           <SideRail
             topics={topics}
             voices={voices}

@@ -28,6 +28,7 @@
   "topicsDescription": "Elegí un tema para filtrar la lista.",
   "allTopics": "Todos",
   "topicsMore": "+{count} más",
+  "topicsShowMore": "Mostrar más",
   "topicsLess": "Mostrar menos",
   "emptyFilterTitle": "No hay charlas en este tema",
   "emptyFilterDescription": "Probá con otro tema o volvé a ver todas las charlas.",
