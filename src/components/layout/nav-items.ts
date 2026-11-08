@@ -29,8 +29,8 @@ export interface NavLinkItem {
 
 /**
  * Ordered exactly as in design: Home, Donate, Bonds, People, We are chatting.
- * Messages is a personal workspace and lives in the profile menu instead of the
- * main nav (see `navbar-user-menu.tsx`), with its unread badge.
+ * Messages is a personal workspace, so it is a standalone icon button in the
+ * navbar's right cluster rather than a main nav item (see `navbar-messages.tsx`).
  */
 export const NAV_ITEMS: readonly NavItemConfig[] = [
   { key: "Home", href: "/", icon: Home },

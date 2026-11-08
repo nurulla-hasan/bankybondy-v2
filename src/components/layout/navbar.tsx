@@ -14,6 +14,7 @@ import { MobileNav } from "./mobile-nav";
 import { NavbarUserMenu } from "./navbar-user-menu";
 import { NavbarSearch } from "./navbar-search";
 import { NavbarNotifications } from "./navbar-notifications";
+import { NavbarMessages } from "./navbar-messages";
 
 interface NavbarProps {
   className?: string;
@@ -53,6 +54,7 @@ export function Navbar({ className }: NavbarProps) {
           <LanguageToggle size="icon" />
           <ThemeToggle size="icon" className="hidden md:inline-flex" />
           <NavbarNotifications />
+          <NavbarMessages />
 
           {/* User Auth Profile / Guest CTA */}
           <NavbarUserMenu />
