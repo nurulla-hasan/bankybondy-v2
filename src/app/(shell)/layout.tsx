@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "react-day-picker";
 
 export default function ShellLayout({
   children,
@@ -9,6 +10,7 @@ export default function ShellLayout({
     <>
       <Navbar />
       {children}
+      <Footer />
     </>
   );
 }

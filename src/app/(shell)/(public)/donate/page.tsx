@@ -15,12 +15,9 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { DonationAmbience } from "@/app/(shell)/(public)/(with-footer)/donate/_components/donation-ambience";
+import { DonationAmbience } from "@/app/(shell)/(public)/donate/_components/donation-ambience";
 import { CardAura, HeroVisuals } from "@/components/home/hero-visuals";
-import {
-  MercadoPagoIcon,
-  PayPalIcon,
-} from "@/components/common/brand-icons";
+import { MercadoPagoIcon, PayPalIcon } from "@/components/common/brand-icons";
 import { SectionWrapper } from "@/components/common/section-wrapper";
 import { SectionHeading } from "@/components/common/section-heading";
 import { ProgressGrid } from "@/components/common/progress-grid";
