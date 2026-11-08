@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Gift, Globe, MapPin, Plus, Sparkles, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Modal } from "@/components/common/modal";
@@ -12,7 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormInput } from "@/components/common/form-input";
 import { useCreateBondRequest } from "@/services";
-import { successToast } from "@/lib/toast";
+import { getErrorMessage, isBondLimitReachedError } from "@/lib/error";
+import { errorToast, successToast } from "@/lib/toast";
 import { createBondSchema, type CreateBondValues } from "@/validations";
 import { cn } from "@/lib/utils";
 
@@ -125,6 +127,7 @@ function BondValueField({
 
 export function CreateBondDialog() {
   const t = useTranslations("Bonds");
+  const router = useRouter();
   const createRequest = useCreateBondRequest();
   const [open, setOpen] = useState(false);
 
@@ -145,6 +148,23 @@ export function CreateBondDialog() {
           successToast(t("createSuccessTitle"), t("createSuccess"));
           form.reset();
           setOpen(false);
+        },
+        onError: (error) => {
+          if (isBondLimitReachedError(error)) {
+            // Keep the dialog and its values open: upgrading and coming back
+            // shouldn't cost the user everything they just typed.
+            errorToast(t("limitReachedTitle"), t("limitReachedDescription"), {
+              action: {
+                label: t("viewPlans"),
+                onClick: () => router.push("/subscriptions"),
+              },
+            });
+            return;
+          }
+          errorToast(
+            t("createErrorTitle"),
+            getErrorMessage(error, t("createError")),
+          );
         },
       });
     },

@@ -10,5 +10,6 @@ export * from "./bond.hook";
 export * from "./friend.hook";
 export * from "./people.hook";
 export * from "./profile.hook";
+export * from "./subscription.hook";
 
 

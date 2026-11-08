@@ -1,0 +1,38 @@
+{
+  "title": "Elegí tu plan",
+  "subtitle": "Un solo pago, para siempre. Más vínculos publicados a la vez, sin renovaciones ni cobros automáticos.",
+  "availablePlans": "Planes disponibles",
+  "currentPlan": "Plan actual",
+  "currentPlanNote": "Tu plan no vence: es un pago único.",
+  "bondLimit": "Hasta {count} vínculos publicados a la vez",
+  "bondCountNote": "El cupo cuenta los vínculos que tengas publicados, activos o en pausa. Concretar un trueque no da de baja tu vínculo: sigue corriendo, porque lo más probable es que quieras repetirlo.",
+  "priceNotice": "El precio en pesos se convierte a la cotización del día y MercadoPago te muestra el total exacto antes de que confirmes. PayPal cobra en dólares. Sin cuotas ni interés.",
+  "plan": {
+    "Free": "Gratis",
+    "Standard": "Standard",
+    "Premium": "Premium"
+  },
+  "current": "Actual",
+  "included": "Incluido",
+  "free": "Gratis",
+  "noCard": "Sin tarjeta de crédito",
+  "oneTime": "pago único",
+  "pay": {
+    "paypal": "Pagar con PayPal ({price})",
+    "mercadopago": "Pagar con MercadoPago ({price})"
+  },
+  "unavailable": "No disponible ahora",
+  "redirecting": "Redirigiendo…",
+  "alreadyOwnedTitle": "Ya tenés este plan",
+  "alreadyOwned": "Ya tenés este plan o uno superior.",
+  "checkoutInProgressTitle": "Checkout en curso",
+  "checkoutInProgress": "Ya iniciaste un checkout para este plan. Terminalo o probá de nuevo en un momento.",
+  "checkoutErrorTitle": "No se pudo iniciar el pago",
+  "checkoutError": "No pudimos iniciar el checkout. Probá de nuevo en un momento.",
+  "loadErrorTitle": "Planes no disponibles",
+  "loadErrorDescription": "No pudimos cargar los planes y precios. Revisá tu conexión y probá de nuevo.",
+  "retry": "Reintentar",
+  "trustSecure": "Checkout seguro",
+  "trustOneTime": "Pago único",
+  "trustNoRenewal": "Sin renovaciones automáticas"
+}

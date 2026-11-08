@@ -1,0 +1,38 @@
+{
+  "title": "Choose your plan",
+  "subtitle": "One payment, forever. More bonds published at a time, with no renewals and no automatic charges.",
+  "availablePlans": "Available plans",
+  "currentPlan": "Current plan",
+  "currentPlanNote": "Your plan never expires: it's a one-time payment.",
+  "bondLimit": "Up to {count} bonds published at a time",
+  "bondCountNote": "The quota counts the bonds you have published, active or paused. Completing a trade does not retire your bond: it keeps running, because chances are you want to do it again.",
+  "priceNotice": "The peso price is converted at today's rate and MercadoPago shows the exact total before you confirm. PayPal charges in US dollars. No instalments, no interest.",
+  "plan": {
+    "Free": "Free",
+    "Standard": "Standard",
+    "Premium": "Premium"
+  },
+  "current": "Current",
+  "included": "Included",
+  "free": "Free",
+  "noCard": "No credit card",
+  "oneTime": "one-time payment",
+  "pay": {
+    "paypal": "Pay with PayPal ({price})",
+    "mercadopago": "Pay with MercadoPago ({price})"
+  },
+  "unavailable": "Unavailable right now",
+  "redirecting": "Redirecting…",
+  "alreadyOwnedTitle": "Plan already owned",
+  "alreadyOwned": "You already have this plan or a higher one.",
+  "checkoutInProgressTitle": "Checkout in progress",
+  "checkoutInProgress": "You already started a checkout for this plan. Finish it or try again in a moment.",
+  "checkoutErrorTitle": "Checkout failed",
+  "checkoutError": "We couldn't start the checkout. Please try again.",
+  "loadErrorTitle": "Plans unavailable",
+  "loadErrorDescription": "We couldn't load the plans and prices. Check your connection and try again.",
+  "retry": "Try again",
+  "trustSecure": "Secure checkout",
+  "trustOneTime": "One-time payment",
+  "trustNoRenewal": "No automatic renewals"
+}

@@ -79,3 +79,27 @@ export function isNotFoundError(error: unknown): boolean {
 
   return readStatus(error as AppError) === 404;
 }
+
+/** The checkout was refused because the user already owns that plan or a higher one. */
+export function isPlanAlreadyOwnedError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+
+  const err = error as AppError;
+  return readStatus(err) === 409 && readCode(err) === "PLAN_ALREADY_OWNED";
+}
+
+/** Another checkout for this plan is still being created; retry in a moment. */
+export function isCheckoutInProgressError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+
+  const err = error as AppError;
+  return readStatus(err) === 409 && readCode(err) === "CHECKOUT_IN_PROGRESS";
+}
+
+/** The bond quota is full; the backend sends a code so the UI can offer an upgrade. */
+export function isBondLimitReachedError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+
+  const err = error as AppError;
+  return readStatus(err) === 403 && readCode(err) === "BOND_LIMIT_REACHED";
+}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
   ArrowRight,
+  Crown,
   LogOut,
   MessageSquare,
   Settings,
@@ -127,6 +128,10 @@ export function NavbarUserMenu({
                   ? t("friendsCount", { count: pendingRequests })
                   : t("friends")}
               </span>
+            </DropdownMenuItem>
+            <DropdownMenuItem render={<Link href="/subscriptions" />}>
+              <Crown className="size-4 mr-2" />
+              <span>{t("subscription")}</span>
             </DropdownMenuItem>
             <DropdownMenuItem render={<Link href="/settings" />}>
               <Settings className="size-4 mr-2" />

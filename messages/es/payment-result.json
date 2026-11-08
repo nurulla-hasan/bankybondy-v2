@@ -1,0 +1,14 @@
+{
+  "success": {
+    "title": "Pago recibido",
+    "description": "Si compraste un plan, ya está activo: lo podés ver en tu página de suscripción. Si donaste, gracias por sostener Bankybondy.",
+    "ctaSubscriptions": "Ver mi suscripción",
+    "ctaHome": "Volver al inicio"
+  },
+  "cancel": {
+    "title": "El pago no se completó",
+    "description": "El pago se canceló o no se pudo aplicar. Si te cobraron y no ves tu plan o tu donación, escribinos y lo resolvemos.",
+    "ctaSubscriptions": "Ver mi suscripción",
+    "ctaHome": "Volver al inicio"
+  }
+}

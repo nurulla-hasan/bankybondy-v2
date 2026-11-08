@@ -6,6 +6,7 @@ export const PRIVATE_ROUTES = [
   "/chatting",
   "/messages",
   "/friends",
+  "/subscriptions",
 ] as const;
 
 export const AUTH_ROUTES = [

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   ArrowRight,
+  Crown,
   LogOut,
   Menu,
   MessageSquare,
@@ -50,11 +51,13 @@ export function MobileNav({
   const tMessages = useTranslations("Messages");
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
+  const [prevPathname, setPrevPathname] = React.useState(pathname);
 
-  // Close the drawer whenever route changes
-  React.useEffect(() => {
+  // Close the drawer on any route change, including programmatic navigation.
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setOpen(false);
-  }, [pathname]);
+  }
 
   const { data: profileData, isLoading: queryLoading } = useGetMyProfile();
   const { mutate: queryLogout } = useLogout();
@@ -199,6 +202,14 @@ export function MobileNav({
                   >
                     <Users className="size-4 shrink-0" />
                     <span>{t("friends")}</span>
+                  </Link>
+                  <Link
+                    href="/subscriptions"
+                    onClick={() => setOpen(false)}
+                    className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+                  >
+                    <Crown className="size-4 shrink-0" />
+                    <span>{t("subscription")}</span>
                   </Link>
                   <Link
                     href="/settings"
