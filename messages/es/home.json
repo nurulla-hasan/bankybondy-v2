@@ -1,0 +1,52 @@
+{
+  "howItWorks": {
+    "eyebrow": "Cómo funciona",
+    "title": "De un primer hola a un vínculo que dura",
+    "description": "Tres pasos simples. Sin algoritmos ni ruido — solo personas conversando.",
+    "step1": {
+      "title": "Mostrate como sos",
+      "description": "Creá tu perfil y contale a la comunidad de qué te gusta hablar."
+    },
+    "step2": {
+      "title": "Sintonizá voces reales",
+      "description": "Escuchá conversaciones en vivo y sumate a las salas que se sienten tuyas."
+    },
+    "step3": {
+      "title": "Cultivá un vínculo real",
+      "description": "Compartí tiempo, conocimiento y cosas con quienes valoran lo mismo que vos."
+    }
+  },
+  "features": {
+    "eyebrow": "Por qué Bankybondy",
+    "title": "Hecho para conversar, no para scrollear",
+    "description": "Cada decisión empieza con una pregunta: ¿esto acerca a las personas?",
+    "feature1": {
+      "title": "Audio primero",
+      "description": "Voces reales y salas en vivo en lugar de feeds infinitos."
+    },
+    "feature2": {
+      "title": "Vínculos verdaderos",
+      "description": "Conexiones basadas en la confianza y la reciprocidad, nunca en el alcance."
+    },
+    "feature3": {
+      "title": "Igualdad en el centro",
+      "description": "Cada persona llega con la misma voz y los mismos derechos."
+    },
+    "feature4": {
+      "title": "Realidad compartida",
+      "description": "La cultura se construye entre todos, conversación a conversación."
+    }
+  },
+  "marquee": {
+    "words": ["Escuchar", "Hablar", "Intercambiar", "Vincularse", "Compartir", "Crecer"]
+  },
+  "cta": {
+    "eyebrow": "Tu turno",
+    "title": "Tu próximo vínculo empieza con una conversación",
+    "description": "Sumate a la comunidad, abrí el micrófono y dejá que una conversación real te sorprenda.",
+    "guestPrimary": "Creá tu cuenta",
+    "guestSecondary": "Iniciar sesión",
+    "userPrimary": "Estamos conversando",
+    "userSecondary": "Explorar vínculos"
+  }
+}

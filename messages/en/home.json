@@ -1,0 +1,52 @@
+{
+  "howItWorks": {
+    "eyebrow": "How it works",
+    "title": "From a first hello to a bond that lasts",
+    "description": "Three small steps. No algorithms, no noise — just people talking.",
+    "step1": {
+      "title": "Show up as you are",
+      "description": "Create your profile and tell the community what you love to talk about."
+    },
+    "step2": {
+      "title": "Tune into real voices",
+      "description": "Listen to live conversations and join the rooms that feel like yours."
+    },
+    "step3": {
+      "title": "Grow a real bond",
+      "description": "Share time, knowledge and things with people who value the same as you."
+    }
+  },
+  "features": {
+    "eyebrow": "Why Bankybondy",
+    "title": "Built for conversations, not for scrolling",
+    "description": "Every decision starts with one question: does this bring people closer?",
+    "feature1": {
+      "title": "Audio first",
+      "description": "Real voices and live rooms instead of endless feeds."
+    },
+    "feature2": {
+      "title": "True bonds",
+      "description": "Connections built on trust and reciprocity, never on reach."
+    },
+    "feature3": {
+      "title": "Equality at the center",
+      "description": "Everyone arrives with the same voice and the same rights."
+    },
+    "feature4": {
+      "title": "Shared reality",
+      "description": "Culture is made together, one conversation at a time."
+    }
+  },
+  "marquee": {
+    "words": ["Listen", "Talk", "Swap", "Bond", "Share", "Grow"]
+  },
+  "cta": {
+    "eyebrow": "Your turn",
+    "title": "Your next bond starts with a conversation",
+    "description": "Join the community, open the mic and let a real conversation surprise you.",
+    "guestPrimary": "Create your account",
+    "guestSecondary": "Sign in",
+    "userPrimary": "We are chatting",
+    "userSecondary": "Explore bonds"
+  }
+}

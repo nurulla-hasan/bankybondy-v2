@@ -19,6 +19,7 @@ export default getRequestConfig(async () => {
       Common: (await import(`../../messages/${locale}/common.json`)).default,
       Navbar: (await import(`../../messages/${locale}/navbar.json`)).default,
       Hero: (await import(`../../messages/${locale}/hero.json`)).default,
+      Home: (await import(`../../messages/${locale}/home.json`)).default,
       DonateUs: (await import(`../../messages/${locale}/donate.json`)).default,
       Footer: (await import(`../../messages/${locale}/footer.json`)).default,
       Bonds: (await import(`../../messages/${locale}/bonds.json`)).default,

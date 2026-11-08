@@ -232,3 +232,24 @@
   }
 }
 
+/* Sunrise cadence: the line fully exits left, then re-enters from the right,
+ * instead of wrapping seamlessly. 100vw guarantees it starts off-screen even on
+ * wide monitors; -100% of its own width guarantees a clean full exit left. */
+@keyframes marquee {
+  from {
+    transform: translate3d(100vw, 0, 0);
+  }
+  to {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+.marquee-track {
+  animation: marquee 22s linear infinite;
+  will-change: transform;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
