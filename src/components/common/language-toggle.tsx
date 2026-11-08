@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe } from "lucide-react";
+import { Languages } from "lucide-react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 
@@ -42,7 +42,7 @@ export function LanguageToggle({
             className={className || "cursor-pointer"}
             aria-label="Change language"
           >
-            <Globe/>
+            <Languages className="size-5" aria-hidden />
           </Button>
         }
       />

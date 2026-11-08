@@ -53,7 +53,15 @@ export default function LoginPage() {
           }
 
           successToast(t("loginTitle"), t("loginSubtitle"));
-          router.replace("/");
+
+          const rawCallback = new URLSearchParams(window.location.search).get(
+            "callbackUrl",
+          );
+          const callbackUrl =
+            rawCallback?.startsWith("/") && !rawCallback.startsWith("//")
+              ? rawCallback
+              : "/";
+          router.replace(callbackUrl);
         },
         onError: (err) => {
           errorToast(getErrorMessage(err, "Login failed"));

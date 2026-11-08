@@ -10,7 +10,6 @@ import {
   InstagramIcon,
   ShareAlikeIcon,
 } from "@/components/common/brand-icons";
-import { ConsumerLinks } from "@/components/legal/consumer-links";
 import { CONTAINER_GUTTER, CONTAINER_MAX_WIDTH } from "@/lib/layout";
 import { cn } from "@/lib/utils";
 
@@ -127,11 +126,6 @@ export function Footer() {
               </nav>
             ))}
           </div>
-        </div>
-
-        {/* Consumer rights: required to be literal and prominent (Disposición 954/2025) */}
-        <div className="mt-10 border-t border-border/70 pt-6">
-          <ConsumerLinks variant="footer" />
         </div>
 
         {/* Bottom bar */}

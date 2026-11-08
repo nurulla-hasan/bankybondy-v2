@@ -27,12 +27,18 @@ function isTokenExpiringSoon(session: TokenPayload | null): boolean {
 
 async function refreshAccessToken(refreshToken: string): Promise<string | null> {
   try {
-    const apiUrl =
+    // The backend mounts its routers at the root; `NEXT_PUBLIC_API_BASE_URL`
+    // carries the `/api/v1` prefix used by the browser rewrite, so it must be
+    // stripped before appending the endpoint.
+    const apiUrl = (
       process.env.BACKEND_API_URL ||
       process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "http://localhost:5000";
+      "http://localhost:5000"
+    )
+      .replace(/\/+$/, "")
+      .replace(/\/api\/v1$/, "");
 
-    const res = await fetch(`${apiUrl.replace(/\/$/, "")}/api/v1/auth/refresh-token`, {
+    const res = await fetch(`${apiUrl}/auth/refresh-token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
