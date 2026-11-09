@@ -3,14 +3,13 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import type { RawAudioTopicWithCount } from "@/types";
 
-const MOBILE_VISIBLE_TOPICS = 6;
-const DESKTOP_VISIBLE_TOPICS = 10;
+const COLLAPSED_COUNT = 9;
 
 interface TopicFiltersProps {
   activeTopicId: string | null;
@@ -28,29 +27,15 @@ export function TopicFilters({
   const t = useTranslations("Chatting");
   const [showAllTopics, setShowAllTopics] = useState(false);
 
-  const visibleTopics = useMemo(() => {
-    const initialTopics = topics.slice(0, DESKTOP_VISIBLE_TOPICS);
-    if (
-      showAllTopics ||
-      !activeTopicId ||
-      initialTopics.some((topic) => topic._id === activeTopicId)
-    ) {
-      return initialTopics;
-    }
+  const initialTopics = useMemo(() => {
+    return topics.slice(0, COLLAPSED_COUNT);
+  }, [topics]);
 
-    const selectedTopic = topics.find((topic) => topic._id === activeTopicId);
-    return selectedTopic
-      ? [...initialTopics.slice(0, DESKTOP_VISIBLE_TOPICS - 1), selectedTopic]
-      : initialTopics;
-  }, [activeTopicId, showAllTopics, topics]);
+  const extraTopics = useMemo(() => {
+    return topics.slice(COLLAPSED_COUNT);
+  }, [topics]);
 
-  const extraTopics = showAllTopics
-    ? topics.filter(
-        (topic) => !visibleTopics.some((visible) => visible._id === topic._id),
-      )
-    : [];
-
-  const canToggle = !isPending && topics.length > MOBILE_VISIBLE_TOPICS;
+  const canToggle = !isPending && topics.length > COLLAPSED_COUNT;
 
   return (
     <section id="chatting-topics" className="space-y-3 scroll-mt-24">
@@ -70,7 +55,7 @@ export function TopicFilters({
             size="sm"
             onClick={() => setShowAllTopics((value) => !value)}
             aria-expanded={showAllTopics}
-            className="shrink-0 text-muted-foreground"
+            className="shrink-0 text-muted-foreground cursor-pointer"
           >
             {showAllTopics ? (
               <>
@@ -92,6 +77,7 @@ export function TopicFilters({
           variant={activeTopicId === null ? "default" : "outline"}
           aria-pressed={activeTopicId === null}
           onClick={() => onSelectTopic(null)}
+          className="shrink-0"
         >
           {t("allTopics")}
         </Button>
@@ -100,34 +86,74 @@ export function TopicFilters({
           ? Array.from({ length: 5 }).map((_, index) => (
               <Skeleton key={index} className="h-9 w-24 rounded-xl" />
             ))
-          : [...visibleTopics, ...extraTopics].map((topic, index) => {
-              const compactOnly =
-                index >= MOBILE_VISIBLE_TOPICS &&
-                index < DESKTOP_VISIBLE_TOPICS &&
-                !showAllTopics &&
-                topic._id !== activeTopicId;
+          : initialTopics.map((topic) => (
+              <Button
+                key={topic._id}
+                variant={activeTopicId === topic._id ? "default" : "outline"}
+                aria-pressed={activeTopicId === topic._id}
+                onClick={() => onSelectTopic(topic._id)}
+                className="shrink-0"
+              >
+                <span>{topic.name}</span>
+                {topic.totalAudios > 0 ? (
+                  <span
+                    className="hidden text-xs font-normal tabular-nums opacity-60 sm:inline ml-1"
+                    aria-hidden
+                  >
+                    {topic.totalAudios}
+                  </span>
+                ) : null}
+              </Button>
+            ))}
+      </div>
 
-              return (
+      <AnimatePresence initial={false}>
+        {showAllTopics && (
+          <motion.div
+            key="extra-topics"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{
+              height: "auto",
+              opacity: 1,
+              transition: {
+                height: { duration: 0.25, ease: "easeInOut" },
+                opacity: { duration: 0.2 },
+              },
+            }}
+            exit={{
+              height: 0,
+              opacity: 0,
+              transition: {
+                height: { duration: 0.2, ease: "easeInOut" },
+                opacity: { duration: 0.15 },
+              },
+            }}
+            className="overflow-hidden"
+          >
+            <div className="flex flex-wrap gap-2 mt-2">
+              {extraTopics.map((topic) => (
                 <Button
                   key={topic._id}
                   variant={activeTopicId === topic._id ? "default" : "outline"}
                   aria-pressed={activeTopicId === topic._id}
                   onClick={() => onSelectTopic(topic._id)}
-                  className={cn(compactOnly && "hidden sm:inline-flex")}
+                  className="shrink-0"
                 >
-                  {topic.name}
+                  <span>{topic.name}</span>
                   {topic.totalAudios > 0 ? (
                     <span
-                      className="hidden text-xs font-normal tabular-nums opacity-60 sm:inline"
+                      className="hidden text-xs font-normal tabular-nums opacity-60 sm:inline ml-1"
                       aria-hidden
                     >
                       {topic.totalAudios}
                     </span>
                   ) : null}
                 </Button>
-              );
-            })}
-      </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

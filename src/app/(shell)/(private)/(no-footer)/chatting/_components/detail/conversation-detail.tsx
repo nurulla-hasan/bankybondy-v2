@@ -496,10 +496,19 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
 
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="space-y-6 lg:col-span-7">
-          <CommentsSection audioId={audio._id} enabled={isReady} />
+          <CommentsSection
+            key={audio._id}
+            audioId={audio._id}
+            enabled={isReady}
+          />
         </div>
         <div className="lg:col-span-5">
-          <FeedbackPanel audio={audio} isOwner={isOwner} enabled={isReady} />
+          <FeedbackPanel
+            key={audio._id}
+            audio={audio}
+            isOwner={isOwner}
+            enabled={isReady}
+          />
         </div>
       </div>
 

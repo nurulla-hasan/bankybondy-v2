@@ -98,6 +98,7 @@ function FavoriteCard({
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30">
       <Link
         href={`/chatting/conversations/${audio._id}`}
+        aria-label={t("cardOpenLabel", { title: audio.title })}
         className="relative block aspect-video overflow-hidden bg-linear-to-br from-primary/25 via-tone-violet/15 to-transparent"
       >
         {audio.cover_image ? (

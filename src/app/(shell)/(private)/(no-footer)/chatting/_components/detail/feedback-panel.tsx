@@ -39,16 +39,31 @@ export function FeedbackPanel({ audio, isOwner, enabled }: FeedbackPanelProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>(
     audio.myFeeling?.feelingTags ?? [],
   );
+  // Rating is a two-step action: pick a value (hover previews it), then send.
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const [hoveredRating, setHoveredRating] = useState<number | null>(null);
+  // Covers the gap between a successful send and the detail refetch, so the
+  // picker does not flash back before `myRating` arrives.
+  const [submittedRating, setSubmittedRating] = useState<number | null>(null);
+  const myRating = audio.myRating ?? submittedRating;
 
   if (!enabled) return null;
 
   const feelingTags = feelingTagsQuery.data ?? [];
   const hasFeeling = selectedTags.length > 0;
   const canSubmit = text.trim().length > 0 || hasFeeling;
+  const previewRating = hoveredRating ?? selectedRating ?? 0;
 
-  const handleRate = (value: number) => {
-    giveRating.mutate(value, {
-      onSuccess: () => successToast(t("detailRatingThanks")),
+  const handleRate = () => {
+    if (!selectedRating) return;
+
+    giveRating.mutate(selectedRating, {
+      onSuccess: () => {
+        setSubmittedRating(selectedRating);
+        setSelectedRating(null);
+        setHoveredRating(null);
+        successToast(t("detailRatingThanks"));
+      },
       onError: (error) =>
         errorToast(
           t("detailRatingFailed"),
@@ -79,7 +94,13 @@ export function FeedbackPanel({ audio, isOwner, enabled }: FeedbackPanelProps) {
         },
       },
       {
-        onSuccess: () => successToast(t("detailCommentSaved")),
+        onSuccess: () => {
+          // The list above already shows the saved text and feelings; leaving
+          // them in the composer made the save look like it had not happened.
+          setText("");
+          setSelectedTags([]);
+          successToast(t("detailCommentSaved"));
+        },
         onError: (error) =>
           errorToast(
             t("detailCommentFailed"),
@@ -118,37 +139,80 @@ export function FeedbackPanel({ audio, isOwner, enabled }: FeedbackPanelProps) {
                 : t("detailRatingsEmpty")}
             </p>
 
-            {audio.myRating ? (
-              <p className="mt-3 text-sm">
-                {t("detailYourRating", { value: audio.myRating })}
-              </p>
-            ) : (
-              <div
-                className="mt-3 flex items-center gap-1"
-                role="group"
-                aria-label={t("detailRatingLabel")}
-              >
-                {RATING_VALUES.map((value) => {
-                  const active = value <= (audio.myRating ?? 0);
-
-                  return (
-                    <Button
+            {myRating ? (
+              <div className="mt-3 space-y-1.5">
+                <div className="flex items-center gap-1" aria-hidden>
+                  {RATING_VALUES.map((value) => (
+                    <Star
                       key={value}
-                      variant="ghost"
-                      size="icon"
-                      disabled={giveRating.isPending}
-                      aria-label={t("detailRateStar", { value })}
-                      onClick={() => handleRate(value)}
-                    >
-                      <Star
-                        aria-hidden
-                        className={cn(
-                          active && "fill-current text-primary",
-                        )}
-                      />
-                    </Button>
-                  );
-                })}
+                      className={cn(
+                        "size-6",
+                        value <= myRating
+                          ? "fill-tone-amber text-tone-amber"
+                          : "text-muted-foreground/40",
+                      )}
+                    />
+                  ))}
+                </div>
+                <p className="text-sm">
+                  {t("detailYourRating", { value: myRating })}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-3 space-y-3">
+                <div
+                  role="radiogroup"
+                  aria-label={t("detailRatingLabel")}
+                  className="flex items-center gap-1"
+                  onMouseLeave={() => setHoveredRating(null)}
+                >
+                  {RATING_VALUES.map((value) => {
+                    const active = value <= previewRating;
+
+                    return (
+                      <Button
+                        key={value}
+                        variant="ghost"
+                        size="icon-lg"
+                        role="radio"
+                        aria-checked={selectedRating === value}
+                        aria-label={t("detailRateStar", { value })}
+                        disabled={giveRating.isPending}
+                        onMouseEnter={() => setHoveredRating(value)}
+                        onFocus={() => setHoveredRating(value)}
+                        onBlur={() => setHoveredRating(null)}
+                        onClick={() => setSelectedRating(value)}
+                      >
+                        <Star
+                          aria-hidden
+                          className={cn(
+                            "size-7 transition-colors",
+                            active
+                              ? "fill-tone-amber text-tone-amber"
+                              : "text-muted-foreground/40",
+                          )}
+                        />
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {selectedRating
+                      ? t("detailRatingSelected", { value: selectedRating })
+                      : t("detailRatingHint")}
+                  </span>
+                  <Button
+                    disabled={!selectedRating || giveRating.isPending}
+                    onClick={handleRate}
+                  >
+                    {giveRating.isPending ? (
+                      <Loader2 className="animate-spin" aria-hidden />
+                    ) : null}
+                    {t("detailRatingSubmit")}
+                  </Button>
+                </div>
               </div>
             )}
           </section>
@@ -189,12 +253,17 @@ export function FeedbackPanel({ audio, isOwner, enabled }: FeedbackPanelProps) {
             )}
 
             {audio.topFeelings.length ? (
-              <div className="flex flex-wrap gap-1.5">
-                {audio.topFeelings.map((feeling) => (
-                  <Badge key={feeling.tag} variant="secondary" size="sm">
-                    {feeling.tag} · {feeling.count}
-                  </Badge>
-                ))}
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">
+                  {t("detailFeelingsTop")}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {audio.topFeelings.map((feeling) => (
+                    <Badge key={feeling.tag} variant="secondary" size="sm">
+                      {feeling.tag} · {feeling.count}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             ) : null}
 

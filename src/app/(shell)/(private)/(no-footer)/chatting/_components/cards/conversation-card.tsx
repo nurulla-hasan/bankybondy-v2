@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  ArrowUpRight,
   AudioLines,
   Bookmark,
   Headphones,
@@ -53,37 +54,47 @@ export function ConversationCard({
           conversation.gradient,
         )}
       >
-        {conversation.coverImage ? (
-          <>
-            <Image
-              src={conversation.coverImage}
-              alt=""
-              fill
-              unoptimized
-              sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 100vw"
-              className="object-cover"
-            />
-            <div
+        <Link
+          href={`/chatting/conversations/${conversation.id}`}
+          aria-label={t("cardOpenLabel", { title: conversation.title })}
+          className="absolute inset-0 block"
+        >
+          {conversation.coverImage ? (
+            <>
+              <Image
+                src={conversation.coverImage}
+                alt=""
+                fill
+                unoptimized
+                sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 100vw"
+                className="object-cover"
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-linear-to-t from-foreground/50 via-transparent to-transparent"
+              />
+            </>
+          ) : (
+            <AudioLines
               aria-hidden
-              className="absolute inset-0 bg-linear-to-t from-foreground/50 via-transparent to-transparent"
+              className="absolute right-3 bottom-3 size-12 text-foreground/10"
             />
-          </>
-        ) : (
-          <AudioLines
-            aria-hidden
-            className="absolute right-3 bottom-3 size-12 text-foreground/10"
-          />
-        )}
+          )}
 
-        <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
-          <Badge variant="secondary">{conversation.topic.name}</Badge>
-          <Badge variant="secondary">
-            {formatClock(conversation.durationSec)}
-          </Badge>
-        </div>
+          <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+            <Badge variant="secondary">{conversation.topic.name}</Badge>
+            <Badge variant="secondary">
+              {formatClock(conversation.durationSec)}
+            </Badge>
+          </div>
 
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
+          <span className="absolute right-3 bottom-3 inline-flex items-center rounded-full bg-background/90 p-2 opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
+            <ArrowUpRight className="size-4" aria-hidden />
+          </span>
+        </Link>
+
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="pointer-events-auto opacity-100 transition-opacity duration-200 sm:pointer-events-none sm:opacity-0 sm:group-focus-within:pointer-events-auto sm:group-focus-within:opacity-100 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100">
             <Button
               size="icon-lg"
               aria-label={

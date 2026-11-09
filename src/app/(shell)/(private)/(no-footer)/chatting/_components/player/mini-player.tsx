@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   Loader2,
   Pause,
@@ -89,7 +90,12 @@ export function MiniPlayer({
         )}
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{conversation.title}</p>
+          <Link
+            href={`/chatting/conversations/${conversation.id}`}
+            className="block truncate text-sm font-medium transition-colors hover:text-primary"
+          >
+            {conversation.title}
+          </Link>
           <p className="truncate text-xs text-muted-foreground">
             {conversation.author.name}
             <span aria-hidden> · </span>

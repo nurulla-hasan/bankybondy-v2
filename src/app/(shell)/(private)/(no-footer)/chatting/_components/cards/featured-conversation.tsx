@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import {
+  ArrowUpRight,
   Bookmark,
   Clock3,
   Headphones,
@@ -80,7 +82,12 @@ export function FeaturedConversation({
         <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
           <div className="space-y-4">
             <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-              {conversation.title}
+              <Link
+                href={`/chatting/conversations/${conversation.id}`}
+                className="transition-colors hover:text-primary"
+              >
+                {conversation.title}
+              </Link>
             </h2>
 
             <p className="text-sm leading-6 text-muted-foreground sm:text-base">
@@ -129,6 +136,17 @@ export function FeaturedConversation({
                   className={cn(isSaved && "fill-current")}
                 />
                 {isSaved ? t("featuredSaved") : t("featuredSave")}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="xl"
+                render={
+                  <Link href={`/chatting/conversations/${conversation.id}`} />
+                }
+              >
+                <ArrowUpRight aria-hidden />
+                {t("cardOpen")}
               </Button>
 
               <Button

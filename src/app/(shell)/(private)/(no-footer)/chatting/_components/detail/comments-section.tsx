@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { EmptyState } from "@/components/common/empty-state";
 import { RelativeTime } from "@/components/common/relative-time";
 import {
   Avatar,
@@ -56,6 +57,20 @@ export function CommentsSection({ audioId, enabled }: CommentsSectionProps) {
             <Skeleton key={index} className="h-24 rounded-2xl" />
           ))}
         </div>
+      ) : feedbackQuery.isError ? (
+        <EmptyState
+          icon={<MessageCircle className="size-5" aria-hidden />}
+          title={t("detailCommentsErrorTitle")}
+          description={t("detailCommentsErrorDescription")}
+          action={
+            <Button
+              variant="outline"
+              onClick={() => void feedbackQuery.refetch()}
+            >
+              {t("detailCommentsRetry")}
+            </Button>
+          }
+        />
       ) : comments.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
           {t("detailCommentsEmpty")}
