@@ -1,4 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter } from "next/navigation";
+
+import { PRIVATE_ROUTES } from "@/constants/routes";
+
 import {
   changePassword,
   deleteAccount,
@@ -137,6 +141,8 @@ export function useChangePassword() {
  */
 export function useLogout() {
   const queryClient = useQueryClient();
+  const pathname = usePathname();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: logoutUser,
@@ -144,6 +150,15 @@ export function useLogout() {
       queryClient.cancelQueries();
       queryClient.setQueryData(["auth", "profile"], null);
       queryClient.clear();
+
+      // Clearing the cache flips the navbar to its logged-out state, but the
+      // current page keeps whatever it already rendered. On a private route
+      // that meant staying on screen until a manual reload, so leave explicitly
+      // (`proxy.ts` re-checks cookies on the next navigation anyway).
+      const onPrivateRoute = PRIVATE_ROUTES.some(
+        (route) => pathname === route || pathname.startsWith(`${route}/`),
+      );
+      if (onPrivateRoute) router.replace("/login");
     },
   });
 }
