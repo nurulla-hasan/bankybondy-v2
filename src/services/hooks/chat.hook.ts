@@ -105,6 +105,8 @@ export function useChatList(
  * shapes, and the thread must never see that difference.
  */
 export function useChatMessages(conversationId: string | null, meId: string) {
+  const isPendingId = conversationId?.startsWith("pending-");
+
   return useInfiniteQuery({
     queryKey: chatKeys.thread(conversationId),
     queryFn: ({ pageParam }) =>
@@ -118,7 +120,7 @@ export function useChatMessages(conversationId: string | null, meId: string) {
       const { page, totalPages } = lastPage.data.meta;
       return page < totalPages ? page + 1 : undefined;
     },
-    enabled: Boolean(conversationId && meId),
+    enabled: Boolean(conversationId && meId && !isPendingId),
     staleTime: 15 * 1000,
     select: (data): ChatThreadData => {
       // Live messages shift the server's page offsets, so an older page can
@@ -213,6 +215,12 @@ export function useSendMessage() {
               ),
             );
 
+            // If this was a newly synthesized conversation, update the cache with the real ID
+            if (response.data?.conversationId && conversation._id.startsWith("pending-")) {
+              const realKey = chatKeys.thread(response.data.conversationId);
+              queryClient.setQueryData(realKey, queryClient.getQueryData(key));
+            }
+
             // Last-message preview and ordering come from the server list; this
             // covers the REST-send-with-socket-down path.
             void queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
@@ -253,10 +261,6 @@ export function useSendMessage() {
     },
     onMutate: ({ conversation, payload, me, clientId }) => {
       const key = chatKeys.thread(conversation._id);
-
-      // If the thread is not cached yet there is nothing to prepend to; the
-      // fetch that is already in flight will include the stored message.
-      if (!queryClient.getQueryData<ThreadPages>(key)) return;
 
       queryClient.setQueryData<ThreadPages>(key, (data) =>
         insertOptimisticMessage(

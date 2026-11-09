@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Handshake, ShieldBan, UserPlus } from "lucide-react";
+import { Handshake, MessageSquare, ShieldBan, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -124,9 +124,26 @@ export function ProfileActions({
     });
   };
 
+  const handleOpenMessages = () => {
+    router.push(
+      `/messages?userId=${encodeURIComponent(profile._id)}&userName=${encodeURIComponent(
+        profile.name,
+      )}&userAvatar=${encodeURIComponent(profile.profile_image || "")}`,
+    );
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button
+        variant="default"
+        onClick={handleOpenMessages}
+      >
+        <MessageSquare className="size-4" aria-hidden />
+        {t("actions.message")}
+      </Button>
+
+      <Button
+        variant="outline"
         onClick={handlePropose}
         disabled={!canPropose}
         loading={createRequest.isPending}

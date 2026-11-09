@@ -80,8 +80,23 @@ export function toOptimisticMessage(input: OptimisticMessageInput): WireChatMess
 export function insertOptimisticMessage(
   data: ThreadPages | undefined,
   message: WireChatMessage,
-): ThreadPages | undefined {
-  if (!data?.pages.length) return data;
+): ThreadPages {
+  if (!data?.pages.length) {
+    return {
+      pages: [
+        {
+          statusCode: 200,
+          success: true,
+          message: "",
+          data: {
+            meta: { page: 1, limit: 20, total: 1, totalPages: 1 },
+            result: [message],
+          },
+        },
+      ],
+      pageParams: [1],
+    };
+  }
 
   const [first, ...rest] = data.pages;
   const page = first.data;

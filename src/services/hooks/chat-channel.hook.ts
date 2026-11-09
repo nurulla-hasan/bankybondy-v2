@@ -76,6 +76,7 @@ export function useConversationChannel(
 
   // Opening a thread marks it read; so does bringing a hidden tab back to it.
   useEffect(() => {
+    if (conversationId.startsWith("pending-")) return;
     const mark = () => {
       if (document.visibilityState === "visible") markSeen(conversationId);
     };

@@ -39,7 +39,7 @@ import { NoConversationState } from "./shared/no-conversation-state";
 import { PANE, PANE_BODY } from "./shared/pane";
 import { MessageThread } from "./thread/message-thread";
 
-type MessagesFilterKey = "c" | "searchTerm";
+type MessagesFilterKey = "c" | "searchTerm" | "userId" | "userName" | "userAvatar";
 
 export function MessagesShell() {
   const t = useTranslations("Messages");
@@ -55,6 +55,9 @@ export function MessagesShell() {
       }
     : null;
   const selectedId = getFilter("c") || null;
+  const targetUserId = getFilter("userId") || null;
+  const targetUserName = getFilter("userName") || "";
+  const targetUserAvatar = getFilter("userAvatar") || "";
   const searchTerm = getFilter("searchTerm") ?? "";
   const [hiddenOpen, setHiddenOpen] = useState(false);
 
@@ -72,10 +75,37 @@ export function MessagesShell() {
     queryClient.getQueryData<ApiResponse<RawConversationList>>(
       chatKeys.list(""),
     )?.data;
-  const conversation =
+
+  // 1. Existing conversation matching selectedId
+  let conversation =
     unfilteredChats?.data.find((item) => item._id === selectedId) ??
     list.data?.data.find((item) => item._id === selectedId) ??
     null;
+
+  // 2. If targetUserId is passed in URL query (?userId=...), find or synthesize conversation
+  if (!conversation && targetUserId) {
+    const existingForUser = (unfilteredChats?.data ?? list.data?.data ?? []).find(
+      (item) => item.type === "one-two-one" && item.userData?._id === targetUserId,
+    );
+
+    if (existingForUser) {
+      conversation = existingForUser;
+    } else {
+      // Synthesized 1-to-1 conversation so the thread opens immediately
+      conversation = {
+        _id: `pending-${targetUserId}`,
+        type: "one-two-one",
+        userData: {
+          _id: targetUserId,
+          name: targetUserName || "User",
+          profile_image: targetUserAvatar || undefined,
+        },
+        lastMessage: null,
+        unseenMsg: 0,
+        members: me ? [me, { _id: targetUserId, name: targetUserName || "User", profile_image: targetUserAvatar || undefined }] : [],
+      };
+    }
+  }
 
   const showOffline = status === "disconnected" || status === "error";
 
@@ -83,8 +113,14 @@ export function MessagesShell() {
     updateFilter("c", conversationId, { resetPage: false, method: "push" });
   };
 
-  const deselect = () =>
+  const deselect = () => {
     updateFilter("c", null, { resetPage: false, method: "push" });
+    if (targetUserId) {
+      updateFilter("userId", null, { resetPage: false, method: "replace" });
+      updateFilter("userName", null, { resetPage: false, method: "replace" });
+      updateFilter("userAvatar", null, { resetPage: false, method: "replace" });
+    }
+  };
 
   const hideSelected = (conversationId: string) => {
     hide.mutate(conversationId);
@@ -216,6 +252,7 @@ function ConversationThread({
   onHide,
 }: ConversationThreadProps) {
   const meId = me?._id ?? "";
+  const isPendingConversation = conversation._id.startsWith("pending-");
   const thread = useChatMessages(conversation._id, meId);
   const send = useSendMessage();
   const remove = useDeleteMessage(conversation._id);
@@ -238,8 +275,8 @@ function ConversationThread({
     <MessageThread
       conversation={conversation}
       messages={thread.data?.messages ?? []}
-      isPending={thread.isPending || !meId}
-      isError={thread.isError}
+      isPending={!isPendingConversation && (thread.isPending || !meId)}
+      isError={!isPendingConversation && thread.isError}
       isSending={send.isPending}
       hasOlder={Boolean(thread.hasNextPage)}
       isLoadingOlder={thread.isFetchingNextPage}

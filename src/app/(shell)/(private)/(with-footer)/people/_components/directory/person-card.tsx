@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, Star, UserPlus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MapPin, MessageSquare, Star, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,7 +45,18 @@ function pickVisibleSkills(skills: string[]) {
 
 export function PersonCard({ person }: { person: RawPerson }) {
   const t = useTranslations("People");
+  const router = useRouter();
   const sendRequest = useSendFriendRequest();
+
+  const handleOpenMessages = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(
+      `/messages?userId=${encodeURIComponent(person._id)}&userName=${encodeURIComponent(
+        person.name,
+      )}&userAvatar=${encodeURIComponent(person.profile_image || "")}`,
+    );
+  };
 
   const handleConnect = () => {
     sendRequest.mutate(
@@ -113,6 +125,25 @@ export function PersonCard({ person }: { person: RawPerson }) {
             </span>
 
             <div className="flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="secondary"
+                        size="icon-sm"
+                        className="bg-card/85 shadow-xs ring-1 ring-border backdrop-blur-sm hover:bg-card"
+                        aria-label={t("actions.message")}
+                        onClick={handleOpenMessages}
+                      >
+                        <MessageSquare className="size-3.5 text-primary" aria-hidden />
+                      </Button>
+                    }
+                  />
+                  <TooltipContent>{t("actions.message")}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
               <FriendStatusBadge status={person.friendRequestStatus} />
               {person.friendRequestStatus === "none" && (
                 <TooltipProvider>
