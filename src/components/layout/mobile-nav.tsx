@@ -29,6 +29,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { AuthUser } from "@/types";
 import { ThemeToggle } from "@/components/common/theme-toggle";
 import { NavbarSearch } from "./navbar-search";
+import { BondQuotaSummary } from "./bond-quota-summary";
 import type { NavLinkItem } from "./nav-items";
 
 interface MobileNavProps {
@@ -167,6 +168,14 @@ export function MobileNav({
                     </p>
                   </div>
                 </div>
+
+                <Link
+                  href="/bonds"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 transition-colors hover:bg-muted"
+                >
+                  <BondQuotaSummary />
+                </Link>
 
                 <div className="flex flex-col gap-0.5">
                   <Link

@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 
 import { ConfirmationModal } from "@/components/common/confirmation-modal";
 import { Button } from "@/components/ui/button";
-import { getErrorMessage } from "@/lib/error";
+import { getErrorMessage, isBondLimitReachedError } from "@/lib/error";
 import { errorToast, successToast } from "@/lib/toast";
 import {
   useBlockUser,
@@ -30,6 +30,7 @@ export function ProfileActions({
   onProposed,
 }: ProfileActionsProps) {
   const t = useTranslations("People");
+  const tBonds = useTranslations("Bonds");
   const router = useRouter();
   const sendRequest = useSendFriendRequest();
   const block = useBlockUser();
@@ -84,11 +85,24 @@ export function ProfileActions({
           onProposed?.();
           router.push(`/bonds?tab=matches&request=${response.data._id}`);
         },
-        onError: (error) =>
-          errorToast(
-            t("actions.proposeErrorTitle"),
-            getErrorMessage(error),
-          ),
+        onError: (error) => {
+          if (isBondLimitReachedError(error)) {
+            // Same upgrade path as the create dialog: keep the reader here and
+            // offer the plans instead of a generic failure.
+            errorToast(
+              tBonds("limitReachedTitle"),
+              tBonds("limitReachedDescription"),
+              {
+                action: {
+                  label: tBonds("viewPlans"),
+                  onClick: () => router.push("/subscriptions"),
+                },
+              },
+            );
+            return;
+          }
+          errorToast(t("actions.proposeErrorTitle"), getErrorMessage(error));
+        },
       },
     );
   };

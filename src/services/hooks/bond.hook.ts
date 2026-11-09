@@ -23,6 +23,7 @@ import {
   countMyBondRequests,
   deleteBondRequest,
   getBondMatches,
+  getBondQuota,
   getBondRequestById,
   getMyBondLinks,
   getMyBondRequests,
@@ -47,6 +48,7 @@ export const bondKeys = {
   links: () => [...bondKeys.all, "links"] as const,
   linkList: (params: BondLinkQueryParams) =>
     [...bondKeys.links(), params] as const,
+  quota: () => [...bondKeys.all, "quota"] as const,
 };
 
 const normalizeRequestParams = (params: BondRequestQueryParams = {}) => ({
@@ -73,6 +75,16 @@ export function useBondRequests(params: BondRequestQueryParams = {}) {
     queryFn: () => getMyBondRequests(normalized),
     select: (response) => response.data,
     placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
+  });
+}
+
+/** Slots used/left for the caller's plan, computed by the same filter the API enforces. */
+export function useBondQuota() {
+  return useQuery({
+    queryKey: bondKeys.quota(),
+    queryFn: getBondQuota,
+    select: (response) => response.data,
     staleTime: 30 * 1000,
   });
 }
@@ -163,6 +175,7 @@ export function useCreateBondRequest() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bondKeys.requests() });
+      queryClient.invalidateQueries({ queryKey: bondKeys.quota() });
     },
   });
 }
@@ -261,6 +274,7 @@ export function useDeleteBondRequest() {
               }
             : response,
       );
+      queryClient.invalidateQueries({ queryKey: bondKeys.quota() });
     },
   });
 }

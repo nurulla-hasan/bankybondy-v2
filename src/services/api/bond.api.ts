@@ -1,11 +1,22 @@
 import { apiClient } from "@/lib/api-client";
 import type { ApiResponse, RawBondRequestStatus } from "@/types";
 import type {
+  BondQuota,
   BondRequestQueryParams,
   CreateBondRequestInput,
   RawBondRequest,
   RawBondRequestList,
 } from "@/types";
+
+/**
+ * Remaining bond slots for the caller's plan.
+ * Endpoint: GET /bond-request/quota
+ */
+export function getBondQuota() {
+  return apiClient<ApiResponse<BondQuota>>("/bond-request/quota", {
+    method: "GET",
+  });
+}
 
 /**
  * List the authenticated user's bond requests.

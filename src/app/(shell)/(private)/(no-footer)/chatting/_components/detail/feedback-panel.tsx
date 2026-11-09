@@ -204,12 +204,11 @@ export function FeedbackPanel({ audio, isOwner, enabled }: FeedbackPanelProps) {
                       : t("detailRatingHint")}
                   </span>
                   <Button
-                    disabled={!selectedRating || giveRating.isPending}
+                    disabled={!selectedRating}
+                    loading={giveRating.isPending}
+                    loadingText={t("detailRatingSubmitting")}
                     onClick={handleRate}
                   >
-                    {giveRating.isPending ? (
-                      <Loader2 className="animate-spin" aria-hidden />
-                    ) : null}
                     {t("detailRatingSubmit")}
                   </Button>
                 </div>

@@ -83,8 +83,8 @@ export function TopicFilters({
         </Button>
 
         {isPending
-          ? Array.from({ length: 5 }).map((_, index) => (
-              <Skeleton key={index} className="h-9 w-24 rounded-xl" />
+          ? Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-9 w-20 rounded-xl" />
             ))
           : initialTopics.map((topic) => (
               <Button

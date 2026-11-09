@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ConversationDetailSkeleton } from "./conversation-detail-skeleton";
 import { errorToast, successToast } from "@/lib/toast";
 import { cn, getInitials } from "@/lib/utils";
 import {
@@ -229,16 +229,7 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
   };
 
   if (detailQuery.isPending) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-9 w-40 rounded-xl" />
-        <Skeleton className="h-72 rounded-3xl" />
-        <div className="grid gap-6 lg:grid-cols-12">
-          <Skeleton className="h-96 rounded-2xl lg:col-span-7" />
-          <Skeleton className="h-96 rounded-2xl lg:col-span-5" />
-        </div>
-      </div>
-    );
+    return <ConversationDetailSkeleton />;
   }
 
   if (detailQuery.isError || !audio) {

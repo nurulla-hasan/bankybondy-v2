@@ -148,6 +148,7 @@
   "detailRatingHint": "Pick a star rating",
   "detailRatingSelected": "You picked {value, plural, one {# star} other {# stars}}",
   "detailRatingSubmit": "Send rating",
+  "detailRatingSubmitting": "Sending...",
   "detailRatingThanks": "Thanks for rating",
   "detailRatingFailed": "Could not save your rating",
   "detailRatingFailedDescription": "Please try again.",

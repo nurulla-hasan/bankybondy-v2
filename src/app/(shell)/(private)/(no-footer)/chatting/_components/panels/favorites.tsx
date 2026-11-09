@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { EmptyState } from "@/components/common/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { FavoriteCardSkeleton } from "../cards/favorite-card-skeleton";
 import {
   useBookmarkedAudios,
   useToggleAudioBookmark,
@@ -44,7 +44,7 @@ export function Favorites({ embedded = false }: FavoritesProps) {
       {bookmarksQuery.isPending ? (
         <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-64 rounded-2xl" />
+            <FavoriteCardSkeleton key={index} />
           ))}
         </div>
       ) : bookmarksQuery.isError ? (

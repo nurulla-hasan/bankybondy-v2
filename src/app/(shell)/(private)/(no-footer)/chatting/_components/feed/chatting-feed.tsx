@@ -8,7 +8,8 @@ import { useTranslations } from "next-intl";
 import { EmptyState } from "@/components/common/empty-state";
 import { Button } from "@/components/ui/button";
 import { useNextFilter } from "@/hooks/useNextFilter";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ConversationCardSkeleton } from "../cards/conversation-card-skeleton";
+import { FeaturedConversationSkeleton } from "../cards/featured-conversation-skeleton";
 import { successToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import {
@@ -231,19 +232,6 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
             <ConversationDetail audioId={conversationId} />
           ) : isFeedSection(section) ? (
             <>
-          {featured ? (
-            <FeaturedConversation
-              conversation={featured}
-              isPlaying={featuredIsPlaying}
-              isSaved={savedIds.has(featured.id)}
-              progress={featuredProgress}
-              elapsedSec={playing?.id === featured.id ? elapsed : 0}
-              onPlay={() => togglePlayback(featured)}
-              onToggleSave={() => toggleSave.mutate(featured.id)}
-              onShare={() => void handleShare(featured)}
-            />
-          ) : null}
-
           <TopicFilters
             activeTopicId={topicId}
             isPending={topicsQuery.isPending}
@@ -251,57 +239,17 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
             topics={topics}
           />
 
-          <div ref={listAnchorRef} aria-hidden className="scroll-mt-24" />
-
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-heading text-base font-medium">
-              {t(sectionLabelKey(section))}
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {t("conversationsCount", { count: totalCount })}
-            </p>
-          </div>
-
-          {pendingProcessing.length ? (
-            <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
-              <Loader2
-                className="mt-0.5 size-4 shrink-0 animate-spin text-muted-foreground"
-                aria-hidden
-              />
-              <div className="min-w-0">
-                <p className="text-sm font-medium">
-                  {t("pendingReview", { count: pendingProcessing.length })}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t("pendingReviewDescription")}
-                </p>
-              </div>
-            </div>
-          ) : null}
-
-          {pendingFailed.length ? (
-            <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
-              <RefreshCw
-                className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                aria-hidden
-              />
-              <div className="min-w-0">
-                <p className="text-sm font-medium">
-                  {t("pendingFailed", { count: pendingFailed.length })}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t("pendingFailedDescription")}
-                </p>
-              </div>
-            </div>
-          ) : null}
-
           {feedQuery.isPending ? (
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <Skeleton key={index} className="h-80 rounded-2xl" />
-              ))}
-            </section>
+            <div className="space-y-6">
+              {section === "recent" && topicId === null ? (
+                <FeaturedConversationSkeleton />
+              ) : null}
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <ConversationCardSkeleton key={index} />
+                ))}
+              </section>
+            </div>
           ) : feedQuery.isError ? (
             <EmptyState
               icon={<Headphones className="size-5" aria-hidden />}
@@ -333,23 +281,38 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
               }
             />
           ) : (
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-              {visible.map((conversation) => (
-                <ConversationCard
-                  key={conversation.id}
-                  conversation={conversation}
-                  isPlaying={
-                    playing?.id === conversation.id &&
-                    isPlaying &&
-                    elapsed < conversation.durationSec
-                  }
-                  isSaved={savedIds.has(conversation.id)}
-                  onPlay={() => togglePlayback(conversation)}
-                  onToggleSave={() => toggleSave.mutate(conversation.id)}
-                  onShare={() => void handleShare(conversation)}
+            <>
+              {featured ? (
+                <FeaturedConversation
+                  conversation={featured}
+                  isPlaying={featuredIsPlaying}
+                  isSaved={savedIds.has(featured.id)}
+                  progress={featuredProgress}
+                  elapsedSec={playing?.id === featured.id ? elapsed : 0}
+                  onPlay={() => togglePlayback(featured)}
+                  onToggleSave={() => toggleSave.mutate(featured.id)}
+                  onShare={() => void handleShare(featured)}
                 />
-              ))}
-            </section>
+              ) : null}
+
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                {visible.map((conversation) => (
+                  <ConversationCard
+                    key={conversation.id}
+                    conversation={conversation}
+                    isPlaying={
+                      playing?.id === conversation.id &&
+                      isPlaying &&
+                      elapsed < conversation.durationSec
+                    }
+                    isSaved={savedIds.has(conversation.id)}
+                    onPlay={() => togglePlayback(conversation)}
+                    onToggleSave={() => toggleSave.mutate(conversation.id)}
+                    onShare={() => void handleShare(conversation)}
+                  />
+                ))}
+              </section>
+            </>
           )}
 
           {hasMore ? (

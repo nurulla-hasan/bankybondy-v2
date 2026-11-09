@@ -21,7 +21,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { RelativeTime } from "@/components/common/relative-time";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MyContentCardSkeleton } from "../cards/my-content-card-skeleton";
 import CustomPagination from "@/components/common/custom-pagination";
 import { getErrorMessage } from "@/lib/error";
 import { errorToast, successToast } from "@/lib/toast";
@@ -153,7 +153,7 @@ export function MyContent({ embedded = false }: MyContentProps) {
       {query.isPending ? (
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-40 rounded-2xl" />
+            <MyContentCardSkeleton key={index} />
           ))}
         </div>
       ) : query.isError ? (

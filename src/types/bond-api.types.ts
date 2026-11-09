@@ -33,6 +33,16 @@ export interface RawBondRequestList {
   result: RawBondRequest[];
 }
 
+/**
+ * Plan quota for published bonds. `used` counts every non-deleted bond
+ * (active, paused and linked); only deleting one frees a slot.
+ */
+export interface BondQuota {
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
 export interface BondRequestQueryParams {
   searchTerm?: string;
   page?: number;

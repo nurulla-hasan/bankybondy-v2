@@ -30,6 +30,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types";
+import { BondQuotaSummary } from "./bond-quota-summary";
 
 interface NavbarUserMenuProps {
   user?: AuthUser | null;
@@ -98,6 +99,13 @@ export function NavbarUserMenu({
                 </p>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              render={<Link href="/bonds" />}
+              className="flex-col items-stretch gap-1.5 px-2.5 py-2"
+            >
+              <BondQuotaSummary />
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem render={<Link href="/profile" />}>
               <UserIcon className="size-4 mr-2" />

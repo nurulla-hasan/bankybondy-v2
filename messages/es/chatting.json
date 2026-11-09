@@ -148,6 +148,7 @@
   "detailRatingHint": "Elegí una puntuación",
   "detailRatingSelected": "Elegiste {value, plural, one {# estrella} other {# estrellas}}",
   "detailRatingSubmit": "Enviar valoración",
+  "detailRatingSubmitting": "Enviando...",
   "detailRatingThanks": "Gracias por valorar",
   "detailRatingFailed": "No se pudo guardar tu valoración",
   "detailRatingFailedDescription": "Intentá de nuevo.",

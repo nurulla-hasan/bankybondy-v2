@@ -27,6 +27,7 @@ import type {
 } from "@/types";
 
 import { PlanCard } from "./plan-card";
+import { SubscriptionSkeleton } from "./subscription-skeleton";
 
 const KNOWN_PLANS: SubscriptionPlanType[] = ["Free", "Standard", "Premium"];
 
@@ -72,16 +73,7 @@ export function SubscriptionContent() {
   };
 
   if (prices.isPending || profile.isPending) {
-    return (
-      <div className="space-y-4" aria-hidden>
-        <Skeleton className="h-32 rounded-xl" />
-        <div className="grid gap-4 md:grid-cols-3">
-          {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} className="h-64 rounded-xl" />
-          ))}
-        </div>
-      </div>
-    );
+    return <SubscriptionSkeleton />;
   }
 
   if (prices.isError || profile.isError || !prices.data || !profile.data) {

@@ -48,13 +48,13 @@ export function LanguageToggle({
           onClick={() => handleLanguageChange("es")}
           className={locale === "es" ? "font-bold text-primary" : ""}
         >
-          Español (ES)
+          Español
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => handleLanguageChange("en")}
           className={locale === "en" ? "font-bold text-primary" : ""}
         >
-          English (EN)
+          English
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
