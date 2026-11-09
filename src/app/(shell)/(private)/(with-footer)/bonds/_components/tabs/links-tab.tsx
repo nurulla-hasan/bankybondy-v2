@@ -20,6 +20,24 @@ interface LinksTabProps {
   onPageChange: (page: number) => void;
 }
 
+export function LinksStatusFilter() {
+  const t = useTranslations("Bonds");
+
+  return (
+    <FilterSelect
+      filterKey="status"
+      placeholder={t("linksFilter.all")}
+      options={[
+        { value: "all", label: t("linksFilter.all") },
+        { value: "Ongoing", label: t("linksFilter.ongoing") },
+        { value: "Completed", label: t("linksFilter.completed") },
+        { value: "Canceled", label: t("linksFilter.canceled") },
+      ]}
+      className="w-full sm:w-44"
+    />
+  );
+}
+
 export function LinksTab({ searchTerm, page, onPageChange }: LinksTabProps) {
   const t = useTranslations("Bonds");
   const { getFilter } = useNextFilter<"status">();
@@ -42,20 +60,6 @@ export function LinksTab({ searchTerm, page, onPageChange }: LinksTabProps) {
   return (
     <TabsContent value="links" className="space-y-4">
       <h2 className="sr-only">{t("tabs.links")}</h2>
-
-      <div className="flex justify-end">
-        <FilterSelect
-          filterKey="status"
-          placeholder={t("linksFilter.all")}
-          options={[
-            { value: "all", label: t("linksFilter.all") },
-            { value: "Ongoing", label: t("linksFilter.ongoing") },
-            { value: "Completed", label: t("linksFilter.completed") },
-            { value: "Canceled", label: t("linksFilter.canceled") },
-          ]}
-          className="w-full sm:w-52"
-        />
-      </div>
 
       {isPending ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-hidden>

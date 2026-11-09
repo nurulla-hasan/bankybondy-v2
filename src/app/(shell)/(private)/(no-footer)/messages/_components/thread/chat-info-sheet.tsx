@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FileText, Film, Images, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -23,18 +24,17 @@ import {
   useConversationMedia,
 } from "@/services/hooks/chat.hook";
 import type {
-  ConversationMediaItem,
   MediaKind,
   RawChatPerson,
   RawConversationListItem,
 } from "@/types";
 
+import { ImageLightbox } from "./image-lightbox";
+
 interface ChatInfoSheetProps {
   conversation: RawConversationListItem;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Tapping an attachment closes the sheet and reveals the message it came from. */
-  onOpenMedia: (item: ConversationMediaItem) => void;
 }
 
 const isGroup = (conversation: RawConversationListItem) =>
@@ -44,13 +44,29 @@ export function ChatInfoSheet({
   conversation,
   open,
   onOpenChange,
-  onOpenMedia,
 }: ChatInfoSheetProps) {
   const t = useTranslations("Messages");
   const groupId = conversation.chatGroup?._id ?? null;
   const media = useConversationMedia(conversation._id, open);
   const groupQuery = useChatGroup(open ? groupId : null);
   const group = groupQuery.data;
+  const [lightbox, setLightbox] = useState<{
+    urls: string[];
+    index: number;
+  } | null>(null);
+
+  // The sheet's focus trap fights a second dialog, so the preview takes over
+  // and the sheet comes back when the preview closes (v1 opened its preview
+  // over the media panel the same way).
+  const openLightbox = (urls: string[], index: number) => {
+    onOpenChange(false);
+    setLightbox({ urls, index });
+  };
+
+  const closeLightbox = () => {
+    setLightbox(null);
+    onOpenChange(true);
+  };
 
   const items = media.data?.items ?? [];
   const hasMore = Boolean(media.hasNextPage);
@@ -67,15 +83,16 @@ export function ChatInfoSheet({
       return <MediaEmpty label={t("mediaEmpty")} />;
     }
 
-    return (
-      <>
-        {kind === "pdf" ? (
+    if (kind === "pdf") {
+      return (
+        <>
           <ul className="flex flex-col gap-2">
             {filtered.map((item) => (
               <li key={`${item.messageId}-${item.url}`}>
-                <button
-                  type="button"
-                  onClick={() => onOpenMedia(item)}
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noreferrer"
                   className="flex w-full items-center gap-3 rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted"
                 >
                   <span className="grid size-9 shrink-0 place-items-center rounded-md bg-destructive/10 text-destructive">
@@ -84,107 +101,155 @@ export function ChatInfoSheet({
                   <span className="min-w-0 flex-1 truncate text-sm">
                     {fileName(item.url) ?? t("attachmentPdf", { count: 1 })}
                   </span>
-                </button>
+                </a>
               </li>
             ))}
           </ul>
-        ) : (
-          <ul className="grid grid-cols-3 gap-1">
-            {filtered.map((item) => (
+          <MediaLoadMore
+            visible={hasMore}
+            loading={loadingMore}
+            label={t("mediaLoadMore")}
+            onLoad={() => void media.fetchNextPage()}
+          />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <ul className="grid grid-cols-3 gap-1">
+          {filtered.map((item, index) =>
+            item.kind === "video" ? (
+              <li key={`${item.messageId}-${item.url}`}>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="relative block aspect-square w-full overflow-hidden rounded-md bg-muted outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  <span className="grid h-full w-full place-items-center">
+                    <Film className="size-5 text-muted-foreground" aria-hidden />
+                  </span>
+                </a>
+              </li>
+            ) : (
               <li key={`${item.messageId}-${item.url}`}>
                 <button
                   type="button"
-                  onClick={() => onOpenMedia(item)}
-                  className="relative block aspect-square w-full overflow-hidden rounded-md bg-muted cursor-zoom-in outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  onClick={() =>
+                    openLightbox(
+                      filtered.map((entry) => entry.url),
+                      index,
+                    )
+                  }
+                  className="relative block aspect-square w-full cursor-zoom-in overflow-hidden rounded-md bg-muted outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
-                  {item.kind === "video" ? (
-                    <span className="grid h-full w-full place-items-center">
-                      <Film className="size-5 text-muted-foreground" aria-hidden />
-                    </span>
-                  ) : (
-                    <Image
-                      src={item.url}
-                      alt=""
-                      width={160}
-                      height={160}
-                      unoptimized
-                      className="size-full object-cover"
-                    />
-                  )}
+                  <Image
+                    src={item.url}
+                    alt=""
+                    width={160}
+                    height={160}
+                    unoptimized
+                    className="size-full object-cover"
+                  />
                 </button>
               </li>
-            ))}
-          </ul>
-        )}
-
-        {hasMore ? (
-          <div className="flex justify-center pt-3">
-            <Button
-              variant="ghost"
-              size="default"
-              disabled={loadingMore}
-              onClick={() => void media.fetchNextPage()}
-            >
-              {t("mediaLoadMore")}
-            </Button>
-          </div>
-        ) : null}
+            ),
+          )}
+        </ul>
+        <MediaLoadMore
+          visible={hasMore}
+          loading={loadingMore}
+          label={t("mediaLoadMore")}
+          onLoad={() => void media.fetchNextPage()}
+        />
       </>
     );
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>{t("infoTitle")}</SheetTitle>
-          <SheetDescription className="sr-only">{t("infoTitle")}</SheetDescription>
-        </SheetHeader>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>{t("infoTitle")}</SheetTitle>
+            <SheetDescription className="sr-only">{t("infoTitle")}</SheetDescription>
+          </SheetHeader>
 
-        <ScrollArea className="min-h-0 flex-1 px-4 pb-4">
-          <MediaSection
-            label={t("mediaTabImages")}
-            itemCount={items.filter((item) => item.kind === "image").length}
-          >
-            {mediaTab("image")}
-          </MediaSection>
-          <MediaSection
-            label={t("mediaTabVideos")}
-            itemCount={items.filter((item) => item.kind === "video").length}
-          >
-            {mediaTab("video")}
-          </MediaSection>
-          <MediaSection
-            label={t("mediaTabFiles")}
-            itemCount={items.filter((item) => item.kind === "pdf").length}
-          >
-            {mediaTab("pdf")}
-          </MediaSection>
+          <ScrollArea className="min-h-0 flex-1 px-4 pb-4">
+            <MediaSection
+              label={t("mediaTabImages")}
+              itemCount={items.filter((item) => item.kind === "image").length}
+            >
+              {mediaTab("image")}
+            </MediaSection>
+            <MediaSection
+              label={t("mediaTabVideos")}
+              itemCount={items.filter((item) => item.kind === "video").length}
+            >
+              {mediaTab("video")}
+            </MediaSection>
+            <MediaSection
+              label={t("mediaTabFiles")}
+              itemCount={items.filter((item) => item.kind === "pdf").length}
+            >
+              {mediaTab("pdf")}
+            </MediaSection>
 
-          {isGroup(conversation) ? (
-            <section className="mt-4 rounded-xl border border-border p-3">
-              <header className="mb-2 flex items-center justify-between gap-2">
-                <h4 className="flex items-center gap-2 font-heading text-sm font-medium">
-                  <Users className="size-4 text-muted-foreground" aria-hidden />
-                  {t("membersTitle")}
-                </h4>
-                <span className="text-xs text-muted-foreground">
-                  {t("membersCountLabel", { count: membersCount(conversation, group?.participants) })}
-                </span>
-              </header>
+            {isGroup(conversation) ? (
+              <section className="mt-4 rounded-xl border border-border p-3">
+                <header className="mb-2 flex items-center justify-between gap-2">
+                  <h4 className="flex items-center gap-2 font-heading text-sm font-medium">
+                    <Users className="size-4 text-muted-foreground" aria-hidden />
+                    {t("membersTitle")}
+                  </h4>
+                  <span className="text-xs text-muted-foreground">
+                    {t("membersCountLabel", { count: membersCount(conversation, group?.participants) })}
+                  </span>
+                </header>
 
-              <MemberList
-                conversation={conversation}
-                participants={group?.participants}
-                creatorId={group?.creator?._id}
-                creatorName={group?.creator?.name}
-                loading={Boolean(groupId) && groupQuery.isPending}
-              />
-            </section>
-          ) : null}
-        </ScrollArea>
-      </SheetContent>
-    </Sheet>
+                <MemberList
+                  conversation={conversation}
+                  participants={group?.participants}
+                  creatorId={group?.creator?._id}
+                  creatorName={group?.creator?.name}
+                  loading={Boolean(groupId) && groupQuery.isPending}
+                />
+              </section>
+            ) : null}
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+
+      <ImageLightbox
+        images={lightbox?.urls ?? []}
+        index={lightbox?.index ?? null}
+        onClose={closeLightbox}
+        label={t("attachmentImage", { count: lightbox?.urls.length ?? 1 })}
+      />
+    </>
+  );
+}
+
+function MediaLoadMore({
+  visible,
+  loading,
+  label,
+  onLoad,
+}: {
+  visible: boolean;
+  loading: boolean;
+  label: string;
+  onLoad: () => void;
+}) {
+  if (!visible) return null;
+
+  return (
+    <div className="flex justify-center pt-3">
+      <Button variant="ghost" size="default" disabled={loading} onClick={onLoad}>
+        {label}
+      </Button>
+    </div>
   );
 }
 

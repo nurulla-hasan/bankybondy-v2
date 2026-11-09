@@ -10,7 +10,7 @@ import { useNextFilter } from "@/hooks/useNextFilter";
 import { useBondLinks, useBondMatches, useBondRequests } from "@/services";
 import type { RawBondRequest } from "@/types";
 
-import { LinksTab } from "./links-tab";
+import { LinksStatusFilter, LinksTab } from "./links-tab";
 import { MatchesTab } from "./matches-tab";
 import { RequestsTab } from "./requests-tab";
 
@@ -132,7 +132,10 @@ export function BondTabs() {
           ))}
         </TabsList>
 
-        <SearchInput />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+          <SearchInput />
+          {activeTab === "links" ? <LinksStatusFilter /> : null}
+        </div>
       </div>
 
       <RequestsTab

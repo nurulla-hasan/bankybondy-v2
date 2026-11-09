@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowDown, WifiOff } from "lucide-react";
+import { ArrowDown, Loader2, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { EmptyState } from "@/components/common/empty-state";
@@ -23,6 +23,9 @@ import { ThreadSkeleton } from "./thread-skeleton";
 
 /** How far from the bottom still counts as "reading the latest". */
 const BOTTOM_SLOP_PX = 80;
+
+/** Reaching this close to the top pulls the next (older) page automatically. */
+const TOP_LOAD_PX = 120;
 
 /** Consecutive messages further apart than this stop looking like one thought. */
 const GROUP_GAP_MS = 5 * 60_000;
@@ -160,6 +163,12 @@ export function MessageThread({
 
     if (stuck) setUnseen(0);
     if (stuck !== atBottomRef.current) pin(stuck);
+
+    // V1 walked backwards as soon as the reader hit the top; the button below
+    // stays as a discoverable fallback. TanStack dedupes a repeated page fetch.
+    if (hasOlder && !isLoadingOlder && viewport.scrollTop <= TOP_LOAD_PX) {
+      loadOlder();
+    }
   };
 
   const showJump = !atBottom || unseen > 0;
@@ -195,13 +204,22 @@ export function MessageThread({
             <>
               {hasOlder || isLoadingOlder ? (
                 <div className="flex justify-center pb-2">
-                  <Button
-                    variant="ghost"
-                    onClick={loadOlder}
-                    disabled={isLoadingOlder}
-                  >
-                    {isLoadingOlder ? t("loadingOlder") : t("loadOlder")}
-                  </Button>
+                  {isLoadingOlder ? (
+                    <span
+                      role="status"
+                      aria-label={t("loadingOlder")}
+                      className="grid size-9 place-items-center"
+                    >
+                      <Loader2
+                        className="size-4 animate-spin text-muted-foreground"
+                        aria-hidden
+                      />
+                    </span>
+                  ) : (
+                    <Button variant="ghost" onClick={loadOlder}>
+                      {t("loadOlder")}
+                    </Button>
+                  )}
                 </div>
               ) : null}
 

@@ -137,7 +137,6 @@ export function ThreadHeader({ conversation, onBack, onHide }: ThreadHeaderProps
         conversation={conversation}
         open={infoOpen}
         onOpenChange={setInfoOpen}
-        onOpenMedia={() => setInfoOpen(false)}
       />
     </header>
   );
