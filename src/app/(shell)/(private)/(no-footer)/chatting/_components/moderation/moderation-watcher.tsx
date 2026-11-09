@@ -8,8 +8,11 @@ import { errorToast, infoToast, successToast } from "@/lib/toast";
 import { useAudioModerationStatus } from "@/services/hooks/audio.hook";
 
 import {
+  markPendingAudioRetryNotified,
+  setPendingAudioStatus,
   untrackPendingAudio,
   usePendingAudio,
+  type PendingAudio,
 } from "../shared/moderation-tracker";
 
 /**
@@ -22,14 +25,15 @@ export function AudioModerationWatcher() {
   return (
     <>
       {pending.map((entry) => (
-        <AudioModerationWatch key={entry.id} audioId={entry.id} />
+        <AudioModerationWatch key={entry.id} entry={entry} />
       ))}
     </>
   );
 }
 
-function AudioModerationWatch({ audioId }: { audioId: string }) {
+function AudioModerationWatch({ entry }: { entry: PendingAudio }) {
   const t = useTranslations("Chatting");
+  const audioId = entry.id;
   const moderation = useAudioModerationStatus(audioId);
   const notifiedRef = useRef<string | null>(null);
 
@@ -37,7 +41,14 @@ function AudioModerationWatch({ audioId }: { audioId: string }) {
   const reason = moderation.data?.moderationReason;
 
   useEffect(() => {
-    if (!status || notifiedRef.current === status) return;
+    if (!status) return;
+
+    // Keep the feed banner honest: a technical `failed` is not "under review".
+    if (status !== "ready" && status !== "rejected") {
+      setPendingAudioStatus(audioId, status);
+    }
+
+    if (notifiedRef.current === status) return;
 
     if (status === "ready") {
       notifiedRef.current = status;
@@ -54,12 +65,19 @@ function AudioModerationWatch({ audioId }: { audioId: string }) {
     }
 
     if (status === "failed") {
-      // Technical failure: the sweep retries it. Inform once and keep the slow
-      // poll running; a later ready/rejected still surfaces the final result.
+      // Technical failure: the sweep retries it. Inform once per upload —
+      // the entry outlives the tab in localStorage, and every retry lands
+      // back on `failed`, so without the persisted flag this notice replayed
+      // on each reload and on every retry cycle.
+      if (entry.retryNotified) {
+        notifiedRef.current = status;
+        return;
+      }
       notifiedRef.current = status;
       infoToast(t("shareRetrying"), reason || t("shareRetryingDescription"));
+      markPendingAudioRetryNotified(audioId);
     }
-  }, [status, reason, audioId, t]);
+  }, [status, reason, audioId, t, entry.retryNotified]);
 
   // The upload was deleted (or belongs to another account): stop tracking it.
   useEffect(() => {

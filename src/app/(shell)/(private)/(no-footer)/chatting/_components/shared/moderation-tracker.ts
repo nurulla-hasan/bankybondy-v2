@@ -2,9 +2,18 @@
 
 import { useSyncExternalStore } from "react";
 
+import type { AudioModerationStatus } from "@/types";
+
 export interface PendingAudio {
   id: string;
   trackedAt: number;
+  /**
+   * The "will be retried" notice was already shown. Persisted so a reload or a
+   * route change doesn't replay it while the entry is still waiting.
+   */
+  retryNotified?: boolean;
+  /** Last moderation status seen by the watcher; drives the feed banner copy. */
+  status?: AudioModerationStatus;
 }
 
 const STORAGE_KEY = "bankybondy:chatting:pending-audio";
@@ -30,9 +39,22 @@ function parse(raw: string | null): PendingAudio[] {
       if (typeof item === "string") return [{ id: item, trackedAt: now }];
 
       if (item && typeof item === "object") {
-        const { id, trackedAt } = item as Record<string, unknown>;
+        const { id, trackedAt, retryNotified, status } = item as Record<
+          string,
+          unknown
+        >;
         if (typeof id === "string" && typeof trackedAt === "number") {
-          return [{ id, trackedAt }];
+          return [
+            {
+              id,
+              trackedAt,
+              retryNotified: retryNotified === true,
+              status:
+                typeof status === "string"
+                  ? (status as AudioModerationStatus)
+                  : undefined,
+            },
+          ];
         }
       }
 
@@ -117,4 +139,26 @@ export function untrackPendingAudio(id: string) {
   const current = load();
   if (!current.some((entry) => entry.id === id)) return;
   write(current.filter((entry) => entry.id !== id));
+}
+
+/** Marks the technical-failure notice as delivered for this upload. */
+export function markPendingAudioRetryNotified(id: string) {
+  const current = load();
+  if (!current.some((entry) => entry.id === id && !entry.retryNotified)) return;
+  write(
+    current.map((entry) =>
+      entry.id === id ? { ...entry, retryNotified: true } : entry,
+    ),
+  );
+}
+
+/** Records the last status the watcher observed so the banner can reflect it. */
+export function setPendingAudioStatus(
+  id: string,
+  status: AudioModerationStatus,
+) {
+  const current = load();
+  const entry = current.find((item) => item.id === id);
+  if (!entry || entry.status === status) return;
+  write(current.map((item) => (item.id === id ? { ...item, status } : item)));
 }

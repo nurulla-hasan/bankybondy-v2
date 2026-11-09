@@ -72,6 +72,10 @@ export function ShareConversationDialog({
     audio: boolean;
     cover: boolean;
   }>({ audio: false, cover: false });
+  const [uploadProgress, setUploadProgress] = useState<{
+    audio: number;
+    cover: number;
+  }>({ audio: 0, cover: 0 });
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const uploadAborts = useRef<
@@ -280,6 +284,7 @@ export function ShareConversationDialog({
     setCoverFile(null);
     setStaged({ audio_url: null, cover_image: null });
     setUploading({ audio: false, cover: false });
+    setUploadProgress({ audio: 0, cover: 0 });
     setRecordedDuration(null);
     setRecordingSeconds(0);
     recordingSecondsRef.current = 0;
@@ -327,6 +332,19 @@ export function ShareConversationDialog({
     else setCoverFile(file);
     setStaged((current) => ({ ...current, [field]: null }));
     setUploading((current) => ({ ...current, [kind]: true }));
+    setUploadProgress((current) => ({ ...current, [kind]: 10 }));
+
+    // Simulate smooth progress ramp up while uploading
+    const progressInterval = setInterval(() => {
+      if (epoch !== dialogEpochRef.current) return;
+      setUploadProgress((current) => {
+        const currentVal = current[kind];
+        if (currentVal >= 90) return current;
+        // increment by random small amount
+        const nextVal = currentVal + Math.floor(Math.random() * 15) + 5;
+        return { ...current, [kind]: Math.min(90, nextVal) };
+      });
+    }, 400);
 
     let timedOut = false;
     const timeout = setTimeout(() => {
@@ -346,6 +364,9 @@ export function ShareConversationDialog({
 
       if (!url) throw new Error("Missing uploaded URL");
 
+      clearInterval(progressInterval);
+      setUploadProgress((current) => ({ ...current, [kind]: 100 }));
+
       // The dialog moved on (closed or the file was replaced): the upload
       // landed but nothing owns it, so delete it server-side.
       if (epoch !== dialogEpochRef.current) {
@@ -355,6 +376,7 @@ export function ShareConversationDialog({
 
       setStaged((current) => ({ ...current, [field]: url }));
     } catch (error) {
+      clearInterval(progressInterval);
       // A superseded/aborted upload must not touch the newer attempt's state.
       if (
         epoch !== dialogEpochRef.current ||
@@ -364,6 +386,7 @@ export function ShareConversationDialog({
       }
       if (kind === "audio") setAudioFile(null);
       else setCoverFile(null);
+      setUploadProgress((current) => ({ ...current, [kind]: 0 }));
 
       if (timedOut) {
         errorToast(
@@ -388,6 +411,7 @@ export function ShareConversationDialog({
       }
     } finally {
       clearTimeout(timeout);
+      clearInterval(progressInterval);
       if (
         epoch === dialogEpochRef.current &&
         uploadAborts.current[kind] === controller
@@ -575,16 +599,22 @@ export function ShareConversationDialog({
                 <Upload className="size-5 text-muted-foreground" aria-hidden />
                 <span className="max-w-full truncate text-sm font-medium">
                   {uploading.audio
-                    ? t("shareUploading")
+                    ? `${t("shareUploading")} (${uploadProgress.audio}%)`
                     : (audioFile?.name ?? t("shareFormUploadHint"))}
                 </span>
                 {uploading.audio ? (
                   <span
-                    className="mt-1 block h-1 w-full overflow-hidden rounded-full bg-muted"
+                    className="mt-2 block h-2 w-full overflow-hidden rounded-full bg-muted"
                     role="progressbar"
                     aria-label={t("shareUploading")}
+                    aria-valuenow={uploadProgress.audio}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
                   >
-                    <span className="block h-full w-full animate-pulse rounded-full bg-primary" />
+                    <span
+                      className="block h-full bg-primary transition-all duration-300 ease-out rounded-full"
+                      style={{ width: `${uploadProgress.audio}%` }}
+                    />
                   </span>
                 ) : null}
               </button>
@@ -665,16 +695,22 @@ export function ShareConversationDialog({
                 <ImageIcon className="size-5 text-muted-foreground" aria-hidden />
                 <span className="max-w-full truncate text-sm font-medium">
                   {uploading.cover
-                    ? t("shareUploading")
+                    ? `${t("shareUploading")} (${uploadProgress.cover}%)`
                     : (coverFile?.name ?? t("shareFormCoverHint"))}
                 </span>
                 {uploading.cover ? (
                   <span
-                    className="mt-1 block h-1 w-full overflow-hidden rounded-full bg-muted"
+                    className="mt-2 block h-2 w-full overflow-hidden rounded-full bg-muted"
                     role="progressbar"
                     aria-label={t("shareUploading")}
+                    aria-valuenow={uploadProgress.cover}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
                   >
-                    <span className="block h-full w-full animate-pulse rounded-full bg-primary" />
+                    <span
+                      className="block h-full bg-primary transition-all duration-300 ease-out rounded-full"
+                      style={{ width: `${uploadProgress.cover}%` }}
+                    />
                   </span>
                 ) : null}
               </button>

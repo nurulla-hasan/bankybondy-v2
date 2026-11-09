@@ -7,6 +7,7 @@ import { errorToast } from "@/lib/toast";
 import { useRecordAudioListen } from "@/services/hooks/audio.hook";
 
 import type { FeedAudio } from "./audio-model";
+import { useAudioVolume } from "./use-audio-volume";
 
 export function useAudioPlayer() {
   const t = useTranslations("Chatting");
@@ -14,9 +15,17 @@ export function useAudioPlayer() {
   const [playing, setPlaying] = useState<FeedAudio | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [muted, setMuted] = useState(false);
+  // Keyed by track id so a previous track's real duration never leaks into the
+  // next one without needing a reset (setState is banned in the effect body).
+  const [loadedDuration, setLoadedDuration] = useState<{
+    id: string;
+    seconds: number;
+  } | null>(null);
+  const [buffering, setBuffering] = useState(false);
+  const { muted, setVolume, toggleMute, volume } = useAudioVolume();
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const mutedRef = useRef(false);
+  const volumeRef = useRef(volume);
+  const mutedRef = useRef(muted);
   const recordedRef = useRef<Set<string>>(new Set());
   const recordListen = useRecordAudioListen();
   const recordListenRef = useRef(recordListen);
@@ -25,10 +34,16 @@ export function useAudioPlayer() {
     tRef.current = t;
   }, [t]);
 
+  // Volume changes apply to the live element; refs let a newly created element
+  // (one per track) start with the current level instead of resetting to 100%.
   useEffect(() => {
+    volumeRef.current = volume;
     mutedRef.current = muted;
-    if (audioRef.current) audioRef.current.muted = muted;
-  }, [muted]);
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      audioRef.current.muted = muted;
+    }
+  }, [muted, volume]);
 
   useEffect(() => {
     recordListenRef.current = recordListen;
@@ -43,7 +58,14 @@ export function useAudioPlayer() {
 
     const audio = new Audio(playing.audioUrl);
     audio.muted = mutedRef.current;
+    audio.volume = volumeRef.current;
     audioRef.current = audio;
+
+    const handleMetadata = () => {
+      if (Number.isFinite(audio.duration) && audio.duration > 0) {
+        setLoadedDuration({ id: playing.id, seconds: audio.duration });
+      }
+    };
 
     const handleTimeUpdate = () => {
       setElapsed(audio.currentTime);
@@ -65,29 +87,45 @@ export function useAudioPlayer() {
 
     const handleEnded = () => {
       setIsPlaying(false);
+      setBuffering(false);
       setElapsed(audio.duration || playing.durationSec);
     };
 
     const handleError = () => {
       setIsPlaying(false);
+      setBuffering(false);
       errorToast(
         tRef.current("playFailed"),
         tRef.current("playFailedDescription"),
       );
     };
 
+    const handleBuffering = () => setBuffering(true);
+    const handlePlaying = () => setBuffering(false);
+
+    audio.addEventListener("loadedmetadata", handleMetadata);
+    audio.addEventListener("durationchange", handleMetadata);
     audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("waiting", handleBuffering);
+    audio.addEventListener("playing", handlePlaying);
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("error", handleError);
 
     void audio.play().then(
-      () => setIsPlaying(true),
+      () => {
+        setIsPlaying(true);
+        setBuffering(false);
+      },
       () => handleError(),
     );
 
     return () => {
       audio.pause();
+      audio.removeEventListener("loadedmetadata", handleMetadata);
+      audio.removeEventListener("durationchange", handleMetadata);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("waiting", handleBuffering);
+      audio.removeEventListener("playing", handlePlaying);
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("error", handleError);
       audio.src = "";
@@ -106,46 +144,75 @@ export function useAudioPlayer() {
 
       if (audio.paused) {
         setIsPlaying(true);
-        void audio.play().catch(() => setIsPlaying(false));
+        setBuffering(true);
+        void audio.play().catch(() => {
+          setIsPlaying(false);
+          setBuffering(false);
+        });
         return;
       }
 
       audio.pause();
       setIsPlaying(false);
+      setBuffering(false);
       return;
     }
 
     setElapsed(0);
+    setLoadedDuration(null);
     setPlaying(conversation);
     setIsPlaying(true);
+    setBuffering(true);
+  };
+
+  const seekTo = (seconds: number) => {
+    const audio = audioRef.current;
+    if (!audio || !playing) return;
+
+    const total =
+      loadedDuration?.id === playing.id
+        ? loadedDuration.seconds
+        : Number.isFinite(audio.duration)
+          ? audio.duration
+          : playing.durationSec;
+    const next = Math.min(Math.max(0, seconds), total || 0);
+    audio.currentTime = next;
+    setElapsed(next);
   };
 
   const seekBy = (delta: number) => {
     const audio = audioRef.current;
-    if (!audio || !playing) return;
+    if (!audio) return;
 
-    const duration = Number.isFinite(audio.duration)
-      ? audio.duration
-      : playing.durationSec;
-    const next = Math.min(Math.max(0, audio.currentTime + delta), duration);
-    audio.currentTime = next;
-    setElapsed(next);
+    seekTo(audio.currentTime + delta);
   };
 
   const closePlayer = () => {
     setPlaying(null);
     setIsPlaying(false);
+    setBuffering(false);
     setElapsed(0);
+    setLoadedDuration(null);
   };
 
+  const totalDuration =
+    loadedDuration && loadedDuration.id === playing?.id
+      ? loadedDuration.seconds
+      : (playing?.durationSec ?? 0);
+
   return {
+    buffering,
     closePlayer,
+    durationSec: totalDuration,
     elapsed,
     isPlaying,
     muted,
     playing,
     seekBy,
-    setMuted,
+    seekTo,
+    setVolume,
+    toggleMute,
     togglePlayback,
+    volume,
   };
 }

@@ -307,6 +307,18 @@ export function useMyAudios(params: AudioListQueryParams) {
     select: (response) => response.data,
     placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
+    // Background moderation never notifies the list, so without this the cards
+    // kept showing "Under review"/"Retrying" after the worker resolved them.
+    refetchInterval: (query) => {
+      const rows = query.state.data?.data.result ?? [];
+      if (rows.some((row) => row.moderationStatus === "processing")) {
+        return MODERATION_POLL_MS;
+      }
+      if (rows.some((row) => row.moderationStatus === "failed")) {
+        return MODERATION_RETRY_POLL_MS;
+      }
+      return false;
+    },
   });
 }
 
@@ -430,6 +442,8 @@ export function useAudioModerationStatus(audioId: string | null) {
   useEffect(() => {
     if (status !== "ready" && status !== "rejected") return;
     void queryClient.invalidateQueries({ queryKey: audioKeys.lists() });
+    // Topic chips count only published audios, so an approval changes them.
+    void queryClient.invalidateQueries({ queryKey: audioKeys.topics() });
     void queryClient.invalidateQueries({
       queryKey: [...audioKeys.all, "my-audios"],
     });

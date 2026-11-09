@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AudioLines,
   Headphones,
@@ -25,6 +26,7 @@ import CustomPagination from "@/components/common/custom-pagination";
 import { getErrorMessage } from "@/lib/error";
 import { errorToast, successToast } from "@/lib/toast";
 import {
+  audioKeys,
   useAudioTopics,
   useDeleteAudio,
   useMyAudios,
@@ -47,6 +49,7 @@ interface MyContentProps {
 
 export function MyContent({ embedded = false }: MyContentProps) {
   const t = useTranslations("Chatting");
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const topicsQuery = useAudioTopics();
   const topics = useMemo(() => topicsQuery.data ?? [], [topicsQuery.data]);
@@ -62,8 +65,36 @@ export function MyContent({ embedded = false }: MyContentProps) {
   const [editTarget, setEditTarget] = useState<RawMyAudio | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RawMyAudio | null>(null);
 
-  const items = query.data?.result ?? [];
+  const items = useMemo(() => query.data?.result ?? [], [query.data]);
   const meta = query.data?.meta;
+
+  // The list polls itself while moderation is pending (see `useMyAudios`).
+  // When a row flips to a final state, refresh the feed and the topic chips so
+  // they reflect the new conversation without a manual reload.
+  const statusesRef = useRef<Map<string, AudioModerationStatus>>(new Map());
+
+  useEffect(() => {
+    let resolved = false;
+
+    for (const audio of items) {
+      const previous = statusesRef.current.get(audio._id);
+      statusesRef.current.set(audio._id, audio.moderationStatus);
+
+      if (
+        previous &&
+        previous !== audio.moderationStatus &&
+        (audio.moderationStatus === "ready" ||
+          audio.moderationStatus === "rejected")
+      ) {
+        resolved = true;
+      }
+    }
+
+    if (!resolved) return;
+
+    void queryClient.invalidateQueries({ queryKey: audioKeys.topics() });
+    void queryClient.invalidateQueries({ queryKey: audioKeys.lists() });
+  }, [items, queryClient]);
 
   const handleShare = async (audio: RawMyAudio) => {
     try {
@@ -148,8 +179,9 @@ export function MyContent({ embedded = false }: MyContentProps) {
             const isProcessing = audio.moderationStatus === "processing";
             const isFailed = audio.moderationStatus === "failed";
             const showReason =
-              (audio.moderationStatus === "rejected" || isFailed) &&
-              Boolean(audio.moderationReason);
+              isFailed ||
+              (audio.moderationStatus === "rejected" &&
+                Boolean(audio.moderationReason));
 
             return (
               <article
@@ -211,7 +243,11 @@ export function MyContent({ embedded = false }: MyContentProps) {
 
                   {showReason ? (
                     <p className="line-clamp-2 text-xs text-muted-foreground">
-                      {audio.moderationReason}
+                      {/* The backend reason for a technical failure is a fixed
+                          English string; show the localized copy instead. */}
+                      {isFailed
+                        ? t("shareRetryingDescription")
+                        : audio.moderationReason}
                     </p>
                   ) : null}
 

@@ -17,8 +17,6 @@ import {
   SkipBack,
   SkipForward,
   Star,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -42,7 +40,10 @@ import {
 } from "@/services/hooks/audio.hook";
 import { useMyProfileId } from "@/services/hooks/profile.hook";
 
+import { AudioSlider } from "../shared/audio-slider";
 import { compactNumber, formatClock } from "../shared/format";
+import { useAudioVolume } from "../shared/use-audio-volume";
+import { VolumeControl } from "../shared/volume-control";
 import { Waveform } from "../shared/waveform";
 import { CommentsSection } from "./comments-section";
 import { FeedbackPanel } from "./feedback-panel";
@@ -76,14 +77,30 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
   const recordedRef = useRef(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [muted, setMuted] = useState(false);
+  // Keyed by URL so a stale metadata read never wins after the audio changes.
+  const [loadedDuration, setLoadedDuration] = useState<{
+    url: string;
+    seconds: number;
+  } | null>(null);
+  const { muted, setVolume, toggleMute, volume } = useAudioVolume();
+  const volumeRef = useRef(volume);
+  const mutedRef = useRef(muted);
 
   useEffect(() => {
     if (!audio?.audio_url) return;
 
     const element = new Audio(audio.audio_url);
     element.preload = "metadata";
+    element.volume = volumeRef.current;
+    element.muted = mutedRef.current;
     audioRef.current = element;
+    recordedRef.current = false;
+
+    const handleMetadata = () => {
+      if (Number.isFinite(element.duration) && element.duration > 0) {
+        setLoadedDuration({ url: audio.audio_url, seconds: element.duration });
+      }
+    };
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
@@ -122,6 +139,8 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
       );
     };
 
+    element.addEventListener("loadedmetadata", handleMetadata);
+    element.addEventListener("durationchange", handleMetadata);
     element.addEventListener("play", handlePlay);
     element.addEventListener("pause", handlePause);
     element.addEventListener("timeupdate", handleTimeUpdate);
@@ -130,6 +149,8 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
 
     return () => {
       element.pause();
+      element.removeEventListener("loadedmetadata", handleMetadata);
+      element.removeEventListener("durationchange", handleMetadata);
       element.removeEventListener("play", handlePlay);
       element.removeEventListener("pause", handlePause);
       element.removeEventListener("timeupdate", handleTimeUpdate);
@@ -143,8 +164,13 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
   }, [audio?.audio_url, audio?._id]);
 
   useEffect(() => {
-    if (audioRef.current) audioRef.current.muted = muted;
-  }, [muted]);
+    volumeRef.current = volume;
+    mutedRef.current = muted;
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      audioRef.current.muted = muted;
+    }
+  }, [muted, volume]);
 
   const togglePlayback = () => {
     const element = audioRef.current;
@@ -162,16 +188,26 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
     element.pause();
   };
 
-  const seekBy = (delta: number) => {
+  const seekTo = (seconds: number) => {
     const element = audioRef.current;
-    if (!element || !audio) return;
+    if (!element) return;
 
-    const duration = Number.isFinite(element.duration)
-      ? element.duration
-      : audio.duration;
-    const next = Math.min(Math.max(0, element.currentTime + delta), duration);
+    const total =
+      loadedDuration && loadedDuration.url === audio?.audio_url
+        ? loadedDuration.seconds
+        : Number.isFinite(element.duration)
+          ? element.duration
+          : (audio?.duration ?? 0);
+    const next = Math.min(Math.max(0, seconds), total);
     element.currentTime = next;
     setElapsed(next);
+  };
+
+  const seekBy = (delta: number) => {
+    const element = audioRef.current;
+    if (!element) return;
+
+    seekTo(element.currentTime + delta);
   };
 
   const handleShare = async () => {
@@ -223,8 +259,12 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
     );
   }
 
-  const progress = audio.duration
-    ? Math.min(100, (elapsed / audio.duration) * 100)
+  const totalDuration =
+    loadedDuration && loadedDuration.url === audio.audio_url
+      ? loadedDuration.seconds
+      : audio.duration || 0;
+  const progress = totalDuration
+    ? Math.min(100, (elapsed / totalDuration) * 100)
     : 0;
   const isSaved = savedQuery.data?.has(audio._id) ?? false;
 
@@ -385,7 +425,7 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
                       ? t("detailStatusFailedDescription")
                       : t("detailStatusProcessingDescription")}
                 </p>
-                {isOwner ? (
+                {isOwner && audio.moderationStatus === "ready" ? (
                   <Button
                     variant="outline"
                     render={<Link href="/chatting/my-content" />}
@@ -398,6 +438,14 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
           ) : (
             <div className="space-y-4 rounded-2xl border border-border bg-background/60 p-4">
               <Waveform bars={64} progress={progress} className="h-14" />
+
+              <AudioSlider
+                value={elapsed}
+                max={totalDuration}
+                onValueChange={seekTo}
+                ariaLabel={t("playerSeek")}
+                valueText={`${formatClock(elapsed)} / ${formatClock(totalDuration)}`}
+              />
 
               <div className="flex flex-wrap items-center gap-3">
                 <Button
@@ -424,22 +472,21 @@ export function ConversationDetail({ audioId }: ConversationDetailProps) {
                 >
                   <SkipForward aria-hidden />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-pressed={muted}
-                  aria-label={
-                    muted ? t("playerUnmute") : t("playerMute")
-                  }
-                  onClick={() => setMuted((value) => !value)}
-                >
-                  {muted ? <VolumeX aria-hidden /> : <Volume2 aria-hidden />}
-                </Button>
+
+                <VolumeControl
+                  volume={volume}
+                  muted={muted}
+                  onToggleMute={toggleMute}
+                  onVolumeChange={setVolume}
+                  ariaLabel={t("playerVolume")}
+                  muteLabel={t("playerMute")}
+                  unmuteLabel={t("playerUnmute")}
+                />
 
                 <span className="ml-auto text-sm tabular-nums text-muted-foreground">
                   {formatClock(elapsed)}
                   <span aria-hidden> / </span>
-                  {formatClock(audio.duration)}
+                  {formatClock(totalDuration)}
                 </span>
               </div>
             </div>

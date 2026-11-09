@@ -261,3 +261,61 @@
   animation-play-state: paused;
 }
 
+
+/* Audio seek/volume sliders: native input[type=range] so dragging, touch and
+ * keyboard arrows work without extra JS. `--range-progress` is set inline by
+ * the component from its current value (layout value, not a color). */
+.audio-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--primary) 0%,
+    var(--primary) var(--range-progress, 0%),
+    var(--muted) var(--range-progress, 0%),
+    var(--muted) 100%
+  );
+  cursor: pointer;
+  outline: none;
+}
+
+.audio-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.audio-range:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+
+.audio-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  width: 14px;
+  border-radius: 999px;
+  background: var(--primary);
+  border: 2px solid var(--background);
+  box-shadow: 0 1px 3px color-mix(in oklch, var(--foreground), transparent 70%);
+  transition: transform 0.15s ease;
+}
+
+.audio-range:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+.audio-range::-moz-range-thumb {
+  height: 14px;
+  width: 14px;
+  border-radius: 999px;
+  background: var(--primary);
+  border: 2px solid var(--background);
+  box-shadow: 0 1px 3px color-mix(in oklch, var(--foreground), transparent 70%);
+}
+
+.audio-range::-moz-range-track {
+  background: transparent;
+}

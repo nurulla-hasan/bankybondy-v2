@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     agentFeedback: true,
+    // The /api/v1 rewrite proxies multipart uploads through Next, which buffers
+    // the body with a 10MB default cap: bigger files failed inside Next with a
+    // plain 500 before ever reaching the API. Headroom above the 50MB app limit
+    // (multer enforces the real one and answers with a clean 413).
+    proxyClientMaxBodySize: "100mb",
   },
   async rewrites() {
     return [

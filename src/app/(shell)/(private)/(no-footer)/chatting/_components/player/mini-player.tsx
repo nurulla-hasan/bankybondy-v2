@@ -2,12 +2,11 @@
 
 import Image from "next/image";
 import {
+  Loader2,
   Pause,
   Play,
   SkipBack,
   SkipForward,
-  Volume2,
-  VolumeX,
   X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -17,35 +16,50 @@ import { CONTAINER_GUTTER } from "@/lib/layout";
 import { cn } from "@/lib/utils";
 
 import type { FeedAudio } from "../shared/audio-model";
+import { AudioSlider } from "../shared/audio-slider";
 import { formatClock } from "../shared/format";
+import { VolumeControl } from "../shared/volume-control";
 
 interface MiniPlayerProps {
   conversation: FeedAudio;
   isPlaying: boolean;
+  buffering: boolean;
   elapsedSec: number;
+  durationSec: number;
+  volume: number;
   muted: boolean;
   onToggle: () => void;
+  onSeek: (seconds: number) => void;
   onBack: () => void;
   onForward: () => void;
   onToggleMute: () => void;
+  onVolumeChange: (volume: number) => void;
   onClose: () => void;
 }
 
 export function MiniPlayer({
   conversation,
   isPlaying,
+  buffering,
   elapsedSec,
+  durationSec,
+  volume,
   muted,
   onToggle,
+  onSeek,
   onBack,
   onForward,
   onToggleMute,
+  onVolumeChange,
   onClose,
 }: MiniPlayerProps) {
   const t = useTranslations("Chatting");
-  const progress = conversation.durationSec
-    ? Math.min(100, (elapsedSec / conversation.durationSec) * 100)
-    : 0;
+  const seekValueText = `${formatClock(elapsedSec)} / ${formatClock(durationSec)}`;
+  const playLabel = buffering
+    ? t("playerBuffering")
+    : isPlaying
+      ? t("playerPause")
+      : t("playerPlay");
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur">
@@ -83,12 +97,14 @@ export function MiniPlayer({
           </p>
 
           <div className="mt-1.5 flex items-center gap-2 md:hidden">
-            <div className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-[width] duration-1000 ease-linear"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+            <AudioSlider
+              value={elapsedSec}
+              max={durationSec}
+              onValueChange={onSeek}
+              ariaLabel={t("playerSeek")}
+              valueText={seekValueText}
+              className="flex-1"
+            />
             <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
               {formatClock(elapsedSec)}
             </span>
@@ -99,18 +115,30 @@ export function MiniPlayer({
           <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
             {formatClock(elapsedSec)}
           </span>
-          <div className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary transition-[width] duration-1000 ease-linear"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          <AudioSlider
+            value={elapsedSec}
+            max={durationSec}
+            onValueChange={onSeek}
+            ariaLabel={t("playerSeek")}
+            valueText={seekValueText}
+            className="flex-1"
+          />
           <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-            {formatClock(conversation.durationSec)}
+            {formatClock(durationSec)}
           </span>
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          <VolumeControl
+            volume={volume}
+            muted={muted}
+            onToggleMute={onToggleMute}
+            onVolumeChange={onVolumeChange}
+            ariaLabel={t("playerVolume")}
+            muteLabel={t("playerMute")}
+            unmuteLabel={t("playerUnmute")}
+          />
+
           <Button
             variant="ghost"
             size="icon"
@@ -123,10 +151,16 @@ export function MiniPlayer({
 
           <Button
             size="icon"
-            aria-label={isPlaying ? t("playerPause") : t("playerPlay")}
+            aria-label={playLabel}
             onClick={onToggle}
           >
-            {isPlaying ? <Pause aria-hidden /> : <Play aria-hidden />}
+            {buffering ? (
+              <Loader2 className="animate-spin" aria-hidden />
+            ) : isPlaying ? (
+              <Pause aria-hidden />
+            ) : (
+              <Play aria-hidden />
+            )}
           </Button>
 
           <Button
@@ -137,17 +171,6 @@ export function MiniPlayer({
             onClick={onForward}
           >
             <SkipForward aria-hidden />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden sm:inline-flex"
-            aria-pressed={muted}
-            aria-label={t("playerMute")}
-            onClick={onToggleMute}
-          >
-            {muted ? <VolumeX aria-hidden /> : <Volume2 aria-hidden />}
           </Button>
 
           <Button

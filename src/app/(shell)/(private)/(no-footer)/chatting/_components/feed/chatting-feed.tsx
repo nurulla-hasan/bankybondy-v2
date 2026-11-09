@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Headphones, Loader2 } from "lucide-react";
+import { Headphones, Loader2, RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { EmptyState } from "@/components/common/empty-state";
@@ -79,6 +79,12 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
   const section = isChattingSection(sectionValue) ? sectionValue : "recent";
   const topicId = getFilter("topic") || null;
   const pendingAudio = usePendingAudio();
+  const pendingFailed = pendingAudio.filter(
+    (entry) => entry.status === "failed",
+  );
+  const pendingProcessing = pendingAudio.filter(
+    (entry) => entry.status !== "failed",
+  );
   const listAnchorRef = useRef<HTMLDivElement | null>(null);
 
   // Old shared links point at the feed with `?c=<id>`; send them to the
@@ -129,14 +135,19 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
   const hasMore = feedQuery.hasNextPage;
 
   const {
+    buffering,
     closePlayer,
+    durationSec,
     elapsed,
     isPlaying,
     muted,
     playing,
     seekBy,
-    setMuted,
+    seekTo,
+    setVolume,
+    toggleMute,
     togglePlayback,
+    volume,
   } = useAudioPlayer();
 
   const handleSelectTopic = (nextTopicId: string | null) => {
@@ -146,7 +157,7 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
 
   const handleSectionChange = (nextSection: FeedSection) => {
     if (conversationId) {
-      router.push("/chatting");
+      router.push(`/chatting?section=${nextSection}`);
       return;
     }
 
@@ -251,7 +262,7 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
             </p>
           </div>
 
-          {pendingAudio.length ? (
+          {pendingProcessing.length ? (
             <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
               <Loader2
                 className="mt-0.5 size-4 shrink-0 animate-spin text-muted-foreground"
@@ -259,10 +270,27 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
               />
               <div className="min-w-0">
                 <p className="text-sm font-medium">
-                  {t("pendingReview", { count: pendingAudio.length })}
+                  {t("pendingReview", { count: pendingProcessing.length })}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {t("pendingReviewDescription")}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          {pendingFailed.length ? (
+            <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
+              <RefreshCw
+                className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                aria-hidden
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-medium">
+                  {t("pendingFailed", { count: pendingFailed.length })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t("pendingFailedDescription")}
                 </p>
               </div>
             </div>
@@ -358,12 +386,17 @@ export function ChattingFeed({ conversationId }: ChattingFeedProps) {
         <MiniPlayer
           conversation={playing}
           isPlaying={isPlaying}
+          buffering={buffering}
           elapsedSec={elapsed}
+          durationSec={durationSec}
+          volume={volume}
           muted={muted}
           onToggle={() => togglePlayback(playing)}
+          onSeek={seekTo}
           onBack={() => seekBy(-15)}
           onForward={() => seekBy(15)}
-          onToggleMute={() => setMuted((value) => !value)}
+          onToggleMute={toggleMute}
+          onVolumeChange={setVolume}
           onClose={closePlayer}
         />
       ) : null}

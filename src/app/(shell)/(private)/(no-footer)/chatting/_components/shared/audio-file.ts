@@ -26,8 +26,12 @@ const IMAGE_MIME_TYPES = new Set([
 
 export function isAcceptedAudioFile(file: File): boolean {
   if (file.size > MAX_UPLOAD_BYTES) return false;
-  // Some browsers report an empty MIME type for .m4a; the server still checks.
-  return !file.type || AUDIO_MIME_TYPES.has(file.type);
+  // Browser MediaRecorder can output various audio types (webm, ogg, mp4, etc.)
+  return (
+    !file.type ||
+    AUDIO_MIME_TYPES.has(file.type) ||
+    file.type.startsWith("audio/")
+  );
 }
 
 export function isAcceptedImageFile(file: File): boolean {
