@@ -2,6 +2,7 @@
 
 import { ClipboardList, Link2, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 
 import { SearchInput } from "@/components/common/search-input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +16,7 @@ import { RequestsTab } from "./requests-tab";
 
 export type BondTab = "requests" | "matches" | "links";
 
-type BondFilterKey = "tab" | "request" | "searchTerm" | "page";
+type BondFilterKey = "tab" | "request" | "match" | "searchTerm" | "page";
 
 const BOND_TABS: readonly BondTab[] = ["requests", "matches", "links"];
 const DEFAULT_TAB: BondTab = "requests";
@@ -28,9 +29,34 @@ export function BondTabs() {
   const tabValue = getFilter("tab", DEFAULT_TAB) as BondTab;
   const activeTab = BOND_TABS.includes(tabValue) ? tabValue : DEFAULT_TAB;
   const requestFilterId = getFilter("request") || null;
+  const matchAlias = getFilter("match");
   const searchTerm = getFilter("searchTerm");
   const pageParam = Number(getFilter("page", "1"));
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+  const matchesRef = useRef<HTMLDivElement>(null);
+
+  // V1 links/emails used `?match=<bondId>`; map them to the v2 match view once.
+  useEffect(() => {
+    if (!matchAlias) return;
+
+    updateBatch(
+      { tab: "matches", request: matchAlias, match: null },
+      { method: "replace" },
+    );
+  }, [matchAlias, updateBatch]);
+
+  useEffect(() => {
+    if (activeTab !== "matches" || !requestFilterId) return;
+
+    const frame = requestAnimationFrame(() => {
+      matchesRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [activeTab, requestFilterId]);
 
   const { data: requests } = useBondRequests({ searchTerm, page });
   // Solo pedir matches cuando la pestaña está visible. Antes se traía el set
@@ -115,12 +141,14 @@ export function BondTabs() {
         page={page}
         onPageChange={handlePageChange}
       />
-      <MatchesTab
-        requestFilterId={requestFilterId}
-        onClearFilter={() => updateFilter("request", null)}
-        onBrowseRequests={() => updateFilter("tab", null)}
-        searchTerm={searchTerm}
-      />
+      <div ref={matchesRef} id="bond-matches" className="scroll-mt-24">
+        <MatchesTab
+          requestFilterId={requestFilterId}
+          onClearFilter={() => updateFilter("request", null)}
+          onBrowseRequests={() => updateFilter("tab", null)}
+          searchTerm={searchTerm}
+        />
+      </div>
       <LinksTab
         searchTerm={searchTerm}
         page={page}

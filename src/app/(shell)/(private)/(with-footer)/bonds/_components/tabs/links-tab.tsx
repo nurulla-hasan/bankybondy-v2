@@ -5,9 +5,11 @@ import { useTranslations } from "next-intl";
 
 import CustomPagination from "@/components/common/custom-pagination";
 import { EmptyState } from "@/components/common/empty-state";
+import { FilterSelect } from "@/components/common/filter-select";
 import { TabsContent } from "@/components/ui/tabs";
+import { useNextFilter } from "@/hooks/useNextFilter";
 import { useBondLinks } from "@/services";
-import { cn } from "@/lib/utils";
+import type { RawBondLinkStatus } from "@/types";
 
 import { BondLinkCard } from "../cards/bond-link-card";
 import { BondLinkCardSkeleton } from "../cards/bond-link-card-skeleton";
@@ -20,9 +22,18 @@ interface LinksTabProps {
 
 export function LinksTab({ searchTerm, page, onPageChange }: LinksTabProps) {
   const t = useTranslations("Bonds");
+  const { getFilter } = useNextFilter<"status">();
+  const statusParam = getFilter("status");
+  const status = (
+    ["Ongoing", "Completed", "Canceled"] as const
+  ).includes(statusParam as RawBondLinkStatus)
+    ? (statusParam as RawBondLinkStatus)
+    : undefined;
+
   const { data, isPending, isError, isFetching } = useBondLinks({
     searchTerm,
     page,
+    status,
   });
 
   const links = data?.result ?? [];
@@ -31,6 +42,20 @@ export function LinksTab({ searchTerm, page, onPageChange }: LinksTabProps) {
   return (
     <TabsContent value="links" className="space-y-4">
       <h2 className="sr-only">{t("tabs.links")}</h2>
+
+      <div className="flex justify-end">
+        <FilterSelect
+          filterKey="status"
+          placeholder={t("linksFilter.all")}
+          options={[
+            { value: "all", label: t("linksFilter.all") },
+            { value: "Ongoing", label: t("linksFilter.ongoing") },
+            { value: "Completed", label: t("linksFilter.completed") },
+            { value: "Canceled", label: t("linksFilter.canceled") },
+          ]}
+          className="w-full sm:w-52"
+        />
+      </div>
 
       {isPending ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-hidden>
@@ -46,10 +71,7 @@ export function LinksTab({ searchTerm, page, onPageChange }: LinksTabProps) {
         />
       ) : links.length ? (
         <div
-          className={cn(
-            "grid gap-4 md:grid-cols-2 xl:grid-cols-3",
-            isFetching && "opacity-60 transition-opacity",
-          )}
+          className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
           aria-busy={isFetching}
         >
           {links.map((link) => (

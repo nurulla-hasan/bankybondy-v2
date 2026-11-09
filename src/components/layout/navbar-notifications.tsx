@@ -178,12 +178,15 @@ function routeFor(item: NotificationItem): string | null {
   switch (item.type as NotificationType) {
     case "MATCH":
       // redirectId is the bond request whose matches changed
-      // (matching.notify.ts:116-117); the links tab opens by request id.
+      // (matching.notify.ts:116-117); the matches tab opens by request id.
       return item.redirectId
         ? `/bonds?tab=matches&request=${item.redirectId}`
         : "/bonds?tab=matches";
     case "GENERAL":
-      return "/bonds";
+      // Legacy match notifications used GENERAL with a bond request id.
+      return item.redirectId
+        ? `/bonds?tab=matches&request=${item.redirectId}`
+        : "/bonds";
     case "TRADE_PROPOSED":
     case "TRADE_COMPLETED":
     case "GIFT_RECEIVED":
@@ -191,8 +194,8 @@ function routeFor(item: NotificationItem): string | null {
     case "DOUBLE_SURPRISE":
     case "ENCOUNTER":
     case "TRADE_REMINDER":
-      // Chat isn't built yet; the links tab is where these trades live.
-      return "/bonds?tab=links";
+      // Trades live in the conversation, like v1's `/message` route.
+      return "/messages";
     case "SUBSCRIPTION":
       return "/subscriptions";
     case "REVIEW":
@@ -496,8 +499,15 @@ export function NavbarNotifications({ className }: NavbarNotificationsProps) {
                               {item.message}
                             </span>
                           )}
-                          <span className="text-muted-foreground/80 mt-1 block text-xs">
+                          <span className="text-muted-foreground/80 mt-1 flex items-center gap-1.5 text-xs">
                             {relativeTime(item.createdAt, locale)}
+                            {!item.seen ? (
+                              <span
+                                role="img"
+                                aria-label={t("unread")}
+                                className="bg-primary size-1.5 rounded-full"
+                              />
+                            ) : null}
                           </span>
                         </span>
                       </button>

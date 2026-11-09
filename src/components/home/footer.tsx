@@ -81,7 +81,7 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
           {/* Brand */}
           <div className="space-y-5 lg:col-span-5">
-            <Logo size="lg" />
+            <Logo size="lg" showText />
 
             <p className="max-w-sm text-sm leading-6 text-muted-foreground">
               {t("description")}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldBan, UserPlus } from "lucide-react";
+import { Handshake, ShieldBan, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -9,17 +9,34 @@ import { ConfirmationModal } from "@/components/common/confirmation-modal";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/lib/error";
 import { errorToast, successToast } from "@/lib/toast";
-import { useBlockUser, useSendFriendRequest } from "@/services";
-import type { RawPersonProfile } from "@/types";
+import {
+  useBlockUser,
+  useCreateBondRequest,
+  useSendFriendRequest,
+} from "@/services";
+import type { RawPersonProfile, RawPublicBond } from "@/types";
 
 import { ReportUserDialog } from "./report-user-dialog";
 
-export function ProfileActions({ profile }: { profile: RawPersonProfile }) {
+interface ProfileActionsProps {
+  profile: RawPersonProfile;
+  selectedBond: RawPublicBond | null;
+  onProposed?: () => void;
+}
+
+export function ProfileActions({
+  profile,
+  selectedBond,
+  onProposed,
+}: ProfileActionsProps) {
   const t = useTranslations("People");
   const router = useRouter();
   const sendRequest = useSendFriendRequest();
   const block = useBlockUser();
+  const createRequest = useCreateBondRequest();
   const [blockOpen, setBlockOpen] = useState(false);
+
+  const canPropose = selectedBond?.status === "WAITING_FOR_LINK";
 
   const handleConnect = () => {
     sendRequest.mutate(
@@ -32,6 +49,46 @@ export function ProfileActions({ profile }: { profile: RawPersonProfile }) {
           ),
         onError: (error) =>
           errorToast(t("actions.connectErrorTitle"), getErrorMessage(error)),
+      },
+    );
+  };
+
+  const handlePropose = () => {
+    if (!selectedBond || !canPropose) return;
+
+    const modality =
+      selectedBond.modality?.toLowerCase() === "online" ? "online" : "physical";
+    const description = selectedBond.description?.trim();
+
+    // Mirrored bond: what they offer becomes what I want.
+    createRequest.mutate(
+      {
+        offer: selectedBond.want,
+        want: selectedBond.offer,
+        description:
+          description && description.length >= 10
+            ? description
+            : t("actions.proposeDescription", {
+                offer: selectedBond.want,
+                want: selectedBond.offer,
+              }),
+        modality,
+        radiusKm: selectedBond.radius ?? 20,
+      },
+      {
+        onSuccess: (response) => {
+          successToast(
+            t("actions.proposeSuccessTitle"),
+            t("actions.proposeSuccess", { name: profile.name }),
+          );
+          onProposed?.();
+          router.push(`/bonds?tab=matches&request=${response.data._id}`);
+        },
+        onError: (error) =>
+          errorToast(
+            t("actions.proposeErrorTitle"),
+            getErrorMessage(error),
+          ),
       },
     );
   };
@@ -55,6 +112,16 @@ export function ProfileActions({ profile }: { profile: RawPersonProfile }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <Button
+        onClick={handlePropose}
+        disabled={!canPropose}
+        loading={createRequest.isPending}
+        loadingText={t("actions.proposing")}
+      >
+        <Handshake className="size-4" aria-hidden />
+        {t("actions.propose")}
+      </Button>
+
       {profile.friendRequestStatus === "none" ? (
         <Button
           onClick={handleConnect}

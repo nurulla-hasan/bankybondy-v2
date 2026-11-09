@@ -93,7 +93,7 @@ export function MobileNav({
             <SheetHeader className="text-left pb-3 border-b border-border">
               <SheetTitle>
                 <div onClick={() => setOpen(false)}>
-                  <Logo size="sm" showTextOnMobile />
+                  <Logo size="sm" showText={false} showTextOnMobile={false} />
                 </div>
               </SheetTitle>
             </SheetHeader>

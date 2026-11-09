@@ -7,7 +7,6 @@ import CustomPagination from "@/components/common/custom-pagination";
 import { EmptyState } from "@/components/common/empty-state";
 import { TabsContent } from "@/components/ui/tabs";
 import { useBondRequests } from "@/services";
-import { cn } from "@/lib/utils";
 import type { RawBondRequest } from "@/types";
 
 import { BondRequestCard } from "../cards/bond-request-card";
@@ -54,10 +53,7 @@ export function RequestsTab({
         />
       ) : requests.length ? (
         <div
-          className={cn(
-            "grid gap-4 sm:grid-cols-2 xl:grid-cols-3",
-            isFetching && "opacity-60 transition-opacity",
-          )}
+          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
           aria-busy={isFetching}
         >
           {requests.map((request) => (

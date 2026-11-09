@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { TabsContent } from "@/components/ui/tabs";
 import { useBondMatches, useBondRequest } from "@/services";
-import { cn } from "@/lib/utils";
 import type { RawBondMatch } from "@/types";
 
 import { MatchCard } from "../cards/match-card";
@@ -139,15 +138,7 @@ export function MatchesTab({
               description={t("matchesComputingDescription")}
             />
           ) : searchedMatches.length ? (
-            <div
-              className={cn(
-                "space-y-4",
-                isFetching &&
-                  !isFetchingNextPage &&
-                  "opacity-60 transition-opacity",
-              )}
-              aria-busy={isFetching}
-            >
+            <div className="space-y-4" aria-busy={isFetching}>
               {searchedMatches.map((match) => (
                 <MatchCard key={matchSignature(match)} match={match} />
               ))}

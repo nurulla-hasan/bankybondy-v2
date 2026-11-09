@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { BondValue } from "@/components/common/bond-value";
 import { RelativeTime } from "@/components/common/relative-time";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { RawPublicBond } from "@/types";
 
 const STATUS_DISPLAY = {
@@ -15,15 +16,36 @@ const STATUS_DISPLAY = {
   CANCELED: { variant: "rejected", key: "cancelled" },
 } as const;
 
-export function PublicBondCard({ bond }: { bond: RawPublicBond }) {
+interface PublicBondCardProps {
+  bond: RawPublicBond;
+  selected?: boolean;
+  onSelect?: () => void;
+}
+
+export function PublicBondCard({
+  bond,
+  selected = false,
+  onSelect,
+}: PublicBondCardProps) {
   const t = useTranslations("People");
   const status = STATUS_DISPLAY[bond.status] ?? STATUS_DISPLAY.WAITING_FOR_LINK;
   const modality =
     bond.modality?.toLowerCase() === "online" ? "online" : "physical";
   const isOnline = modality === "online";
+  const selectable = bond.status === "WAITING_FOR_LINK";
 
   return (
-    <article className="group flex h-full flex-col gap-3 rounded-xl bg-card p-4 text-sm ring-1 ring-foreground/10 transition-colors duration-300 hover:ring-primary/30">
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={!selectable}
+      aria-pressed={selectable ? selected : undefined}
+      className={cn(
+        "group flex h-full flex-col gap-3 rounded-xl bg-card p-4 text-left text-sm ring-1 ring-foreground/10 transition-colors duration-300 hover:ring-primary/30",
+        selectable ? "cursor-pointer" : "cursor-not-allowed opacity-70",
+        selected && "ring-2 ring-primary",
+      )}
+    >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <Badge variant={status.variant}>
           {t(`bondStatus.${status.key}`)}
@@ -82,6 +104,6 @@ export function PublicBondCard({ bond }: { bond: RawPublicBond }) {
         <Clock className="size-3.5" aria-hidden />
         <RelativeTime date={bond.createdAt} />
       </footer>
-    </article>
+    </button>
   );
 }

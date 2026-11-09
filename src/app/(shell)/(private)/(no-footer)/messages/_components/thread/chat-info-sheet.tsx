@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { FileText, Film, Images, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -15,6 +16,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useAuth } from "@/hooks/useAuth";
 import { getInitials } from "@/lib/utils";
 import {
   useChatGroup,
@@ -223,6 +225,7 @@ function MemberList({
   loading: boolean;
 }) {
   const t = useTranslations("Messages");
+  const { user } = useAuth();
 
   if (loading) {
     return <p className="py-4 text-center text-xs text-muted-foreground">…</p>;
@@ -236,20 +239,40 @@ function MemberList({
 
   return (
     <ul className="flex flex-col gap-1">
-      {people.map((member) => (
-        <li key={member._id} className="flex items-center gap-2 rounded-md px-1 py-1.5">
-          <Avatar size="sm">
-            <AvatarImage src={member.profile_image} alt={member.name} />
-            <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-          </Avatar>
-          <span className="min-w-0 flex-1 truncate text-sm">{member.name}</span>
-          {creatorId === member._id ? (
-            <Badge variant="secondary" size="sm">
-              {t("creatorBadge")}
-            </Badge>
-          ) : null}
-        </li>
-      ))}
+      {people.map((member) => {
+        const isSelf = member._id === user?._id;
+        const row = (
+          <>
+            <Avatar size="sm">
+              <AvatarImage src={member.profile_image} alt={member.name} />
+              <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
+            </Avatar>
+            <span className="min-w-0 flex-1 truncate text-sm">{member.name}</span>
+          </>
+        );
+
+        return (
+          <li key={member._id} className="flex items-center gap-2">
+            {isSelf ? (
+              <div className="flex min-w-0 flex-1 items-center gap-2 px-1 py-1.5">
+                {row}
+              </div>
+            ) : (
+              <Link
+                href={`/people/${member._id}`}
+                className="flex min-w-0 flex-1 items-center gap-2 rounded-md px-1 py-1.5 transition-colors hover:bg-muted"
+              >
+                {row}
+              </Link>
+            )}
+            {creatorId === member._id ? (
+              <Badge variant="secondary" size="sm">
+                {t("creatorBadge")}
+              </Badge>
+            ) : null}
+          </li>
+        );
+      })}
     </ul>
   );
 }

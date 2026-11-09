@@ -9,7 +9,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { MyProfile } from "@/types";
+
+interface LinksCardProps {
+  socialLinks?: string[];
+  title?: string;
+}
+
+function safeHref(url: string) {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:"
+      ? parsed.toString()
+      : null;
+  } catch {
+    return null;
+  }
+}
 
 function linkLabel(url: string) {
   try {
@@ -19,24 +34,27 @@ function linkLabel(url: string) {
   }
 }
 
-export function LinksCard({ profile }: { profile: MyProfile }) {
+export function LinksCard({ socialLinks, title }: LinksCardProps) {
   const t = useTranslations("Profile");
-  const links = profile.socialLinks ?? [];
+  const links = (socialLinks ?? []).flatMap((url) => {
+    const href = safeHref(url);
+    return href ? [{ href, url }] : [];
+  });
 
   if (!links.length) return null;
 
   return (
     <Card className="rounded-2xl">
       <CardHeader>
-        <CardTitle>{t("detail.links")}</CardTitle>
+        <CardTitle>{title ?? t("detail.links")}</CardTitle>
       </CardHeader>
 
       <CardContent>
         <ul className="space-y-2">
-          {links.map((url) => (
-            <li key={url}>
+          {links.map(({ href, url }) => (
+            <li key={href}>
               <a
-                href={url}
+                href={href}
                 target="_blank"
                 rel="noreferrer noopener"
                 className="group flex items-center justify-between gap-3 rounded-xl border border-border/70 px-3 py-2.5 text-sm transition-colors hover:border-primary/30 hover:bg-muted/40"

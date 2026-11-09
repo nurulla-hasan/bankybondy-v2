@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { Lock, UserX, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -11,7 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { isNotFoundError, isProfileHiddenError } from "@/lib/error";
 import { usePerson, usePersonRatings } from "@/services";
+import type { RawPublicBond } from "@/types";
 
+import { LinksCard } from "../../../profile/_components/shared/links-card";
 import { PersonBonds } from "./person-bonds";
 import { PersonReviews } from "./person-reviews";
 import { ProfileActions } from "./profile-actions";
@@ -22,6 +25,18 @@ export function PersonProfile({ id }: { id: string }) {
   const { user } = useAuth();
   const { data: profile, isPending, isError, error, refetch } = usePerson(id);
   const { data: ratings } = usePersonRatings(id, { page: 1, limit: 1 });
+  const [selection, setSelection] = useState<{
+    personId: string;
+    bond: RawPublicBond | null;
+  }>({ personId: id, bond: null });
+
+  // Selection belongs to one person; navigating to another starts clean
+  // without an effect that would cascade a second render.
+  const selectedBond = selection.personId === id ? selection.bond : null;
+  const selectBond = useCallback(
+    (bond: RawPublicBond | null) => setSelection({ personId: id, bond }),
+    [id],
+  );
 
   const isSelf = Boolean(user?._id && user._id === id);
 
@@ -131,10 +146,27 @@ export function PersonProfile({ id }: { id: string }) {
         profile={profile}
         reputation={reputation}
         isSelf={isSelf}
-        actions={isSelf ? undefined : <ProfileActions profile={profile} />}
+        actions={
+          isSelf ? undefined : (
+            <ProfileActions
+              profile={profile}
+              selectedBond={selectedBond}
+              onProposed={() => selectBond(null)}
+            />
+          )
+        }
       />
 
-      <PersonBonds personId={profile._id} />
+      <LinksCard
+        socialLinks={profile.socialLinks}
+        title={t("profile.links")}
+      />
+
+      <PersonBonds
+        personId={profile._id}
+        selectedBondId={selectedBond?._id ?? null}
+        onSelectBond={selectBond}
+      />
       <PersonReviews personId={profile._id} />
     </PageWrapper>
   );

@@ -54,6 +54,9 @@ interface ShareConversationDialogProps {
   topics: readonly RawAudioTopicWithCount[];
 }
 
+/** An upload that never settles would leave the dialog spinning forever. */
+const UPLOAD_TIMEOUT_MS = 120 * 1000;
+
 export function ShareConversationDialog({
   topics,
 }: ShareConversationDialogProps) {
@@ -66,14 +69,17 @@ export function ShareConversationDialog({
     cover_image: null,
   });
   const [uploading, setUploading] = useState<{
-    audio: number | null;
-    cover: number | null;
-  }>({ audio: null, cover: null });
+    audio: boolean;
+    cover: boolean;
+  }>({ audio: false, cover: false });
   const audioInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
-  const progressTimers = useRef<Record<"audio" | "cover", ReturnType<
-    typeof setInterval
-  > | null>>({ audio: null, cover: null });
+  const uploadAborts = useRef<
+    Record<"audio" | "cover", AbortController | null>
+  >({ audio: null, cover: null });
+  /** Bumped on close so late responses from an abandoned dialog are ignored. */
+  const dialogEpochRef = useRef(0);
+  const stagedRef = useRef(staged);
   const [recording, setRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [recordedDuration, setRecordedDuration] = useState<number | null>(null);
@@ -84,18 +90,40 @@ export function ShareConversationDialog({
     null,
   );
   const recordingSecondsRef = useRef(0);
-  const micRequestRef = useRef(false);
 
   const createAudio = useCreateAudio();
   const uploadAudioFiles = useUploadAudioFiles();
   const deleteUploads = useDeleteAudioUploads();
+  const deleteUploadsRef = useRef(deleteUploads);
 
-  const isUploading = uploading.audio !== null || uploading.cover !== null;
+  const isUploading = uploading.audio || uploading.cover;
 
   useEffect(() => {
+    stagedRef.current = staged;
+  }, [staged]);
+
+  useEffect(() => {
+    deleteUploadsRef.current = deleteUploads;
+  }, [deleteUploads]);
+
+  useEffect(() => {
+    const aborts = uploadAborts.current;
     return () => {
+      // Unmount must never leave the mic open, a timer running or an upload
+      // landing into a dialog that no longer exists.
+      dialogEpochRef.current += 1;
       if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      aborts.audio?.abort();
+      aborts.cover?.abort();
+      const recorder = recorderRef.current;
+      if (recorder && recorder.state !== "inactive") recorder.stop();
       streamRef.current?.getTracks().forEach((track) => track.stop());
+
+      const files = [
+        stagedRef.current.audio_url,
+        stagedRef.current.cover_image,
+      ].filter((url): url is string => Boolean(url));
+      if (files.length) deleteUploadsRef.current.mutate(files);
     };
   }, []);
 
@@ -159,10 +187,14 @@ export function ShareConversationDialog({
       return;
     }
 
-    micRequestRef.current = true;
+    const epoch = dialogEpochRef.current;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      micRequestRef.current = false;
+      // Closed while the permission prompt was open: drop the stream.
+      if (epoch !== dialogEpochRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       streamRef.current = stream;
       chunksRef.current = [];
 
@@ -179,6 +211,9 @@ export function ShareConversationDialog({
         const blob = new Blob(chunksRef.current, { type });
         chunksRef.current = [];
         releaseMicrophone();
+
+        // Closed mid-recording: discard instead of staging the file.
+        if (epoch !== dialogEpochRef.current) return;
 
         if (!blob.size) {
           errorToast(t("shareMicEmpty"));
@@ -214,8 +249,9 @@ export function ShareConversationDialog({
         setRecordingSeconds(recordingSecondsRef.current);
       }, 1000);
     } catch (error) {
-      micRequestRef.current = false;
       releaseMicrophone();
+      // The dialog was closed while the prompt was pending; stay silent.
+      if (epoch !== dialogEpochRef.current) return;
       errorToast(
         t("shareMicError"),
         getErrorMessage(error, t("shareMicErrorDescription")),
@@ -233,62 +269,76 @@ export function ShareConversationDialog({
   };
 
   const reset = ({ keepStaged = false }: { keepStaged?: boolean } = {}) => {
-    if (!keepStaged) discardStaged([staged.audio_url, staged.cover_image]);
+    if (!keepStaged) {
+      discardStaged([
+        stagedRef.current.audio_url,
+        stagedRef.current.cover_image,
+      ]);
+    }
     form.reset();
     setAudioFile(null);
     setCoverFile(null);
     setStaged({ audio_url: null, cover_image: null });
+    setUploading({ audio: false, cover: false });
     setRecordedDuration(null);
     setRecordingSeconds(0);
     recordingSecondsRef.current = 0;
   };
 
+  const abortUploads = () => {
+    (["audio", "cover"] as const).forEach((kind) => {
+      uploadAborts.current[kind]?.abort();
+      uploadAborts.current[kind] = null;
+    });
+  };
+
   const handleOpenChange = (nextOpen: boolean) => {
-    // Closing mid-upload would orphan the file still landing in S3; closing
-    // mid-recording would leave the microphone open.
-    if (!nextOpen && (isUploading || recording || micRequestRef.current)) {
+    if (nextOpen) {
+      setOpen(true);
       return;
     }
-    setOpen(nextOpen);
-    if (!nextOpen) reset();
+    // Publishing is the one step that cannot be aborted client-side.
+    if (createAudio.isPending) return;
+
+    // Abandon everything in flight: a pending permission prompt, an active
+    // recording, an upload and every timer die with this epoch.
+    dialogEpochRef.current += 1;
+    abortUploads();
+    setRecording(false);
+    stopRecordingTimer();
+    const recorder = recorderRef.current;
+    if (recorder && recorder.state !== "inactive") recorder.stop();
+    releaseMicrophone();
+    setOpen(false);
+    reset();
   };
 
   const stageFile = async (kind: "audio" | "cover", file: File) => {
     const field = kind === "audio" ? "audio_url" : "cover_image";
+    const epoch = dialogEpochRef.current;
 
-    if (staged[field]) discardStaged([staged[field]]);
+    if (stagedRef.current[field]) discardStaged([stagedRef.current[field]]);
 
-    // The browser can only measure its own hop to the API, which finishes
-    // instantly while the server is still relaying the file to S3. A real
-    // percentage would therefore jump straight to 100 and freeze there, so the
-    // bar eases up to a ceiling and snaps to done when the response arrives.
-    const stopProgress = () => {
-      const timer = progressTimers.current[kind];
-      if (timer) clearInterval(timer);
-      progressTimers.current[kind] = null;
-    };
+    uploadAborts.current[kind]?.abort();
+    const controller = new AbortController();
+    uploadAborts.current[kind] = controller;
 
-    stopProgress();
     if (kind === "audio") setAudioFile(file);
     else setCoverFile(file);
     setStaged((current) => ({ ...current, [field]: null }));
-    setUploading((current) => ({ ...current, [kind]: 3 }));
-    progressTimers.current[kind] = setInterval(() => {
-      setUploading((current) => {
-        const percent = current[kind];
-        if (percent === null) return current;
-        const next = Math.min(
-          92,
-          percent + Math.max(1, Math.round((92 - percent) * 0.12)),
-        );
-        return { ...current, [kind]: next };
-      });
-    }, 200);
+    setUploading((current) => ({ ...current, [kind]: true }));
+
+    let timedOut = false;
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, UPLOAD_TIMEOUT_MS);
 
     try {
-      const response = await uploadAudioFiles.mutateAsync(
-        kind === "audio" ? { audio: file } : { cover: file },
-      );
+      const response = await uploadAudioFiles.mutateAsync({
+        ...(kind === "audio" ? { audio: file } : { cover: file }),
+        signal: controller.signal,
+      });
       const url =
         kind === "audio"
           ? response.data.audio_url
@@ -296,17 +346,55 @@ export function ShareConversationDialog({
 
       if (!url) throw new Error("Missing uploaded URL");
 
+      // The dialog moved on (closed or the file was replaced): the upload
+      // landed but nothing owns it, so delete it server-side.
+      if (epoch !== dialogEpochRef.current) {
+        discardStaged([url]);
+        return;
+      }
+
       setStaged((current) => ({ ...current, [field]: url }));
     } catch (error) {
+      // A superseded/aborted upload must not touch the newer attempt's state.
+      if (
+        epoch !== dialogEpochRef.current ||
+        uploadAborts.current[kind] !== controller
+      ) {
+        return;
+      }
       if (kind === "audio") setAudioFile(null);
       else setCoverFile(null);
-      errorToast(
-        t("shareUploadFailed"),
-        getErrorMessage(error, t("shareUploadFailedDescription")),
-      );
+
+      if (timedOut) {
+        errorToast(
+          t("shareUploadTimeout"),
+          t("shareUploadTimeoutDescription"),
+          {
+            action: {
+              label: t("shareUploadRetry"),
+              onClick: () => {
+                if (epoch === dialogEpochRef.current) {
+                  void stageFile(kind, file);
+                }
+              },
+            },
+          },
+        );
+      } else {
+        errorToast(
+          t("shareUploadFailed"),
+          getErrorMessage(error, t("shareUploadFailedDescription")),
+        );
+      }
     } finally {
-      stopProgress();
-      setUploading((current) => ({ ...current, [kind]: null }));
+      clearTimeout(timeout);
+      if (
+        epoch === dialogEpochRef.current &&
+        uploadAborts.current[kind] === controller
+      ) {
+        uploadAborts.current[kind] = null;
+        setUploading((current) => ({ ...current, [kind]: false }));
+      }
     }
   };
 
@@ -486,28 +574,17 @@ export function ShareConversationDialog({
               >
                 <Upload className="size-5 text-muted-foreground" aria-hidden />
                 <span className="max-w-full truncate text-sm font-medium">
-                  {uploading.audio !== null
-                    ? t("shareUploadProgress", { percent: uploading.audio })
+                  {uploading.audio
+                    ? t("shareUploading")
                     : (audioFile?.name ?? t("shareFormUploadHint"))}
                 </span>
-                {uploading.audio !== null ? (
+                {uploading.audio ? (
                   <span
                     className="mt-1 block h-1 w-full overflow-hidden rounded-full bg-muted"
                     role="progressbar"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={uploading.audio}
+                    aria-label={t("shareUploading")}
                   >
-                    <span
-                      className={cn(
-                        "block h-full rounded-full bg-primary transition-all",
-                        // At the top of the eased range the server is still
-                        // relaying to S3; pulse so a stalled number reads as
-                        // "waiting", not "finished".
-                        uploading.audio >= 90 && "animate-pulse",
-                      )}
-                      style={{ width: `${uploading.audio}%` }}
-                    />
+                    <span className="block h-full w-full animate-pulse rounded-full bg-primary" />
                   </span>
                 ) : null}
               </button>
@@ -587,25 +664,17 @@ export function ShareConversationDialog({
               >
                 <ImageIcon className="size-5 text-muted-foreground" aria-hidden />
                 <span className="max-w-full truncate text-sm font-medium">
-                  {uploading.cover !== null
-                    ? t("shareUploadProgress", { percent: uploading.cover })
+                  {uploading.cover
+                    ? t("shareUploading")
                     : (coverFile?.name ?? t("shareFormCoverHint"))}
                 </span>
-                {uploading.cover !== null ? (
+                {uploading.cover ? (
                   <span
                     className="mt-1 block h-1 w-full overflow-hidden rounded-full bg-muted"
                     role="progressbar"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={uploading.cover}
+                    aria-label={t("shareUploading")}
                   >
-                    <span
-                      className={cn(
-                        "block h-full rounded-full bg-primary transition-all",
-                        uploading.cover >= 90 && "animate-pulse",
-                      )}
-                      style={{ width: `${uploading.cover}%` }}
-                    />
+                    <span className="block h-full w-full animate-pulse rounded-full bg-primary" />
                   </span>
                 ) : null}
               </button>
@@ -644,7 +713,7 @@ export function ShareConversationDialog({
             type="button"
             variant="outline"
             onClick={() => handleOpenChange(false)}
-            disabled={isBusy}
+            disabled={isPublishing}
           >
             {t("shareFormCancel")}
           </Button>

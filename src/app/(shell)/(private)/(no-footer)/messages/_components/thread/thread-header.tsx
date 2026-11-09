@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, Ban, EllipsisVertical, Handshake, Info } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -52,10 +53,22 @@ export function ThreadHeader({ conversation, onBack, onHide }: ThreadHeaderProps
       </Button>
 
       {conversation.type === "one-two-one" ? (
-        <Avatar size="lg" className="shrink-0">
-          <AvatarImage src={peer?.profile_image} alt={peer?.name ?? ""} />
-          <AvatarFallback>{getInitials(peer?.name ?? "")}</AvatarFallback>
-        </Avatar>
+        peer?._id ? (
+          <Link
+            href={`/people/${peer._id}`}
+            className="shrink-0 rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <Avatar size="lg">
+              <AvatarImage src={peer.profile_image} alt={peer.name ?? ""} />
+              <AvatarFallback>{getInitials(peer.name ?? "")}</AvatarFallback>
+            </Avatar>
+          </Link>
+        ) : (
+          <Avatar size="lg" className="shrink-0">
+            <AvatarImage src={peer?.profile_image} alt={peer?.name ?? ""} />
+            <AvatarFallback>{getInitials(peer?.name ?? "")}</AvatarFallback>
+          </Avatar>
+        )
       ) : (
         <GroupAvatarStack members={conversation.members} />
       )}
@@ -66,9 +79,20 @@ export function ThreadHeader({ conversation, onBack, onHide }: ThreadHeaderProps
             <Handshake className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
           ) : null}
           <h3 className="truncate font-heading text-sm font-medium">
-            {getConversationTitle(
-              conversation,
-              conversation.type === "bond-link-group" ? t("bondRoomFallback") : undefined,
+            {conversation.type === "one-two-one" && peer?._id ? (
+              <Link
+                href={`/people/${peer._id}`}
+                className="transition-colors hover:text-primary"
+              >
+                {getConversationTitle(conversation, undefined)}
+              </Link>
+            ) : (
+              getConversationTitle(
+                conversation,
+                conversation.type === "bond-link-group"
+                  ? t("bondRoomFallback")
+                  : undefined,
+              )
             )}
           </h3>
         </div>

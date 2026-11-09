@@ -32,6 +32,8 @@ export interface NotificationItem {
   type: NotificationType;
   redirectId?: string | null;
   receiver?: string;
+  /** Per-user read state computed by the API (`seenBy` is never exposed). */
+  seen?: boolean;
   createdAt: string;
   updatedAt?: string;
 }

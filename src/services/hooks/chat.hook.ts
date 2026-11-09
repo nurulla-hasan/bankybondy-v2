@@ -78,7 +78,10 @@ export interface ChatThreadData {
  * The chat list. Search is debounced by `SearchInput` before it reaches the URL,
  * so the key only needs the finished term.
  */
-export function useChatList(searchTerm: string) {
+export function useChatList(
+  searchTerm: string,
+  options?: { enabled?: boolean },
+) {
   const term = searchTerm.trim();
 
   return useQuery({
@@ -89,6 +92,7 @@ export function useChatList(searchTerm: string) {
         searchTerm: term || undefined,
       }),
     select: (response) => response.data,
+    enabled: options?.enabled ?? true,
     placeholderData: keepPreviousData,
     staleTime: 30 * 1000,
   });

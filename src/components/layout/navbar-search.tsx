@@ -57,6 +57,13 @@ export function NavbarSearch({
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
 
+  // ⌘ is Mac-only; Windows/Linux users see the Ctrl chord they can actually press.
+  const isMac = React.useSyncExternalStore(
+    () => () => {},
+    () => /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent),
+    () => false,
+  );
+
   const debouncedQuery = useDebounce(query, 300);
   const term = debouncedQuery.trim();
   const canSearch = term.length >= MIN_SEARCH_LENGTH;
@@ -68,11 +75,16 @@ export function NavbarSearch({
   // Search endpoint requires auth — guests keep the static palette instead.
   const showResults = canSearch && Boolean(user);
 
-  const { data: searchData, isFetching } = useGlobalSearch(debouncedQuery, {
+  const {
+    data: searchData,
+    isFetching,
+    isPlaceholderData,
+  } = useGlobalSearch(debouncedQuery, {
     enabled: open && Boolean(user),
   });
 
-  const results = searchData?.data;
+  // Never paint the previous query's rows as if they belonged to the new one.
+  const results = isPlaceholderData ? undefined : searchData?.data;
   const people = results?.people ?? [];
   const bonds = results?.bonds ?? [];
   const audios = results?.audios ?? [];
@@ -149,7 +161,7 @@ export function NavbarSearch({
             {t("search")}
           </span>
           <kbd className="border-border bg-background text-muted-foreground pointer-events-none hidden h-4.5 select-none items-center gap-0.5 rounded border px-1.5 font-mono text-xs font-medium shadow-2xs sm:inline-flex">
-            <span>⌘</span>K
+            {isMac ? "⌘K" : "Ctrl K"}
           </kbd>
         </button>
       )}

@@ -11,6 +11,7 @@ export default async function AuthLayout({
   children: React.ReactNode;
 }) {
   const t = await getTranslations("Auth");
+  const common = await getTranslations("Common");
 
   return (
     <>
@@ -24,7 +25,7 @@ export default async function AuthLayout({
 
         {/* Top: Brand Logo */}
         <div className="relative z-10">
-          <Logo size="lg" showText showTextOnMobile />
+          <Logo size="lg" showText />
         </div>
 
         {/* Center: Hero Branding & Feature Highlights */}
@@ -70,7 +71,7 @@ export default async function AuthLayout({
         {/* Bottom Tagline */}
         <div className="relative z-10 text-xs text-muted-foreground flex items-center justify-between border-t border-border pt-6">
           <span>&ldquo;{t("authTagline")}&rdquo;</span>
-          <span className="font-mono">Bankybondy v2.0</span>
+          <span>{common("brandTagline")}</span>
         </div>
       </div>
 
@@ -84,7 +85,7 @@ export default async function AuthLayout({
 
         {/* Mobile Header Logo */}
         <div className="lg:hidden mb-6">
-          <Logo size="md" showText showTextOnMobile />
+          <Logo size="md" showText />
         </div>
 
         {/* Form Container */}

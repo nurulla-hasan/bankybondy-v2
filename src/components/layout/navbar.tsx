@@ -39,7 +39,7 @@ export function Navbar({ className }: NavbarProps) {
       >
         {/* Left: Brand Logo */}
         <div className="flex shrink-0 items-center">
-          <Logo size="md" showTextOnMobile />
+          <Logo size="md" showText={false} showTextOnMobile={false} />
         </div>
 
         {/* Center: Desktop Navigation Links */}

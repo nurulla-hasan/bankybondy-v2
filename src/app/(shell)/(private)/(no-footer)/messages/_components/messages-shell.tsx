@@ -4,11 +4,13 @@ import { motion } from "framer-motion";
 import { EyeOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { SearchInput } from "@/components/common/search-input";
 import { Button } from "@/components/ui/button";
 import { useNextFilter } from "@/hooks/useNextFilter";
 import { useAuth } from "@/hooks/useAuth";
+import { chatKeys } from "@/lib/chat/keys";
 import { CONTAINER_GUTTER, CONTAINER_MAX_WIDTH, STICKY_HEIGHT } from "@/lib/layout";
 import { cn } from "@/lib/utils";
 import { useChatSocket } from "@/provider/chat-socket.provider";
@@ -22,8 +24,10 @@ import {
   useSendMessage,
 } from "@/services";
 import type {
+  ApiResponse,
   NewMessagePayload,
   RawChatPerson,
+  RawConversationList,
   RawConversationListItem,
 } from "@/types";
 
@@ -55,10 +59,23 @@ export function MessagesShell() {
   const [hiddenOpen, setHiddenOpen] = useState(false);
 
   const list = useChatList(searchTerm);
+  // The open thread must survive list search: resolve it from the unfiltered
+  // list (live query while searching, cached copy during the transition).
+  const queryClient = useQueryClient();
+  const allChats = useChatList("", {
+    enabled: Boolean(searchTerm.trim()),
+  });
   const hide = useHideConversation();
 
+  const unfilteredChats =
+    allChats.data ??
+    queryClient.getQueryData<ApiResponse<RawConversationList>>(
+      chatKeys.list(""),
+    )?.data;
   const conversation =
-    list.data?.data.find((item) => item._id === selectedId) ?? null;
+    unfilteredChats?.data.find((item) => item._id === selectedId) ??
+    list.data?.data.find((item) => item._id === selectedId) ??
+    null;
 
   const showOffline = status === "disconnected" || status === "error";
 

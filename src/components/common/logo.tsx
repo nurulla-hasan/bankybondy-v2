@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { BrandLogoSvg } from "./brand-logo";
+import { BrandMark } from "./brand-logo";
 
 export function Logo({
   className,
   size = "md",
-  showText = true,
+  showText = false,
   showTextOnMobile = false,
   href = "/",
 }: {
@@ -16,7 +16,7 @@ export function Logo({
   showTextOnMobile?: boolean;
   href?: string;
 }) {
-  const svgSize = size === "lg" ? 44 : size === "md" ? 38 : 30;
+  const svgSize = size === "lg" ? 36 : size === "md" ? 30 : 24;
   const t = useTranslations("Common");
 
   return (
@@ -27,29 +27,19 @@ export function Logo({
         className
       )}
     >
-      <BrandLogoSvg size={svgSize} />
+      <BrandMark size={svgSize} />
 
       {showText && (
-        <div
+        <span
           className={cn(
-            showTextOnMobile ? "flex flex-col" : "hidden sm:flex flex-col",
-            "leading-none gap-1"
+            "font-extrabold tracking-tight font-heading text-foreground",
+            size === "lg" && "text-2xl tracking-tighter",
+            size === "md" && "text-xl tracking-tight",
+            size === "sm" && "text-base"
           )}
         >
-          <span
-            className={cn(
-              "font-extrabold tracking-tight font-heading bg-linear-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent",
-              size === "lg" && "text-2xl tracking-tighter",
-              size === "md" && "text-xl tracking-tight",
-              size === "sm" && "text-base"
-            )}
-          >
-            Banky<span className="text-primary font-black">bondy</span>
-          </span>
-          <span className="text-[9px] font-semibold text-muted-foreground/80 tracking-[0.18em] uppercase">
-            {t("brandTagline")}
-          </span>
-        </div>
+          Bankybondy
+        </span>
       )}
 
     </Link>

@@ -34,6 +34,12 @@
     "none": "Sin conexión"
   },
   "actions": {
+    "propose": "Proponer trueque",
+    "proposing": "Proponiendo...",
+    "proposeDescription": "Propongo el trueque inverso: ofrezco {offer} y busco {want}.",
+    "proposeSuccessTitle": "Propuesta creada",
+    "proposeSuccess": "Te mostramos las coincidencias de tu nuevo trueque con {name}.",
+    "proposeErrorTitle": "No se pudo proponer el trueque",
     "connect": "Enviar solicitud de amistad",
     "connecting": "Enviando...",
     "connectSuccessTitle": "Solicitud enviada",
@@ -93,6 +99,7 @@
     "reputation": "Reputación",
     "reviews": "Reseñas",
     "bonds": "Vínculos",
+    "links": "Enlaces",
     "offer": "Ofrece",
     "want": "Busca",
     "privateBonds": "{count, plural, one {# vínculo es privado} other {# vínculos son privados}}",

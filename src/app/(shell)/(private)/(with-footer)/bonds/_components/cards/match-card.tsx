@@ -2,9 +2,20 @@
 
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { ChevronDown, Handshake, Sparkles, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronDown,
+  Gift,
+  Handshake,
+  Search,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { BondValue } from "@/components/common/bond-value";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
 import { useCreateBondLink } from "@/services";
 import { MatchChain, type BondParticipant } from "./match-chain";
 import { MatchCycle } from "./match-cycle";
@@ -94,8 +106,165 @@ function resolveSpecial(
   return isDouble ? "doubleSurprise" : "openSurprise";
 }
 
-export function MatchCard({ match }: { match: RawBondMatch }) {
+function PersonNode({
+  participant,
+  label,
+  isYou,
+}: {
+  participant: BondParticipant;
+  label: string;
+  isYou: boolean;
+}) {
+  return (
+    <div className="flex w-20 shrink-0 flex-col items-center gap-1 text-center sm:w-24">
+      <Avatar
+        size="lg"
+        className={cn(
+          "size-16",
+          isYou && "ring-2 ring-primary ring-offset-2 ring-offset-card",
+        )}
+      >
+        {participant.avatarUrl && (
+          <AvatarImage src={participant.avatarUrl} alt={participant.name} />
+        )}
+        <AvatarFallback />
+      </Avatar>
+      <span
+        title={participant.name}
+        className="w-full truncate text-xs font-semibold text-foreground"
+      >
+        {isYou ? label : participant.name.split(" ")[0]}
+      </span>
+    </div>
+  );
+}
+
+function ExchangeDirection({
+  caption,
+  item,
+  direction,
+  tone,
+}: {
+  caption: string;
+  item: string;
+  direction: "left" | "right";
+  tone: "give" | "want";
+}) {
+  const isGive = tone === "give";
+  const Arrow = direction === "right" ? ArrowRight : ArrowLeft;
+  const Icon = isGive ? Gift : Search;
+
+  return (
+    <div className="w-full">
+      <p
+        className={cn(
+          "mb-1 text-center text-xs font-semibold",
+          isGive ? "text-emerald-accent" : "text-primary",
+        )}
+      >
+        {caption}
+      </p>
+      <div className="relative flex items-center py-2">
+        <span
+          aria-hidden
+          className={cn(
+            "absolute inset-x-2 top-1/2 h-0.5 -translate-y-1/2 rounded-full",
+            isGive ? "bg-emerald-accent/30" : "bg-primary/30",
+          )}
+        />
+        <Arrow
+          aria-hidden
+          className={cn(
+            "absolute top-1/2 size-4 -translate-y-1/2",
+            direction === "right" ? "right-0" : "left-0",
+            isGive ? "text-emerald-accent" : "text-primary",
+          )}
+          strokeWidth={3}
+        />
+        <span
+          className={cn(
+            "relative mx-auto flex max-w-full items-center gap-1.5 rounded-full border bg-card px-3 py-1 text-xs font-semibold shadow-sm",
+            isGive
+              ? "border-emerald-accent/40"
+              : "border-primary/40",
+          )}
+        >
+          <Icon
+            aria-hidden
+            className={cn(
+              "size-3.5 shrink-0",
+              isGive ? "text-emerald-accent" : "text-primary",
+            )}
+          />
+          <span className="truncate">
+            <BondValue value={item} />
+          </span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A two-person match is an explicit swap, so the diagram reads better as two
+ * directed rows than as a circle (same idea as v1's MatchWhyCard).
+ */
+function DirectExchange({
+  participants,
+  className,
+}: {
+  participants: BondParticipant[];
+  className?: string;
+}) {
   const t = useTranslations("Bonds");
+  const { user } = useAuth();
+  const meIndex = participants.findIndex(
+    (participant) => participant.id === user?._id,
+  );
+  const me = meIndex >= 0 ? participants[meIndex] : participants[0];
+  const them =
+    meIndex >= 0
+      ? participants[(meIndex + 1) % participants.length]
+      : participants[1];
+
+  if (!me || !them) return null;
+
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border border-border/70 bg-background/70 p-4 sm:p-6",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-center gap-2 sm:gap-6">
+        <PersonNode participant={me} label={t("you")} isYou />
+
+        <div className="w-full max-w-64 flex-1 space-y-1">
+          <ExchangeDirection
+            direction="right"
+            tone="give"
+            caption={t("youGive")}
+            item={me.offer}
+          />
+          <ExchangeDirection
+            direction="left"
+            tone="want"
+            caption={t("youReceive")}
+            item={them.offer}
+          />
+        </div>
+
+        <PersonNode participant={them} label={t("you")} isYou={false} />
+      </div>
+
+      <p className="mt-4 text-center text-xs text-muted-foreground">
+        {t("directCaption")}
+      </p>
+    </div>
+  );
+}
+
+export function MatchCard({ match }: { match: RawBondMatch }) {  const t = useTranslations("Bonds");
   const createLink = useCreateBondLink();
   const [whyOpen, setWhyOpen] = useState(false);
   const [proposeOpen, setProposeOpen] = useState(false);
@@ -268,11 +437,18 @@ export function MatchCard({ match }: { match: RawBondMatch }) {
       {whyOpen && (
         <div className="mt-3 rounded-2xl border border-border/70 bg-muted/30 p-4 sm:p-5">
           <div className="flex flex-col items-center gap-6 lg:flex-row lg:gap-8">
-            <MatchCycle
-              score={score}
-              participants={participants}
-              className="shrink-0"
-            />
+            {participants.length === 2 ? (
+              <DirectExchange
+                participants={participants}
+                className="w-full lg:w-auto lg:flex-1"
+              />
+            ) : (
+              <MatchCycle
+                score={score}
+                participants={participants}
+                className="shrink-0"
+              />
+            )}
 
             <div className="w-full min-w-0 flex-1 space-y-3">
               <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">

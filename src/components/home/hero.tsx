@@ -76,7 +76,7 @@ export function Hero() {
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-          className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-5 bg-linear-to-b from-foreground via-foreground to-foreground/80 dark:from-white dark:via-white dark:to-white/70 bg-clip-text text-transparent drop-shadow-xs dark:drop-shadow-[0_4px_30px_rgba(255,255,255,0.15)]"
+          className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-5 text-foreground"
         >
           Bankybondy
         </motion.h1>

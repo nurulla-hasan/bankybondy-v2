@@ -79,6 +79,23 @@ export function useSeeNotifications() {
         );
       }
 
+      queryClient.setQueriesData<ApiResponse<NotificationListResult>>(
+        { queryKey: [...notificationKeys.all, "list"] },
+        (old) =>
+          old
+            ? {
+                ...old,
+                data: {
+                  ...old.data,
+                  result: old.data.result.map((item) => ({
+                    ...item,
+                    seen: true,
+                  })),
+                },
+              }
+            : old
+      );
+
       return { previous };
     },
     onError: (_error, _variables, context) => {
@@ -91,6 +108,9 @@ export function useSeeNotifications() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.unseen() });
+      queryClient.invalidateQueries({
+        queryKey: [...notificationKeys.all, "list"],
+      });
     },
   });
 }
@@ -103,7 +123,7 @@ export function useSeeOneNotification() {
 
   return useMutation({
     mutationFn: seeOneNotification,
-    onMutate: async () => {
+    onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: notificationKeys.unseen() });
       const previous = queryClient.getQueryData<
         ApiResponse<UnseenNotificationResult>
@@ -122,9 +142,25 @@ export function useSeeOneNotification() {
         );
       }
 
+      queryClient.setQueriesData<ApiResponse<NotificationListResult>>(
+        { queryKey: [...notificationKeys.all, "list"] },
+        (old) =>
+          old
+            ? {
+                ...old,
+                data: {
+                  ...old.data,
+                  result: old.data.result.map((item) =>
+                    item._id === id ? { ...item, seen: true } : item
+                  ),
+                },
+              }
+            : old
+      );
+
       return { previous };
     },
-    onError: (_error, _variables, context) => {
+    onError: (_error, _id, context) => {
       if (context?.previous) {
         queryClient.setQueryData(
           notificationKeys.unseen(),
@@ -134,6 +170,9 @@ export function useSeeOneNotification() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.unseen() });
+      queryClient.invalidateQueries({
+        queryKey: [...notificationKeys.all, "list"],
+      });
     },
   });
 }

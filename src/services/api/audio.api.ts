@@ -42,9 +42,11 @@ export function getAllAudios(params?: AudioListQueryParams) {
 export function uploadAudioFiles({
   audio,
   cover,
+  signal,
 }: {
   audio?: File;
   cover?: File;
+  signal?: AbortSignal;
 }) {
   const body = new FormData();
   if (audio) body.append("audio", audio);
@@ -53,6 +55,7 @@ export function uploadAudioFiles({
   return apiClient<ApiResponse<UploadedAudioFiles>>("/audio/upload-audio", {
     method: "POST",
     body,
+    signal,
   });
 }
 

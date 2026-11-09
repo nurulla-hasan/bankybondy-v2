@@ -99,7 +99,7 @@ export function MyProfileView() {
           <AboutCard profile={profile} />
           <SkillsCard profile={profile} />
           <SecurityCard />
-          <LinksCard profile={profile} />
+          <LinksCard socialLinks={profile.socialLinks} />
         </div>
       </div>
     </div>

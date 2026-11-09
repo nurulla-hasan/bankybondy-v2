@@ -34,6 +34,12 @@
     "none": "Not connected"
   },
   "actions": {
+    "propose": "Propose a trade",
+    "proposing": "Proposing...",
+    "proposeDescription": "I propose the reverse trade: I offer {offer} and I am looking for {want}.",
+    "proposeSuccessTitle": "Proposal created",
+    "proposeSuccess": "Here are the matches for your new trade with {name}.",
+    "proposeErrorTitle": "Couldn't propose the trade",
     "connect": "Send friend request",
     "connecting": "Sending...",
     "connectSuccessTitle": "Request sent",
@@ -93,6 +99,7 @@
     "reputation": "Reputation",
     "reviews": "Reviews",
     "bonds": "Bonds",
+    "links": "Links",
     "offer": "Offers",
     "want": "Wants",
     "privateBonds": "{count, plural, one {# bond is private} other {# bonds are private}}",

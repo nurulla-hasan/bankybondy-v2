@@ -15,6 +15,8 @@
   --color-amber-accent: var(--amber-accent);
   --color-violet-accent: var(--violet-accent);
   --color-pink-accent: var(--pink-accent);
+  --color-brand-capsule: var(--brand-capsule);
+  --color-brand-capsule-border: var(--brand-capsule-border);
   --color-tone-red: var(--tone-red);
   --color-tone-red-ink: var(--tone-red-ink);
   --color-tone-green: var(--tone-green);
@@ -97,6 +99,9 @@
   --amber-accent: oklch(0.76 0.15 75); /* Warning / Pending Amber */
   --violet-accent: oklch(0.6 0.2 300); /* Social Violet */
   --pink-accent: oklch(0.62 0.24 350); /* Surprise Pink */
+  /* Traffic-light capsule mark: v1 form, v2 palette (fixed in both themes). */
+  --brand-capsule: #12162b;
+  --brand-capsule-border: #6366f1;
   /* Match-chain exchange tones — hue paired by the backend palette; -ink is the readable text shade. */
   --tone-red: oklch(0.63 0.21 25); /* ≈ red-500 */
   --tone-red-ink: oklch(0.52 0.19 25); /* ≈ red-700 */
@@ -156,6 +161,9 @@
   --amber-accent: oklch(0.8 0.15 75);
   --violet-accent: oklch(0.68 0.2 300);
   --pink-accent: oklch(0.7 0.22 350);
+  /* V1 brand mark stays fixed on dark surfaces, like the physical casing. */
+  --brand-capsule: #12162b;
+  --brand-capsule-border: #6366f1;
   /* Match-chain exchange tones — lighter ink for dark surfaces. */
   --tone-red: oklch(0.68 0.19 25);
   --tone-red-ink: oklch(0.72 0.17 25);

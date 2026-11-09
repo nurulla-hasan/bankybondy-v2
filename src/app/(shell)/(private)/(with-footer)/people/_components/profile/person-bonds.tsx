@@ -10,14 +10,24 @@ import { SearchInput } from "@/components/common/search-input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNextFilter } from "@/hooks/useNextFilter";
-import { cn } from "@/lib/utils";
 import { PERSON_BONDS_PAGE_SIZE, usePersonBonds } from "@/services";
+import type { RawPublicBond } from "@/types";
 
 import { PublicBondCard } from "./public-bond-card";
 
 type BondsFilterKey = "searchTerm" | "bondsPage";
 
-export function PersonBonds({ personId }: { personId: string }) {
+interface PersonBondsProps {
+  personId: string;
+  selectedBondId: string | null;
+  onSelectBond: (bond: RawPublicBond | null) => void;
+}
+
+export function PersonBonds({
+  personId,
+  selectedBondId,
+  onSelectBond,
+}: PersonBondsProps) {
   const t = useTranslations("People");
   const { getFilter, updateBatch } = useNextFilter<BondsFilterKey>();
   const previousTermRef = useRef<string | null>(null);
@@ -41,8 +51,9 @@ export function PersonBonds({ personId }: { personId: string }) {
     if (previousTermRef.current === searchTerm) return;
 
     previousTermRef.current = searchTerm;
+    onSelectBond(null);
     updateBatch({ bondsPage: null }, { resetPage: false });
-  }, [searchTerm, updateBatch]);
+  }, [searchTerm, updateBatch, onSelectBond]);
 
   const totalPages = data
     ? Math.max(1, Math.ceil(data.count / Math.max(data.limit, 1)))
@@ -60,6 +71,7 @@ export function PersonBonds({ personId }: { personId: string }) {
   }, [data, page, totalPages, updateBatch]);
 
   const handlePageChange = (nextPage: number) => {
+    onSelectBond(null);
     updateBatch(
       { bondsPage: nextPage <= 1 ? null : nextPage },
       { resetPage: false },
@@ -105,14 +117,16 @@ export function PersonBonds({ personId }: { personId: string }) {
         />
       ) : bonds.length ? (
         <div
-          className={cn(
-            "grid gap-4 sm:grid-cols-2 xl:grid-cols-3",
-            isFetching && "opacity-60 transition-opacity",
-          )}
+          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
           aria-busy={isFetching}
         >
           {bonds.map((bond) => (
-            <PublicBondCard key={bond._id} bond={bond} />
+            <PublicBondCard
+              key={bond._id}
+              bond={bond}
+              selected={bond._id === selectedBondId}
+              onSelect={() => onSelectBond(bond)}
+            />
           ))}
         </div>
       ) : term ? (

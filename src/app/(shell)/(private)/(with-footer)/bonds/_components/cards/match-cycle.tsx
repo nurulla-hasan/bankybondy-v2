@@ -67,16 +67,17 @@ export function MatchCycle({
           <defs>
             <marker
               id={markerId}
-              markerWidth="3"
-              markerHeight="3"
-              refX="2.7"
-              refY="1.5"
+              markerWidth="6"
+              markerHeight="6"
+              refX="5.4"
+              refY="3"
               orient="auto"
+              markerUnits="strokeWidth"
             >
               <path
-                d="M 0 0 L 3 1.5 L 0 3 Z"
+                d="M 0 0 L 6 3 L 0 6 Z"
                 fill="var(--primary)"
-                fillOpacity="0.7"
+                fillOpacity="0.8"
               />
             </marker>
           </defs>

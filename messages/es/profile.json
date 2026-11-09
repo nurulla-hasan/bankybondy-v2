@@ -13,7 +13,7 @@
     "retry": "Reintentar"
   },
   "stat": {
-    "activeBonds": "Bonos activos",
+    "activeBonds": "Vínculos activos",
     "completedBonds": "Completados",
     "rating": "Valoración · {count} reseñas"
   },
@@ -23,13 +23,13 @@
     "people": "Aparecer en Personas",
     "peopleHint": "Los miembros pueden buscarte y ver tu perfil en el directorio.",
     "peopleHiddenHint": "Desapareces del directorio y nadie que no sea amigo tuyo podrá abrir tu perfil.",
-    "bonds": "Mostrar mis bonos públicamente",
-    "bondsHint": "Tus bonos activos y pasados se listan en tu perfil público.",
-    "bondsHiddenHint": "Tus bonos quedan privados; las visitas solo ven tu nombre y tu reputación.",
+    "bonds": "Mostrar mis vínculos públicamente",
+    "bondsHint": "Tus vínculos activos y pasados se listan en tu perfil público.",
+    "bondsHiddenHint": "Tus vínculos quedan privados; las visitas solo ven tu nombre y tu reputación.",
     "savedTitle": "Visibilidad actualizada",
     "saveFailed": "No se pudo actualizar la visibilidad",
     "listedInPeopleSaved": "Se guardó tu configuración de aparición.",
-    "bondsPublicSaved": "Se guardó la visibilidad de tus bonos.",
+    "bondsPublicSaved": "Se guardó la visibilidad de tus vínculos.",
     "hiddenNote": "Estos ajustes también aplican al enlace directo: un perfil oculto muestra un aviso de bloqueo en lugar de tus datos."
   },
   "location": {
@@ -88,7 +88,7 @@
     "namePlaceholder": "Cómo quieren verte los demás",
     "email": "Correo",
     "phone": "Teléfono",
-    "phonePlaceholder": "Solo se comparte dentro de tus bonos",
+    "phonePlaceholder": "Solo se comparte dentro de tus vínculos",
     "location": "Ubicación",
     "locationPlaceholder": "Ciudad, país",
     "gender": "Género",
@@ -122,7 +122,7 @@
     "passwordTitle": "Contraseña",
     "passwordDescription": "Mínimo 6 caracteres. Al cambiarla se cierran las demás sesiones.",
     "dangerTitle": "Eliminar cuenta",
-    "dangerDescription": "Borra tu perfil, tus bonos y tu reputación para siempre."
+    "dangerDescription": "Borra tu perfil, tus vínculos y tu reputación para siempre."
   },
   "password": {
     "title": "Contraseña",
@@ -132,7 +132,7 @@
     "new": "Nueva contraseña",
     "minLength": "Mínimo 6 caracteres",
     "confirm": "Confirmar nueva contraseña",
-    "sessionsHint": "Se cierra la sesión en los demás dispositivos. Tu perfil y tu historial de bonos no cambian.",
+    "sessionsHint": "Se cierra la sesión en los demás dispositivos. Tu perfil y tu historial de vínculos no cambian.",
     "update": "Actualizar contraseña",
     "savedTitle": "Contraseña actualizada",
     "savedDescription": "Las otras sesiones necesitarán la nueva contraseña.",
@@ -141,7 +141,7 @@
     "sessionExpiredDescription": "Este dispositivo quedó cerrado porque la contraseña cambió en otro sitio."
   },
   "danger": {
-    "consequence1": "Los bonos abiertos con otros miembros quedan sin ti.",
+    "consequence1": "Los vínculos abiertos con otros miembros quedan sin ti.",
     "consequence2": "Tus reseñas y tu valoración desaparecen con la cuenta.",
     "consequence3": "Puedes registrarte otra vez con el mismo correo, pero el historial no vuelve.",
     "action": "Eliminar cuenta",
@@ -150,7 +150,7 @@
     "password": "Contraseña",
     "confirmPhrase": "Confirmación",
     "deletedTitle": "Cuenta eliminada",
-    "deletedDescription": "Tu perfil, tus bonos y tus reseñas han desaparecido.",
+    "deletedDescription": "Tu perfil, tus vínculos y tus reseñas han desaparecido.",
     "deleteFailed": "No se pudo eliminar la cuenta"
   },
   "settings": {

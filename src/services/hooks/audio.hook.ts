@@ -199,6 +199,7 @@ export function useRecordAudioListen() {
 export interface UploadAudioFilesVariables {
   audio?: File;
   cover?: File;
+  signal?: AbortSignal;
 }
 
 /**
@@ -207,8 +208,8 @@ export interface UploadAudioFilesVariables {
  */
 export function useUploadAudioFiles() {
   return useMutation({
-    mutationFn: ({ audio, cover }: UploadAudioFilesVariables) =>
-      uploadAudioFiles({ audio, cover }),
+    mutationFn: ({ audio, cover, signal }: UploadAudioFilesVariables) =>
+      uploadAudioFiles({ audio, cover, signal }),
   });
 }
 

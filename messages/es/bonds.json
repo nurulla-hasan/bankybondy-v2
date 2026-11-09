@@ -1,6 +1,6 @@
 {
-  "title": "Tus vínculos, en movimiento",
-  "subtitle": "Publica lo que ofreces, encuentra quién lo necesita — sin dinero de por medio.",
+  "title": "Hacé trueque",
+  "subtitle": "Publicá lo que ofrecés y lo que pedís y encontrá coincidencias.",
   "newBond": "Nueva solicitud de vínculo",
   "tabsLabel": "Secciones de vínculos",
   "tabs": {
@@ -22,6 +22,13 @@
     "completed": "Completado",
     "paused": "En pausa",
     "cancelled": "Cancelado"
+  },
+  "linksFilter": {
+    "label": "Filtrar vínculos",
+    "all": "Todos los vínculos",
+    "ongoing": "En curso",
+    "completed": "Completados",
+    "canceled": "Cancelados"
   },
   "onlineGlobal": "En línea · donde sea",
   "inPersonRadius": "En persona · hasta {km} km",
@@ -75,6 +82,10 @@
   "noRatings": "Sin valoraciones",
   "cycleNote": "El ciclo se cierra con {name} — todos dan y todos reciben.",
   "whyMatch": "¿Por qué esta coincidencia?",
+  "you": "Vos",
+  "youGive": "Das tu oferta",
+  "youReceive": "Recibís su oferta",
+  "directCaption": "Tu oferta encaja con lo que busca y su oferta es lo que buscás.",
   "propose": "Proponer vínculo",
   "proposeTitle": "Nombra tu vínculo",
   "proposeDescription": "Todos en esta coincidencia verán el nombre y podrán aceptar o rechazar.",

@@ -1,6 +1,6 @@
 {
-  "title": "Your bonds, in motion",
-  "subtitle": "Post what you offer, find who needs it — no money involved.",
+  "title": "Make a trade",
+  "subtitle": "List what you offer and what you want and find matches.",
   "newBond": "New bond request",
   "tabsLabel": "Bond sections",
   "tabs": {
@@ -22,6 +22,13 @@
     "completed": "Completed",
     "paused": "Paused",
     "cancelled": "Cancelled"
+  },
+  "linksFilter": {
+    "label": "Filter links",
+    "all": "All links",
+    "ongoing": "Ongoing",
+    "completed": "Completed",
+    "canceled": "Canceled"
   },
   "onlineGlobal": "Online · anywhere",
   "inPersonRadius": "In person · within {km} km",
@@ -75,6 +82,10 @@
   "noRatings": "No ratings yet",
   "cycleNote": "The cycle closes with {name} — everyone gives and everyone receives.",
   "whyMatch": "Why this match?",
+  "you": "You",
+  "youGive": "You give your offer",
+  "youReceive": "You receive their offer",
+  "directCaption": "Your offer matches what they want, and their offer is what you're looking for.",
   "propose": "Propose bond",
   "proposeTitle": "Name your bond",
   "proposeDescription": "Everyone in this match will see the name and can accept or decline.",

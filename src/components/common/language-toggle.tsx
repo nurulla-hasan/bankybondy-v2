@@ -15,13 +15,11 @@ import {
 interface LanguageToggleProps {
   variant?: "ghost" | "outline" | "default" | "secondary";
   size?: "default" | "sm" | "lg" | "icon";
-  className?: string;
 }
 
 export function LanguageToggle({
   variant = "ghost",
   size = "icon",
-  className,
 }: LanguageToggleProps) {
   const locale = useLocale();
   const router = useRouter();
@@ -39,10 +37,9 @@ export function LanguageToggle({
           <Button
             variant={variant}
             size={size}
-            className={className || "cursor-pointer"}
             aria-label="Change language"
           >
-            <Languages className="size-5" aria-hidden />
+            <Languages aria-hidden />
           </Button>
         }
       />
