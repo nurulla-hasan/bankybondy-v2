@@ -99,8 +99,8 @@
   --amber-accent: oklch(0.76 0.15 75); /* Warning / Pending Amber */
   --violet-accent: oklch(0.6 0.2 300); /* Social Violet */
   --pink-accent: oklch(0.62 0.24 350); /* Surprise Pink */
-  /* Traffic-light capsule mark: v1 form, v2 palette (fixed in both themes). */
-  --brand-capsule: #12162b;
+  /* Brand capsule: light indigo chip on light theme, deep navy on dark. */
+  --brand-capsule: oklch(0.93 0.035 265);
   --brand-capsule-border: #6366f1;
   /* Match-chain exchange tones — hue paired by the backend palette; -ink is the readable text shade. */
   --tone-red: oklch(0.63 0.21 25); /* ≈ red-500 */
