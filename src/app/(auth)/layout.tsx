@@ -1,9 +1,31 @@
 import * as React from "react";
+import type { Metadata } from "next";
 import { Users, HeartHandshake, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/common/logo";
 import { ThemeToggle } from "@/components/common/theme-toggle";
 import { LanguageToggle } from "@/components/common/language-toggle";
 import { getTranslations } from "next-intl/server";
+
+/**
+ * Auth screens are conversion pages, not search landing pages: keep them out
+ * of the index while preserving the brand in the browser tab.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Auth");
+
+  return {
+    description: t("authHeroSubtitle"),
+    robots: {
+      index: false,
+      follow: true,
+      nocache: true,
+      googleBot: {
+        index: false,
+        follow: true,
+      },
+    },
+  };
+}
 
 export default async function AuthLayout({
   children,

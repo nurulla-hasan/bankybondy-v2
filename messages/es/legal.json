@@ -3,32 +3,36 @@
     "about": {
       "title": "Sobre nosotros",
       "metaTitle": "Sobre BankyBondy",
-      "metaDescription": "Quiénes somos y por qué creamos BankyBondy.",
+      "metaDescription": "Bankybondy es una red de ayuda mutua para vínculos, trueques y comunidad. Conocé quiénes somos, cómo funciona el matching y por qué creamos una forma más humana de conectar.",
       "emptyTitle": "Contenido no disponible",
       "emptyDescription": "Esta página no está disponible ahora. Probá de nuevo más tarde o escribinos a bankybondyar@gmail.com."
     },
     "terms": {
       "title": "Términos y condiciones",
       "metaTitle": "Términos y condiciones",
-      "metaDescription": "Las condiciones de uso de BankyBondy.",
+      "metaDescription": "Leé los términos y condiciones de uso de Bankybondy: cuentas, vínculos, trueques, donaciones, suscripciones y normas de convivencia de la comunidad.",
       "emptyTitle": "Términos no disponibles",
       "emptyDescription": "No pudimos cargar los términos y condiciones. Probá de nuevo más tarde o escribinos a bankybondyar@gmail.com."
     },
     "privacy": {
       "title": "Política de privacidad",
       "metaTitle": "Política de privacidad",
-      "metaDescription": "Cómo BankyBondy recolecta, usa y protege tus datos.",
+      "metaDescription": "Cómo Bankybondy recolecta, usa, almacena y protege tus datos personales, tus derechos y las cookies que utilizamos. Política de privacidad clara y en lenguaje simple.",
       "emptyTitle": "Privacidad no disponible",
       "emptyDescription": "No pudimos cargar la política de privacidad. Probá de nuevo más tarde o escribinos a bankybondyar@gmail.com."
     }
   },
   "contact": {
     "title": "Contactanos",
+    "eyebrow": "Hablemos",
     "description": "Siempre estamos para escucharte. Contanos qué pensás, hacé una pregunta o simplemente saludá.",
     "emailTitle": "Escribinos",
     "phoneTitle": "Llamanos",
+    "hoursTitle": "Horario de atención",
     "hours": "Atención: lunes a viernes de 9 a 17 h (hora de Argentina).",
+    "responseTime": "Solemos responder dentro de las 24 horas hábiles.",
     "formTitle": "Mandanos un mensaje",
+    "formDescription": "Contanos qué necesitás y te respondemos al correo que nos dejes.",
     "name": "Nombre",
     "namePlaceholder": "Tu nombre",
     "email": "Correo",
@@ -70,5 +74,6 @@
     "avisoCheckout": "Tenés 10 días corridos desde el pago para arrepentirte, sin motivo y sin costo: te devolvemos el 100%.",
     "atencion": "Atención al usuario: lunes a viernes de 9 a 17 h (hora de Argentina), por email a bankybondyar@gmail.com."
   },
-  "backHome": "Volver al inicio"
+  "backHome": "Volver al inicio",
+  "breadcrumbHome": "Inicio"
 }

@@ -11,6 +11,11 @@ const BACKEND_URL =
 const nextConfig: NextConfig = {
   /* config options here */
   output: "standalone",
+  compress: true,
+  poweredByHeader: false,
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
   experimental: {
     agentFeedback: true,
     // The /api/v1 rewrite proxies multipart uploads through Next, which buffers
@@ -24,6 +29,21 @@ const nextConfig: NextConfig = {
       {
         source: "/api/v1/:path*",
         destination: `${BACKEND_URL}/:path*`,
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
       },
     ];
   },

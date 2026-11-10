@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { LegalDocumentPage } from "@/components/legal/legal-document-page";
+import { buildMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("Legal");
-  return {
+  const [locale, t] = await Promise.all([
+    getLocale(),
+    getTranslations("Legal"),
+  ]);
+
+  return buildMetadata({
     title: t("pages.about.metaTitle"),
     description: t("pages.about.metaDescription"),
-  };
+    path: "/about",
+    locale,
+  });
 }
 
 export default function AboutPage() {

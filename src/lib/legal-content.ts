@@ -62,6 +62,9 @@ const sanitizeLegalHtml = (html: string): string => {
     transformTags: {
       strong: unwrapNormalWeight,
       b: unwrapNormalWeight,
+      // The page renders its own single <h1>; admin HTML starts at <h2> so the
+      // document never ends up with two top-level headings.
+      h1: (tagName, attribs) => ({ tagName: "h2", attribs }),
       a: (tagName, attribs) => {
         const href = attribs.href ?? "";
         const external = /^https?:\/\//i.test(href);

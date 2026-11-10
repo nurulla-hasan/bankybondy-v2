@@ -2,10 +2,17 @@
 
 import { useTranslations } from "next-intl";
 import { useForm } from "@tanstack/react-form";
+import { MessageSquare } from "lucide-react";
 
 import { FormInput } from "@/components/common/form-input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { errorToast, successToast } from "@/lib/toast";
 import { useSendContactMessage } from "@/services";
 import { contactSchema, type ContactSchemaType } from "@/validations";
@@ -49,9 +56,13 @@ export function ContactForm() {
   return (
     <Card>
       <CardHeader>
+        <span className="mb-2 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <MessageSquare className="size-5" aria-hidden />
+        </span>
         <CardTitle className="text-xl font-semibold">
           {t("contact.formTitle")}
         </CardTitle>
+        <CardDescription>{t("contact.formDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form
@@ -100,6 +111,7 @@ export function ContactForm() {
 
           <Button
             type="submit"
+            size="lg"
             className="w-full"
             loading={isPending}
             loadingText={t("contact.sending")}

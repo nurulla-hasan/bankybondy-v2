@@ -3,16 +3,23 @@
 import { useState } from "react";
 import { MessageCircle, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RelativeTime } from "@/components/common/relative-time";
 import { useAuth } from "@/hooks/useAuth";
+import { chatKeys } from "@/lib/chat/keys";
 import { getErrorMessage } from "@/lib/error";
 import { errorToast, successToast } from "@/lib/toast";
 import { getInitials } from "@/lib/utils";
-import { useMarkBondLinkComplete } from "@/services";
+import {
+  CHAT_LIST_LIMIT,
+  getChatList,
+  useMarkBondLinkComplete,
+} from "@/services";
 import type { RawBondLink } from "@/types";
 import { RateBondLinkDialog } from "../dialogs/rate-bond-link-dialog";
 
@@ -26,6 +33,8 @@ export function BondLinkCard({ link }: { link: RawBondLink }) {
   const t = useTranslations("Bonds");
   const { user } = useAuth();
   const markComplete = useMarkBondLinkComplete();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [rateOpen, setRateOpen] = useState(false);
 
   const isOngoing = link.status === "Ongoing";
@@ -53,9 +62,38 @@ export function BondLinkCard({ link }: { link: RawBondLink }) {
 
   const status = STATUS_DISPLAY[link.status];
 
-  const handleOpenChat = () => {
-    successToast(t("mockChatTitle"), t("mockChat", { name: link.name }));
-  };
+  // The API creates the bond-link-group conversation together with the link
+  // (bondIntegrity.ts:47-49), so opening the chat means finding that existing
+  // conversation and handing its id to the messages page.
+  const openChat = useMutation({
+    mutationFn: async () => {
+      const response = await queryClient.fetchQuery({
+        queryKey: chatKeys.list(""),
+        queryFn: () => getChatList({ limit: CHAT_LIST_LIMIT }),
+        staleTime: 30 * 1000,
+      });
+
+      const conversation = response.data.data.find(
+        (item) =>
+          item.type === "bond-link-group" && item.bondLink?._id === link._id,
+      );
+
+      if (!conversation) {
+        throw new Error(t("chatUnavailable", { name: link.name }));
+      }
+
+      return conversation._id;
+    },
+    onSuccess: (conversationId) => {
+      router.push(`/messages?c=${encodeURIComponent(conversationId)}`);
+    },
+    onError: (error) => {
+      errorToast(
+        t("chatUnavailableTitle"),
+        getErrorMessage(error, t("chatUnavailable", { name: link.name })),
+      );
+    },
+  });
 
   const handleMarkComplete = () => {
     markComplete.mutate(link._id, {
@@ -109,7 +147,12 @@ export function BondLinkCard({ link }: { link: RawBondLink }) {
         <div className="flex shrink-0 gap-2">
           {isOngoing && !selfMarked ? (
             <>
-              <Button variant="outline" onClick={handleOpenChat}>
+              <Button
+                variant="outline"
+                onClick={() => openChat.mutate()}
+                loading={openChat.isPending}
+                loadingText={t("openingChat")}
+              >
                 <MessageCircle className="size-4" aria-hidden />
                 {t("openChat")}
               </Button>

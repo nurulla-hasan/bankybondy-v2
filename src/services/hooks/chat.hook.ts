@@ -60,7 +60,7 @@ import {
 const CHAT_PAGE_SIZE = 30;
 
 /** The list is capped at 500 by the backend; one page gets everything visible. */
-const CHAT_LIST_LIMIT = 500;
+export const CHAT_LIST_LIMIT = 500;
 
 /** Gallery tile grid: the backend caps `limit` at 100, this keeps each page short. */
 const MEDIA_PAGE_SIZE = 40;

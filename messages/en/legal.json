@@ -3,32 +3,36 @@
     "about": {
       "title": "About us",
       "metaTitle": "About BankyBondy",
-      "metaDescription": "Who we are and why we built BankyBondy.",
+      "metaDescription": "Bankybondy is a mutual-help network for bonds, barter and community. Learn who we are, how matching works and why we built a more human way to connect.",
       "emptyTitle": "Content not available",
       "emptyDescription": "This page isn't available right now. Please try again later or write to bankybondyar@gmail.com."
     },
     "terms": {
       "title": "Terms & Conditions",
       "metaTitle": "Terms & Conditions",
-      "metaDescription": "The terms of use for BankyBondy.",
+      "metaDescription": "Read the terms and conditions for using Bankybondy: account rules, bonds, barter exchanges, donations, subscriptions and community guidelines.",
       "emptyTitle": "Terms not available",
       "emptyDescription": "We couldn't load the terms and conditions. Please try again later or write to bankybondyar@gmail.com."
     },
     "privacy": {
       "title": "Privacy Policy",
       "metaTitle": "Privacy Policy",
-      "metaDescription": "How BankyBondy collects, uses and protects your data.",
+      "metaDescription": "How Bankybondy collects, uses, stores and protects your personal data, your rights and the cookies we rely on. A clear, plain-language privacy policy.",
       "emptyTitle": "Privacy policy not available",
       "emptyDescription": "We couldn't load the privacy policy. Please try again later or write to bankybondyar@gmail.com."
     }
   },
   "contact": {
     "title": "Contact us",
+    "eyebrow": "Get in touch",
     "description": "We're always here to listen. Share your thoughts, ask a question, or simply say hello.",
     "emailTitle": "Email us",
     "phoneTitle": "Call us",
+    "hoursTitle": "Support hours",
     "hours": "Support: Monday to Friday, 9 a.m. to 5 p.m. (Argentina time).",
+    "responseTime": "We usually reply within 24 business hours.",
     "formTitle": "Send us a message",
+    "formDescription": "Tell us what you need and we'll get back to you at the email you provide.",
     "name": "Name",
     "namePlaceholder": "Your name",
     "email": "Email",
@@ -70,5 +74,6 @@
     "avisoCheckout": "You have 10 calendar days from payment to withdraw, with no reason and at no cost: we refund 100%.",
     "atencion": "User support: Monday to Friday, 9 a.m. to 5 p.m. (Argentina time), by email at bankybondyar@gmail.com."
   },
-  "backHome": "Back to home"
+  "backHome": "Back to home",
+  "breadcrumbHome": "Home"
 }
